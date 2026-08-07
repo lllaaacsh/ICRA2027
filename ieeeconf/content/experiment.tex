@@ -75,6 +75,19 @@ Table~\ref{tab:dif} compares pre-training configurations of the predictive model
 \vspace{-1pt}
 % \vspace{0.pt}
 
+\subsection{Multi-task generalization on Meta-World}
+\label{sec:exp_metaworld}
+Franka Kitchen evaluates five tasks that share a single kitchen scene and a common arm configuration. To test whether the intent-aligned residual also helps when a \emph{single} policy must cover heterogeneous scenes, objects and motion primitives, we additionally evaluate on Meta-World MT10~\cite{yu2020meta}, a ten-task multi-task benchmark on a simulated Sawyer arm.
+
+\noindent\textbf{Setup.}
+We collect 100 expert demonstrations per task with the benchmark's scripted policies and train a single language-conditioned multi-task policy by offline behavioral cloning, with no reinforcement learning and no online interaction. As in Sec.~\ref{sec:exp_franka}, every backbone is kept frozen and only the action decoder is trained, so differences in Table~\ref{tab:metaworld} isolate the quality of the pre-trained representation. We report closed-loop success over 50 episodes per task using an evaluation seed that is disjoint from all demonstration-collection seeds, which prevents the policy from being scored on object configurations it has already seen.
+
+\input{ieeeconf/tables/metaworld}
+
+LARM reaches a \textbf{77.8\%} MT10 average and leads on 8 of the 10 tasks. The margin over the strongest baseline, R3M~\cite{nair2022r3m} (70.0\%), is concentrated exactly where multi-task behavioral cloning is hardest: ``Pick-Place'' (\textbf{64.0\%} vs.\ 2.0\%) and ``Push'' (\textbf{68.0\%} vs.\ 32.0\%). Both tasks require the policy to keep tracking an object whose position changes while the gripper approaches it, whereas the articulation tasks (Door, Drawer, Window) are largely solved by every method that produces a usable representation at all. Static features are sufficient to memorise a fixed opening trajectory, but they under-determine the action when the target itself moves; conditioning on the intent-aligned residual $\Delta_z$ supplies precisely the directional signal that this setting is missing. This extends the answer to \textbf{Q2} from a single-scene benchmark to a multi-task one.
+
+The ordering of the baselines also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite using a larger backbone, consistent with the view that MAE features are strong for reconstruction but less linearly separable under a frozen-backbone, shallow-decoder protocol. We caution that this comparison is not scale-matched: ToBo and MPI are publicly released only at ViT-Small scale, so their numbers should be read as a property of the released checkpoints rather than of the methods at ViT-Base.
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{ieeeconf/figure/arm.pdf}

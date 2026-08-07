@@ -1,0 +1,49 @@
+\begin{table*}[!t]
+\centering
+\caption{\textbf{Results on Meta-World MT10~\cite{yu2020meta}}. All policies are trained by offline behavioral cloning on 100 expert demonstrations per task with a \emph{frozen} visual backbone, and evaluated over 50 closed-loop episodes per task on a held-out seed disjoint from the demonstration seeds. Backbones denote the largest publicly released checkpoint of each method; ToBo and MPI are only distributed at ViT-Small scale, so this comparison is not scale-matched (see Sec.~\ref{sec:exp_metaworld}). Task names abbreviate the MT10 suite: Drawer-O/C denote drawer open/close and Window-O/C denote window open/close.}
+\setlength{\tabcolsep}{3.5pt}
+\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{llcccccccccc>{\columncolor[HTML]{F5F2F7}}c}
+\toprule
+\bf Method &
+\bf Backbone &
+ Reach &
+ Push &
+ Pick-Place &
+ Door &
+ Drawer-O &
+ Drawer-C &
+ Button &
+ Peg-Insert &
+ Window-O &
+ Window-C &
+\bf Average \\
+
+\midrule
+
+\rowcolor[HTML]{EFEFEF}
+\multicolumn{13}{l}{\textbf{Visual Representation Models}} \\ \midrule
+% TODO: DINOv3 (frozen, official) —— 评估 job 44409331 完成后填入这一行
+% DINOv3~\cite{simeoni2025dinov3} & ViT-Base  & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+R3M~\cite{nair2022r3m}          & ResNet50  & \bf 50.0 & 32.0 & 2.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & 26.0 & 90.0 & \bf 100.0 & 70.0 \\
+VC-1~\cite{majumdar2023we}      & ViT-Base  & 32.0 & 2.0 & 0.0 & 80.0 & 86.0 & 36.0 & 28.0 & 2.0 & 22.0 & \bf 100.0 & 38.8 \\
+
+\midrule
+\rowcolor[HTML]{EFEFEF}
+\multicolumn{13}{l}{\textbf{Vision-only Predictive Models}} \\ \midrule
+ToBo~\cite{kim2025token}        & ViT-Small & 28.0 & 38.0 & 2.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & 0.0 & \bf 34.0 & 96.0 & \bf 100.0 & 59.8 \\
+
+\midrule
+\rowcolor[HTML]{EFEFEF}
+\multicolumn{13}{l}{\textbf{Vision-Language Predictive Models}} \\ \midrule
+MPI~\cite{zeng2024learning}     & ViT-Small & 36.0 & 24.0 & 4.0 & 80.0 & \bf 100.0 & \bf 100.0 & 0.0 & 12.0 & 72.0 & \bf 100.0 & 52.8 \\
+
+\rowcolor[HTML]{DCD5E0}
+\textbf{Ours} & ViT-Base & 34.0 & \bf 68.0 & \bf 64.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & 16.0 & \bf 96.0 & \bf 100.0 & \bf 77.8 \\
+
+\bottomrule
+\end{tabular}%
+}
+\label{tab:metaworld}
+\end{table*}
