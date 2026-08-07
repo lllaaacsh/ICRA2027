@@ -1,0 +1,100 @@
+{\color{blue}
+\begin{itemize}
+
+\item Backup the current version (Jul. 8)
+
+\item Additional simulation experiments (Jul. 8 -- Aug. 10)
+    \begin{itemize}
+        \item Evaluate on an additional manipulation benchmark (e.g., RLBench, MetaWorld, or LIBERO).
+        \item Collect quantitative results and update comparison tables.
+        \item Conduct additional ablation studies if necessary.
+    \end{itemize}
+
+\item Clarify the methodology (Jul. 8 -- Aug. 5)
+    \begin{itemize}
+        \item Explain the relationship between LARM and latent action learning methods.
+        \item Clarify how dynamics are learned without explicit latent action supervision.
+        \item Correct and clarify the optimization of $F_{\text{full}}$ and $F_{\text{intent}}$, especially Eq.~(5) and the stop-gradient operation.
+        \item Clarify the role of the predictor during deployment (when it is executed and how $\Delta z$ is computed online).
+        \item Clarify the origin and usage of the [CLS] token throughout the paper.
+    \end{itemize}
+
+\item Improve figures and paper presentation  (Aug. 1 -- Aug. 20)
+    \begin{itemize}
+        \item Redesign Fig. 2 to clearly illustrate information flow, trainable/frozen modules, and predictor inputs.
+        \item Improve Fig. 3 and affordance visualization.
+        \item Clarify camera viewpoints, observation inputs, and deployment pipeline.
+        \item Add missing experimental details (scene initialization, object randomization, evaluation protocol, occlusion handling).
+        \item Revise related work discussion (especially the citation to R3M).
+    \end{itemize}
+
+\item Improve the video (Aug. 15 -- Aug. 25)
+
+\item Internal review and paper polishing (Aug. 20 -- Sep. 1)
+
+\item Final check (Sep. 1 -- Sep. 5)
+
+\item Create the final submission package (Sep. 5 -- Sep. 8)
+
+\item Submit to ICRA 2027 (before the deadline)
+
+\end{itemize}
+}
+\section{Introduction}
+
+Robot learning is increasingly important to build autonomous systems that operate in unstructured and unseen environments. Learning robot manipulation policies fundamentally requires rich, structured representations that capture object semantics and geometry, spatial relationships, dynamics, and task-relevant affordances. However, learning such representations without extensive manual supervision remains a fundamental challenge.
+
+
+
+
+
+
+\begin{figure}[t]
+    \centering   
+    
+    \includegraphics[width=\linewidth]{ieeeconf/figure/teaser1_cropped.pdf}    
+    
+    \vspace{-0.2cm} 
+    
+    \includegraphics[width=\linewidth]{ieeeconf/figure/teaser2_cropped.pdf}
+    
+    \caption{\textbf{Overview.} 
+        (Top) Existing models discard predictive knowledge after pre-training, lacking guidance on the temporal evolution of task-relevant dynamics. 
+        (Bottom) Our approach utilizes the \textit{intent-aware latent residual} ($\Delta z$) as a guidance signal that simplifies complex manipulation into a precise residual-tracking task, effectively bridging the gap between high-level semantics and low-level control.}
+    \label{fig:teaser}
+\end{figure}
+
+
+
+
+
+
+Recent advances in self-supervised representation learning have enabled general-purpose models, such as DINO~\cite{caron2021emerging}, R3M~\cite{nair2022r3m}, and VIP~\cite{ma2022vip}, which provide transferrable features for robotic perception and manipulation. These models improve robots' ability to extract semantically meaningful information from the scene.
+However, these representations are fundamentally static, as they are learned to characterize the current state of the scene (\textit{what is in the scene}), rather than capturing temporal transition (\textit{how the world is changed}). In result, downstream control policies are required to learn the capability of inferring task-relevant dynamics and physical transitions, implicitly discovering which visual changes are critical to task completion. 
+This separation between perception and dynamics understanding forces policies to re-learn, from scratch, the temporal structure that is essential for manipulation~\cite{hewage2020temporal,zakka2022xirl}.
+
+% However, these representations are inherently static—they excel at describing \textit{what is}, but remain silent about \textit{how the world should change}. 
+
+% The burden of inferring actionable dynamics and physical transitions is left entirely to downstream control policies, which must implicitly discover which visual changes matter for task completion. This separation between perception and dynamics understanding forces policies to re-learn, from scratch, the temporal structure that is essential for manipulation.
+
+Learning predictive representations offers a natural solution by introducing a temporal structure through future-state forecasting. By learning to predict the future state, a model can capture the dynamics that policies need~\cite{hafner2019dream,finn2017deep}. However, existing approaches show two critical limitations. First, many approaches rely on computationally heavy pixel-level reconstructions~\cite{he2022masked, gupta2023siamese, zhu2025lava, zeng2024learning, karamcheti2023language,kim2025token}, forcing models to allocate a capacity to learn high-frequency visual details that might be irrelevant to operating robotic tasks. This entangles manipulation-induced object motion with passive dynamics or environmental noise. Second, existing models typically discard the predictive decoder entirely during downstream policy training~\cite{nair2022r3m, radosavovic2023real, xiao2022masked}. By retaining only the static encoder (Fig.~\ref{fig:teaser}, top), these models discard dynamics information that predictive learning is designed to capture, forcing downstream task policies to re-solve the disentanglement problem from scratch.
+
+In this work, we hypothesize that predictive learning should not be treated only as a pre-training task that will be discarded, but rather as a mechanism for extracting \textit{intent-aligned state transitions} directly within the latent space. Instead of predicting all future environmental changes, we focus on identifying specific future states that align with the intended task.
+
+We present LARM (\textbf{L}earning Intent-\textbf{A}ligned Latent Residuals for Language-Conditioned \textbf{R}obotic \textbf{M}anipulation), a self-supervised representation learning framework that constrains future latent representations using task semantics derived from an image and language instructions.  
+Specifically, LARM uses two distinct prediction modules. One module has access to detailed visual features of the scene, while the other module relies on a global scene-level representation. By encouraging these two modules to align their predicted future states, the model learns to filter out irrelevant background or passive movements and focuses on the visual changes that are directly related to the robot executing the target manipulation task.
+
+
+At deployment, we use LARM's predictive module to compute a lightweight latent residual between the current observation and the future state (Fig.~\ref{fig:teaser}, bottom). This residual directly captures intent-aligned changes specified by the language-based task description. This residual provides an explicit directional signal, which simplifies the policy's objective to follow a clear, step-by-step latent trajectory rather than inferring task priorities from complex observations. Consequently, the predictor actively guides downstream control rather than merely serving as a standalone pre-training objective.
+
+We summarize our contributions as follows:
+\begin{itemize}
+\item We introduce an asymmetric predictive representation learning framework that extracts intent-aligned dynamics in latent space. Our latent-space learning naturally encourages the model to focus on task-relevant changes without requiring explicit supervision. 
+
+\item We show that utilizing the predictor is beneficial, by demonstrating that the intent-aware latent residuals ($\Delta_z$) can serve as a lightweight, effective control prior that improves policy precision and robustness.
+\item We validate our model on the simulated Franka Kitchen benchmark~\cite{franka_kitchen} and across 7 different real-robot manipulation tasks, where our model consistently outperforms existing models.
+\end{itemize}
+
+
+
+

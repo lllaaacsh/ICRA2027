@@ -1,0 +1,156 @@
+% \begin{table*}[t]
+% \centering
+% \caption{\textbf{Results on Franka Kitchen~\cite{franka_kitchen}}. We classify the compared methods into three groups. To ensure a fair comparison, we use the most common pre-training dataset (Kinetics-300K) and model scale (ViT-Base) across all evaluations in this downstream, highlighting the effectiveness of our model design.}
+% \setlength{\tabcolsep}{3pt}
+% \resizebox{\textwidth}{!}{%
+% \renewcommand{\arraystretch}{1.0}
+% \begin{tabular}{@{}lllcccccc@{}}
+% \toprule
+% \bf Method &
+% \bf  Backbone &
+% \bf  Pre-training dataset  &
+%   Turn knob &
+%   Open door &
+%   Flip switch &
+%   Open microwave &
+%   Slide door &
+% \bf  Average \\ 
+
+
+
+
+%   \midrule
+% \rowcolor[HTML]{EFEFEF} 
+%   \multicolumn{10}{l}{\cellcolor[HTML]{EFEFEF}Robotics-focused Vision-Language Models}                             \\ \midrule
+% INSUP~\cite{insup}    & ResNet50                     & ImageNet~\cite{imagenet}         & 28.0 & 18.0 & 50.0 & 26.7 & 75.7  & 39.7  \\
+% R3M~\cite{r3m}      & ResNet50                     & Ego4D~\cite{ego4d}             & 53.3 & 50.7 & 86.3 & 59.3 & 97.0  & 69.5  \\
+% MVP~\cite{mvp1}      & ViT-Base                     & Multi-dataset   & 79.0 & 48.0 & 90.7 & 41.0 & \bf 100.0 & 71.7  \\
+% Voltron~\cite{voltron} &
+%   ViT-Base &
+%   Something-Something~\cite{something2something} &
+  
+%   76.0 &
+%   45.3 &
+%   91.0 &
+%   41.0 &
+%   99.3 &
+%   70.5 \\
+% MPI~\cite{mpi}      & ViT-Base                     & Ego4D Hand-Obj~\cite{ego4d}   & 89.0 & \bf 57.7 & 93.7 & 54.0 & \bf 100.0 & 78.9  \\
+
+% LaVA-Man~\cite{lava-man} & ViT-Base                     & Multi-dataset   &  90.0 & 50.7 &    94.0 &  61.3 & \bf 100.0 &  79.2  \\
+
+
+
+
+% \midrule
+%   \multicolumn{10}{l}{\cellcolor[HTML]{EFEFEF}General-purpose Vision-only Models}                             \\ \midrule
+
+% CLIP~\cite{clip}   & ResNet50                     & Internet scale  & 26.3 & 13.0 & 41.7 & 24.7 & 86.3  & 38.4  \\
+% SigLIP-1~\cite{siglip} &
+%   \multicolumn{1}{l}{ViT-Base} &
+%   Internet scale &
+  
+%   25.5 &
+%   15.5 &
+%   38.0 &
+%   20.0 &
+%   82.0 &
+%   36.2 \\ 
+% SimCLR~\cite{simclr}   & \multicolumn{1}{l}{ResNet50} &                &       25.3 & 72.3 & 55.8 & 23.3 & 72.3  & 49.8  \\
+% MoCo v3~\cite{mocov3}  &                              &                &      11.5 & 66.5 & 24.3 & 14.3 & 66.5  & 36.6 \\
+% DINO~\cite{dino}     &                              &                   & 27.0 & 77.0 & 44.3 & 28.5 & 77.0  & 50.8 \\
+% MAE~\cite{heMasked2022}      &                              &                    & 12.0 & 71.5 & 24.3 & 10.0 & 71.5  & 37.9 \\
+% SiamMAE~\cite{guptaSiamese2023}  &                              &                  & 16.8 & 68.0 & 36.5 & 13.5 & 68.0  & 40.6 \\
+% RSP~\cite{rsp}      &                              &                 & 31.0 & 82.5 & 44.5 & 10.3 & 82.5  & 50.2 \\
+% CropMAE~\cite{cropmae}  &                              &                  & 31.5 & 77.0 & 54.0 & 32.5 & 77.0  & 54.4  \\
+% I-JEPA~\cite{i-jepa}   &                              &                  & 26.0 & 21.3 & 40.0 & 17.3 & 74.7  & 35.9 \\
+% V-JEPA~\cite{v-jepa}   &                              &                  & 21.3 & 28.0 & 41.3 & 12.7 & 78.7  & 36.4  \\
+% ToBo~\cite{kim2025tobo} &
+%   \multirow{-10}{*}{ViT-Base} &
+%   \multirow{-10}{*}{Kinetics}  &
+%   57.0 &
+%   51.0 &
+%   82.0 &
+%   55.0 &
+%   95.0 &
+%   68.0 \\
+
+% DINOv3  &  ViT-Base  & Internet scale   &  79.3 &
+% 43.7 &
+% 92.3 &
+% 40.3 &
+% \bf 100.0 &
+% 71.3 \\
+  
+
+% \rowcolor[HTML]{ECF4FF} 
+% Ours     & ViT-Base                     & Internet scale, Kinetics  	& \bf 91.7 &  56.7 &	\bf 95.7 & \bf 62.0	& \bf 100.0	& \bf 81.2  \\
+
+
+% % \rowcolor[HTML]{EFEFEF} 
+%  \bottomrule
+% \end{tabular}%
+% }
+% \label{tab:franka_kit_results}
+% \end{table*}
+
+
+
+
+\begin{table*}[!t]
+\centering
+\caption{\textbf{Results on Franka Kitchen~\cite{franka_kitchen}}. To ensure a fair comparison and highlight the effectiveness of our architectural design, we use the most common pre-training dataset (Kinetics-300K) and model scale (ViT-Base) across all downstream evaluations. We categorize the baselines by their fundamental representation paradigms.}
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.05} 
+\begin{tabular}{lllcccccc}
+\toprule
+\bf Method &
+\bf Backbone &
+\bf Pre-training dataset &
+ Turn knob &
+ Open door &
+ Flip switch &
+ Open microwave &
+ Slide door &
+\bf Average \\ 
+
+\midrule
+
+\rowcolor[HTML]{EFEFEF} 
+\multicolumn{9}{l}{\textbf{Visual Representation Models} } \\ \midrule
+CLIP~\cite{radford2021learning}       & ResNet50 & Internet scale      & 26.3 & 13.0 & 41.7 & 24.7 & 86.3 & 38.4 \\
+SigLIP-1~\cite{zhai2023sigmoid}       & ViT-Base & Internet scale      & 25.5 & 15.5 & 38.0 & 20.0 & 82.0 & 36.2 \\ 
+MAE~\cite{he2022masked}               & ViT-Base & ImageNet            & 12.0 & 71.5 & 24.3 & 10.0 & 71.5 & 37.9 \\
+DINO~\cite{zhang2022dino}             & ViT-Base & ImageNet            & 27.0 & 77.0 & 44.3 & 28.5 & 77.0 & 50.8 \\
+DINOv3~\cite{simeoni2025dinov3}       & ViT-Base & Internet scale      & 79.3 & 43.7 & 92.3 & 40.3 & \bf 100.0 & 71.3 \\
+R3M~\cite{nair2022r3m}                & ResNet50 & Ego4D~\cite{grauman2022ego4d}  & 53.3 & 50.7 & 86.3 & 59.3 & 97.0 & 69.5 \\
+MVP~\cite{radosavovic2023real}        & ViT-Base & Multi-dataset       & 79.0 & 48.0 & 90.7 & 41.0 & \bf 100.0 & 71.7 \\
+
+\midrule
+% 同样去掉 [0pt][0pt] 和 @{}
+\rowcolor[HTML]{EFEFEF} 
+\multicolumn{9}{l}{\textbf{Vision-only Predictive Models}} \\ \midrule
+SiamMAE~\cite{gupta2023siamese}       & ViT-Base & Kinetics~\cite{kay2017kinetics} & 16.8 & 68.0 & 36.5 & 13.5 & 68.0 & 40.6 \\
+CropMAE~\cite{eymael2024efficient}    & ViT-Base & Kinetics & 31.5 & 77.0 & 54.0 & 32.5 & 77.0 & 54.4 \\
+I-JEPA~\cite{assran2023self}          & ViT-Base & Kinetics & 26.0 & 21.3 & 40.0 & 17.3 & 74.7 & 35.9 \\
+V-JEPA~\cite{bardes2024revisiting}             & ViT-Base & Kinetics & 21.3 & 28.0 & 41.3 & 12.7 & 78.7 & 36.4 \\
+ToBo~\cite{kim2025token}              & ViT-Base & Kinetics & 57.0 & 51.0 & 82.0 & 55.0 & 95.0 & 68.0 \\
+
+\midrule
+% 同样去掉 [0pt][0pt] 和 @{}
+\rowcolor[HTML]{EFEFEF} 
+\multicolumn{9}{l}{\textbf{Vision-Language Predictive Models} } \\ \midrule
+Voltron~\cite{karamcheti2023language} & ViT-Base & Something-V2~\cite{goyal2017something} & 76.0 & 45.3 & 91.0 & 41.0 & 99.3 & 70.5 \\
+MPI~\cite{zeng2024learning}           & ViT-Base & Ego4D Hand-Obj~\cite{grauman2022ego4d} & 89.0 & \bf 57.7 & 93.7 & 54.0 & \bf 100.0 & 78.9 \\
+LaVA-Man~\cite{zhu2025lava}           & ViT-Base & OOPP~\cite{zhu2025lava}, DROID~\cite{khazatsky2024droid}, Bridge~\cite{walke2023bridgedata}       & 90.0 & 50.7 & 94.0 & 61.3 & \bf 100.0 & 79.2 \\
+
+
+\rowcolor[HTML]{DCD5E0} 
+\textbf{Ours} & ViT-Base & Internet scale, Kinetics & \bf 91.7 & 56.7 & \bf 95.7 & \bf 62.0 & \bf 100.0 & \bf 81.2 \\
+
+\bottomrule
+\end{tabular}%
+}
+\label{tab:franka}
+\end{table*}

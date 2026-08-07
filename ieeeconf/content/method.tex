@@ -1,0 +1,74 @@
+\section{Method}
+\label{sec:method}
+
+ 
+ 
+ 
+ Our method leverages large-scale, general-domain human video datasets (e.g., web videos) for self-supervised pre-training rather than relying on robot-specific trajectories. This allows the model to learn generalized motion priors by understanding the correlation between visual dynamics and language-based action annotations in datasets like Kinetics~\cite{kay2017kinetics} (e.g., ``a person is water sliding''). By capturing the underlying structure of these motions, the model develops a robust understanding of physical dynamics, which can then be transferred to robotic control with minimal post-training. To this end, we formulate a two-stage framework: (1) \textit{self-supervised pre-training with intent-aligned prediction}, which learns to isolate task-relevant dynamics by predicting future latent states under an information bottleneck (Sec.~\ref{subsec:encoder} and ~\ref{subsec:pretraing}), and (2) \textit{residual-guided policy learning}, which conditions the downstream policy on the predicted change between current and future states (Sec.~\ref{subsec:policy_learning}).
+
+\subsection{Language-grounded visual encoding}
+\label{subsec:encoder}
+In Fig.~\ref{fig:ab_probe}, we show the model architecture for our self-supervised pre-training. The pre-training begins by grounding visual features in natural language descriptions of general human activities. Inspired by GLIP~\cite{li2022grounded} and recent vision-language fusion techniques for robotics~\cite{karamcheti2023language}, we employ bidirectional cross-attention to fuse information from the two modalities. This fusion process enhances a semantic conistency between task intent and scene features, allowing the model to compress task-relevant information into the global context representation, i.e., the \texttt{[CLS]} token.
+
+Given visual patch tokens $V$ and language tokens $L$, we first apply intra-modal self-attention to build rich internal representations for each modality independently. We then fuse two modalities through two cross-attention layers for bi-directional feature updates:
+%
+\begin{align}
+    V' &= \texttt{CrossAttn}(V, L, L) + V \label{eq:vision_update}, \\
+    L' &= \texttt{CrossAttn}(L, V', V') + L \label{eq:language_update},
+\end{align}
+%
+where the first, second, third arguments for the cross attention layers, $\texttt{CrossAttn}(\cdot,\cdot,\cdot)$, are queries, keys, and values, respectively.
+As shown in Eq.~\ref{eq:vision_update} and Eq.~\ref{eq:language_update}, these cross-attention layers have two effects: visual patches can be conditioned on the language context (attention shifts to regions mentioned in the instruction), while language tokens can be contextualized by the current scene layout (the same instruction yields different grounding depending on object locations). The resulting \texttt{[CLS]} token thus serves as a semantic anchor that encodes both visual content and task intent. Meanwhile, the sequence of updated patch embeddings preserves dense, localized spatial features, serving as the foundational input for fine-grained spatial prediction in the subsequent stage.
+
+\subsection{Asymmetric intent-aligned prediction}
+\label{subsec:pretraing}
+
+We aim to ensure that the learned representations capture dynamics relevant to the task rather than random environmental variations. We introduce an intent-aligned predictive learning objective that filters out task-irrelevant background dynamics and forces the model to focus only on the core motions dictated by the language instruction. Existing predictive models forecast future observations based on past inputs, which may inevitably entangle controllable transitions with uncontrollable passive dynamics~\cite{he2022masked, gupta2023siamese}. We isolate task-relevant change without pixel-level decoding by employing an asymmetric predictive architecture in the latent space, as shown in Fig.~\ref{fig:ab_probe}.
+
+Let $z^{\text{gt}}_{t+1}$ be the ground-truth future latent state extracted by a frozen DINOv3~\cite{simeoni2025dinov3} target encoder which we defined as a teacher backbone in Fig.~\ref{fig:ab_probe}.During pre-training, the Teacher encodes the future frame to generate the ground-truth latent target providing supervision signal to our trainable module. We construct two parallel predictive streams with shared weights. First, the Full-Information Predictor ($F_{\text{full}}$) retains access to dense spatial memory ($V'$), enabling accurate modeling of physical scene evolution. Second, the Intent-aligned Predictor ($F_{\text{intent}}$) operates under an information bottleneck, restricted to only the language-grounded \texttt{[CLS]} token. It lacks low-level spatial memory and relies on global task context ($L'$) to infer future dynamics.
+
+Both predictors are optimized jointly to reconstruct future latent states. We use a dual-objective loss combining Mean Squared Error (MSE) and Cosine distance:
+%
+\begin{align}
+    \mathcal{L}_{\text{full}} &= \| F_{\text{full}}(V', L') - z^{\text{gt}} \|^2 + (1 - \cos(F_{\text{full}}, z^{\text{gt}})), \label{eq:loss_full} \\
+    \mathcal{L}_{\text{intent}} &= \| F_{\text{intent}}(V'_{\text{cls}}, L') - z^{\text{gt}} \|^2 + (1 - \cos(F_{\text{intent}}, z^{\text{gt}})). \label{eq:loss_intent}
+\end{align}
+%
+The cosine distance function in Eq.~\ref{eq:loss_full} and Eq.~\ref{eq:loss_intent} provides scale-invariant supervision, aligning the semantic direction of predictions with the target, while MSE acts as a magnitude regularizer to keep predictions on the DINOv3 feature manifold.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{ieeeconf/figure/ACDINO_cropped.pdf}
+\caption{\textbf{Proposed residual-guided policy learning}. The LARM encoder compresses the raw image into latent representations, where the future latent $ z_{t+1}$
+   is predicted from the current state $z_t$. The latent residual $\Delta_z$ captures the intended motion, which is fused with the current state, then forms the final input signal along with joint state for policy model. }
+\label{fig:acdino}
+\end{figure*}
+
+
+
+
+
+
+Following asymmetric siamese designs~\cite{gupta2023siamese}, we introduce a consistency loss $\mathcal{L}_{\text{cons}}$ to penalize the divergence between the two predictive streams:
+\begin{equation}
+    \mathcal{L}_{\text{cons}} = \alpha \cdot \| F_{\text{intent}} - \text{sg}(F_{\text{full}}) \|^2, \label{eq:consistency}
+\end{equation}
+where $\text{sg}(\cdot)$ denotes a stop-gradient operator, which prevents gradients from propagating through $F_{\text{full}}$, and $\alpha=0.3$ is a hyperparameter to scale the effect of the loss. This encourages the intent-aligned stream to agree with the full-information stream while maintaining independence. Since $F_{\text{intent}}$ operates under an information bottleneck, minimizing this consistency loss effectively filters $F_{\text{full}}$'s predictions: futures that cannot be predicted from task context alone are suppressed. The model thus learns to allocate capacity primarily to intent-aligned dynamics. The total objective combines Eq.~\ref{eq:loss_full}, Eq.~\ref{eq:loss_intent}, and Eq.~\ref{eq:consistency}:
+\begin{equation}
+    \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{intent}} + \mathcal{L}_{\text{cons}}. \label{eq:total}
+\end{equation}
+
+\subsection{Residual-guided policy learning}
+\label{subsec:policy_learning}
+
+Following pre-training, we adapt the learned representations for downstream manipulation. Existing approaches~\cite{black2023zero,zhu2025lava} condition policies on fully reconstructed future images, which introduces significant computational overhead and generates redundant static information, e.g. unchanged static background. In contrast, we discard the intent-aligned regularizer and retain only $F_{\text{full}}$, now denoted as $z_{t+1}$, to compute a latent residual:
+%
+\begin{equation}
+    \Delta_z = z_{t+1} - z_t \label{eq:residual}.
+\end{equation}
+%
+The residual $\Delta_z$ in Eq.~\ref{eq:residual} represents the minimal update between current and future states. In other words, $\Delta_z$ can be considered as a directional cue that highlights what should change to achieve the task. Rather than providing the policy with a full future state, which forces the policy network to implicitly compute the difference between current and future observations to deduce the required motion.
+
+To translate this latent residual into motor commands, we condition the policy on both the current state $z_t$ and the predicted change $\Delta_z$. As illustrated in Fig.~\ref{fig:acdino}, $\Delta_z$ is first fused with the current state $z_t$ via SNR-enhanced normalization. This operation amplifies the $\Delta_z$ signal, ensuring that it is not disregarded as background noise by the policy model, thus producing a combined representation $z_{fused} = \text{Norm}(z_t \oplus \Delta_z)$. This representation is then concatenated with proprioceptive joint states $q_t$ and fed into the policy network $\pi(a_t | z_{fused}, q_t)$, which outputs actions via standard behavioral cloning or reinforcement learning objectives.
+
+The latent residual $\Delta_z$ can be adapted to different policy architectures depending on the action space. For \textit{1D continuous control} that uses state-based algorithms predicting joint angles or end-effector poses~\cite{assran2025v}, we flatten the \texttt{[CLS]} residual into a 1D vector and concatenate it with $q_t$ as input to a multi-layer perceptron (MLP) policy. In \textit{2D spatial-action policies} designed for vision-based affordance models  (e.g., tabletop pick-and-place~\cite{shridhar2022cliport}), we extract the residual of patch tokens, reshape it into a 2D spatial feature map, and fuse it with the policy's visual backbone via convolutional layers, providing an explicit spatial prior on where and how to interact. This flexibility allows LARM to integrate seamlessly with both low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification.

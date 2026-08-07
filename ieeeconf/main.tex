@@ -1,0 +1,109 @@
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out if you need a4paper
+
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4 paper
+ 
+\IEEEoverridecommandlockouts
+\usepackage{censor}  
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+%\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{cite}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+
+% our packages
+\usepackage{graphics}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{cancel}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of 
+\usepackage[table,xcdraw]{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{subcaption}  
+\usepackage{enumitem}  
+\usepackage{pifont}
+\usepackage{caption}
+\usepackage{wrapfig} 
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepackage{tikz}
+\usepackage{siunitx}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+
+
+\overrideIEEEmargins                                      % Needed to meet printer requirements.
+
+%In case you encounter the following error:
+%Error 1010 The PDF file may be corrupt (unable to open PDF file) OR
+%Error 1000 An error occurred while parsing a contents stream. Unable to analyze the PDF file.
+%This is a known problem with pdfLaTeX conversion filter. The file cannot be opened with acrobat reader
+%Please use one of the alternatives below to circumvent this error by uncommenting one or the other
+%\pdfobjcompresslevel=0
+%\pdfminorversion=4
+
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+
+\usepackage{graphics} % for pdf, bitmapped graphics files
+\usepackage{epsfig} % for postscript graphics files
+% \usepackage{mathptmx} % assumes new font selection scheme installed
+\usepackage{times} % assumes new font selection scheme installed
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+
+\title{\LARGE \bf
+{Learning Intent-Aligned Latent Residuals for Language-Conditioned Robot Manipulation}}
+
+\author{Anonymous submission
+}
+
+
+% \author{\censor{Yazhe Wan}$^{1}$ and \censor{Changjae Oh}$^{2}$}
+
+
+
+\input{ieeeconf/premeable}
+\begin{document}
+\maketitle
+
+
+\thispagestyle{empty}
+\pagestyle{empty}
+\input{ieeeconf/content/abstract}
+\input{ieeeconf/content/intro}
+\input{ieeeconf/content/related_work}
+\input{ieeeconf/content/method}
+\input{ieeeconf/content/experiment}
+
+
+
+
+\input{ieeeconf/content/conclusion}
+
+\addtolength{\textheight}{-5cm}  
+
+% \section*{ACKNOWLEDGMENT}
+
+% The preferred spelling of the word ÒacknowledgmentÓ in America is without an ÒeÓ after the ÒgÓ. Avoid the stilted expression, ÒOne of us (R. B. G.) thanks . . .Ó  Instead, try ÒR. B. G. thanksÓ. Put sponsor acknowledgments in the unnumbered footnote on the first page.
+
+
+
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{ieeeconf/mybib}
+
+
+\end{document}

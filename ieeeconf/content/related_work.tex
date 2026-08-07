@@ -1,0 +1,24 @@
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Visual representations for robotic manipulation}
+Vision foundation models have become widely used for robotic representation learning. Self-supervised approaches extract robust features from static observations via time-contrastive learning (e.g., R3M~\cite{nair2022r3m}, VIP~\cite{ma2022vip}, LIV~\cite{ma2023liv}) and masked autoencoders (e.g., MAE~\cite{he2022masked}, MVP~\cite{radosavovic2023real}, VC-1~\cite{majumdar2023we}). To incorporate semantic priors, vision-language models align visual features with language instructions, enabling open-vocabulary manipulation (e.g., CLIPort~\cite{shridhar2022cliport}, RT-1~\cite{brohan2022rt}). 
+
+
+These methods primarily produce static representations that capture \textit{what} is in the scene, but not \textit{how} it changes over time. To extract more robust and task-relevant signals, recent approaches extend these static representations using the Information Bottleneck (IB) principle~\cite{tishby2000information}. By strictly limiting information capacity, IB-based methods learn compressed representations that filter out irrelevant distractors, improving downstream reinforcement learning~\cite{you2024multimodal} and behavior cloning~\cite{bai2025rethinking}. However, these IB-based methods still lack explicit modeling of task-conditioned dynamics, as they compress the current state while not predicting its future evolution.
+
+\subsection{Predictive modeling for visual control}
+An alternative approach is learning representations by predicting future observations, which effectively captures environment dynamics. Several approaches focus on pixel-level video prediction (e.g., RoboNet~\cite{dasari2019robonet}, UniPi~\cite{du2023learning}, SUSIE~\cite{black2023zero}), for visual planning or sub-goal generation. Other approaches, such as Voltron~\cite{karamcheti2023language} and LaVA-Man~\cite{zhu2025lava}, extend such pixel-level prediction by integrating language and action conditioning into image reconstruction and forward video prediction. However, forecasting at the pixel level is computationally expensive and overly sensitive to task-irrelevant visual distractions such as lighting variations or background movement.
+
+Joint-Embedding Predictive Architectures (JEPAs)~\cite{lecun2022path} address the limitation of pixel-level prediction by shifting the prediction objective to the latent space, which improves efficiency. I-JEPA~\cite{assran2023self} and V-JEPA~\cite{bardes2024revisiting} learn powerful spatial and spatiotemporal representations by predicting the latent embeddings of masked regions. In the robotics domain, MC-JEPA~\cite{benchetrit2024mcjepa} jointly models motion and content features, which can capture both scene appearance and dynamics. As a recent extension to predictive models, ToBo (Token Bottleneck)~\cite{kim2025token} squeezes the current scene into a compact bottleneck token to predict future latent patches, forcing the model to encode temporal dependencies. 
+
+Despite these advances, standard latent predictive models (e.g., Siamese MAE~\cite{gupta2023siamese}) still attempt to forecast the \textit{full} future state, inevitably entangling controllable transitions with uncontrollable passive dynamics. In contrast, our proposed LARM combines the efficiency of latent prediction with an intent-conditioned bottleneck. Unlike prior methods, LARM explicitly predicts the \textit{residual} between current and future states, providing policies with a gradient-like directional cue that isolates task-compatible dynamics.
+
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{ieeeconf/figure/DiPredict_cropped.pdf}
+\caption{\textbf{LARM architecture}. During pre-training, visual and linguistic features are fused using the bidirectional cross-attention module. An asymmetric architecture suppresses the futures that cannot be predicted from task context between the intent-aligned predictor (top) and the full-feature predictor (bottom) to filter out task-irrelevant dynamics. During deployment, the intent predictor is discarded. The future latent output by the full predictor, denoted as $z_{t+1}$, is then subtracted by the current latent $z_t$  to obtain the residual $\Delta_z$ which explicitly guides downstream policy learning.}
+\label{fig:ab_probe}
+\end{figure*}
+
