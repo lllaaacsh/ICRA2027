@@ -84,6 +84,13 @@ We collect 100 expert demonstrations per task with the benchmark's scripted poli
 
 \input{ieeeconf/tables/metaworld}
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{ieeeconf/figure/failure_stages.pdf}
+\caption{\textbf{Where the policies fail on Meta-World.} Every closed-loop episode is assigned to the furthest stage it reaches, using the simulator's \texttt{near\_object}, \texttt{grasp\_success} and \texttt{success} flags; the four outcomes are mutually exclusive and account for all 50 episodes per method and task. The dominant failure of every baseline is not mistimed grasping but never reaching the object at all --- 58\% of episodes for R3M and all 50 for VC-1 on Pick-Place. Conditioning on the predicted future reduces this to 16\%, and the residual failures shift to the strictly later stage of placing an already grasped object. Push requires no grasp, so its \emph{grasped, no place} band is empty by construction.}
+    \label{fig:failure_stages}
+\end{figure}
+
 LARM reaches a \textbf{75.6\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
 
 These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorised opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the intent-aligned residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
