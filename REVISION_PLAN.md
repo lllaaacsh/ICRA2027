@@ -41,9 +41,14 @@ backbone 全程冻结。
 - [ ] `metaworld_bc/model_wrapper.py` 还在用旧的 `LatentFramePredictorToBo`,
       要为新 checkpoint 加一个 policy 类
 - [ ] 三张图重画 (第 9 节)
-- [ ] 真机实验协议 / 相机 / 遮挡 / trial 数 (第 6-7 节, 需要用户提供事实)
-- [ ] III-D 末尾的推理延迟数字 (`\TODO` 占位)
+- [ ] 真机实验协议 / trial 数 (第 7 节, 需要用户提供事实)
+- [ ] **真机遮挡 (R9-8)**: 相机确认是**腕部安装**,审稿人的读图没错。但答法取决于
+      观测是在运动流程的哪个时刻拍的 (回 scan pose 拍一帧 / pick 与 place 各拍
+      一帧 / 每步闭环) —— 用户待确认,确认前不动第 6.2 节那段文字
 - [ ] 消融段与 MT10 的矛盾 (第 3 节, 需要用户拍板)
+
+已否决: III-D 末尾的推理延迟段 (用户决定删掉;III-D 开头已经回答了 R9-6 的
+执行频率问题,延迟数字是额外的)。
 
 ⚠️ 顺带发现的既有问题: `tables/franka.tex` 里有 20 个 `\cite` 键在 `mybib.bib`
 里不存在 (`clip`/`r3m`/`mpi`/`voltron`/...),`tables/eval_set.tex` 还有一个
