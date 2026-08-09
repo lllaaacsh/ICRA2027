@@ -6,6 +6,14 @@
 \usepackage{booktabs}  \usepackage[table]{xcolor}
 \usepackage{subcaption}
 \usepackage{subfigure}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% --- 本轮修订的标记。定稿时把下面这行换成 \newcommand{\rev}[1]{#1} 就能一键去掉。
+% 用文字着色而不是背景高亮: \hl{} 遇到行内公式会炸,而 method 里全是公式。
+\definecolor{revcolor}{HTML}{B8860B}   % dark goldenrod, 屏幕和打印都读得清的"黄"
+\newcommand{\rev}[1]{{\color{revcolor}#1}}
+
 \newcommand{\red}[1]{{\color{red}#1}}
 \newcommand{\todo}[1]{{\color{red}#1}}
 \newcommand{\new}[1]{{\color{blue}#1}}
