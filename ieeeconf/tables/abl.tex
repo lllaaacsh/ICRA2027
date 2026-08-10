@@ -1,36 +1,33 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
-\caption{\textbf{Ablation study on latent residuals}, on Franka Kitchen~\cite{franka_kitchen} and Meta-World MT10~\cite{yu2020meta}. All variants share an identical encoder, predictor and pooled action decoder; they differ only in what is fed to the decoder as the second conditioning stream. For MT10 we report the four tasks that discriminate between variants together with the ten-task average; the remaining six tasks are saturated for every variant. Bold marks the best entry per column. With 50 episodes per task the standard error of an MT10 average is $\approx\!2.2$ points, so the three variants that receive a predicted future are statistically indistinguishable from one another on MT10 ($\leq\!1.3\sigma$), while all three separate clearly from the encoder-only variant ($\geq\!5.7\sigma$).}
-\setlength{\tabcolsep}{4pt}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{ll cccccc cccc>{\columncolor[HTML]{F5F2F7}}c}
+\caption{\textbf{Ablation study on latent residuals.} We evaluating the impact of retaining the predictive module to compute $\Delta_z$ on the Franka Kitchen benchmark~\cite{franka_kitchen}.}
+\setlength{\tabcolsep}{3.5pt} 
+\footnotesize 
+\renewcommand{\arraystretch}{1.1}
+
+\begin{tabular}{lc ccccc c}
 \toprule
 \multirow{2}{*}{\bf Variant} &
 \multirow{2}{*}{\bf Input} &
-\multicolumn{6}{c}{\bf Franka Kitchen} &
-\multicolumn{5}{c}{\bf Meta-World MT10} \\
-\cmidrule(lr){3-8}\cmidrule(lr){9-13}
-& &
-Turn & Open & Flip & Open & Slide & \multirow{2}{*}{\bf Avg.} &
-Reach & Push & Pick- & Peg- & \multirow{2}{*}{\bf Avg.} \\
-& &
-knob & door & switch & micro. & door & &
-& & Place & Insert & \\
-\midrule
-
-Encoder-Only   & $z_t$              & 79.3 & 46.0 & 91.0 & 56.3 & \bf 100.0 & 74.5
-                                    & 0.0 & 34.0 & 0.0 & 6.0 & 57.0 \\
-Predictor-Only & $z_{t+1}$          & 86.3 & 46.3 & 89.7 & 55.3 & \bf 100.0 & 75.5
-                                    & \bf 48.0 & \bf 72.0 & \bf 68.0 & 10.0 & \bf 79.0 \\
-Absolute pair  & $z_t,\,z_{t+1}$    & --   & --   & --   & --   & --        & --
-                                    & 18.0 & \bf 72.0 & 52.0 & 18.0 & 75.0 \\
-\rowcolor[HTML]{DCD5E0}
-\bf Full       & \bf $z_t,\,\Delta_z$ & \bf 91.7 & \bf 56.7 & \bf 95.7 & \bf 62.0 & \bf 100.0 & \bf 81.2
-                                    & 22.0 & 70.0 & 40.0 & \bf 32.0 & 75.6 \\
+Turn &
+Open &
+Flip &
+Open &
+Slide &
+\multirow{2}{*}{\bf Avg.} \\ 
+& & 
+knob & 
+door & 
+switch & 
+micro. & 
+door & 
+\\ \midrule
+Encoder-Only & $z_t$ & 79.3 & 46.0 & 91.0 & 56.3 & 100.0 & 74.5 \\
+Predictor-Only & $z_{t+1}$ &86.3 &46.3 &89.7 &55.3 &100.0 &75.5
+\\
+\rowcolor[HTML]{DCD5E0} 
+\bf Full & \bf $z_t, \Delta_z$ & \bf 91.7 & \bf 56.7 & \bf 95.7 & \bf 62.0 & \bf 100.0 & \bf 81.2 \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \label{tab:ablation_residual}
-\end{table*}
+\end{table}
