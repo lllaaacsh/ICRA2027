@@ -64,7 +64,7 @@ Following asymmetric siamese designs~\cite{gupta2023siamese}, a consistency loss
 \begin{equation}
     \mathcal{L}_{\text{cons}} = \alpha \cdot \big\| \hat z^{\text{int}}_{t+1} - \text{sg}\big(\hat z^{\text{full}}_{t+1}\big) \big\|^2, \label{eq:consistency}
 \end{equation}
-where $\text{sg}(\cdot)$ is the stop-gradient operator and $\alpha=0.3$ scales the term. \rev{The stop-gradient is placed on the \emph{teacher} side: the bottlenecked forecast is pulled towards the accurate one, while the accurate one is not dragged back towards a deliberately impoverished prediction, which would otherwise collapse both streams onto their average.} The total objective is
+where $\text{sg}(\cdot)$ is the stop-gradient operator and we empirically selected $\alpha=0.3$ to scale the term. \rev{The stop-gradient is placed on the \emph{teacher} side: the bottlenecked forecast is pulled towards the accurate one, while the accurate one is not dragged back towards a deliberately impoverished prediction, which would otherwise collapse both streams onto their average.} The total objective is
 \begin{equation}
     \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{int}} + \mathcal{L}_{\text{cons}}. \label{eq:total}
 \end{equation}
