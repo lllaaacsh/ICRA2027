@@ -51,7 +51,8 @@ We validate our model on five long-horizon visuomotor tasks in Franka Kitchen~\c
 As shown in Table~\ref{tab:franka}, we compare our method against three major categories of baselines: standard visual representation models, vision-only predictive models, and vision-language predictive models. To ensure a fair comparison, all downstream policies employ the same standard behavioral cloning (BC) architecture, utilizing the respective frozen backbones.
 
 
-\input{ieeeconf/tables/dif}
+% tables/dif.tex 已并入 tables/franka.tex 的下半块 (共用一个 table* 浮动体)。
+% \ref{tab:dif} 仍然有效,指向合并后的那张表。
 
 
 LARM achieves an 81.2\% average success rate, which significantly outperforms standard visual backbones, surpassing MVP \cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M \cite{nair2022r3m} (69.5\%) by +9.5\% and +11.7\%, respectively. Despite being pre-trained exclusively on human videos without robot embodiment data, LARM successfully generalizes to out-of-domain robotic control, providing a strong affirmative answer to \textbf{Q1}.
