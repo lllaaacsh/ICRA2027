@@ -53,12 +53,12 @@ Both streams are supervised against the same target with a dual objective combin
 %
 The cosine term provides scale-invariant supervision that aligns the semantic direction of the prediction with the target, while MSE acts as a magnitude regulariser that keeps predictions on the DINOv3 feature manifold.
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{ieeeconf/figure/ACDINO_cropped.pdf}
+\includegraphics[width=\linewidth,height=0.55\textheight,keepaspectratio]{ieeeconf/figure/ACDINO_cropped}
 \caption{\textbf{Proposed residual-guided policy learning}. The LARM encoder compresses the raw image into latent representations, where the future latent $z_{t+1}$ is predicted from the current state $z_t$ \rev{by the retained intent-aligned predictor}. The latent residual $\Delta_z$ captures the intended motion, which is fused with the current state, then forms the final input signal along with joint state for the policy model.}
 \label{fig:acdino}
-\end{figure*}
+\end{figure}
 
 Following asymmetric siamese designs~\cite{gupta2023siamese}, a consistency loss ties the two streams together:
 \begin{equation}
