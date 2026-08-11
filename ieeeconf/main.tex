@@ -43,12 +43,14 @@
 \usepackage{hyperref}
 
 \newcommand{\trailtitleicon}{%
-  \tikz[baseline=-0.22em,x=0.048em,y=-0.048em,line width=0.09em,line cap=round,line join=round]{
-    \draw (4,15) -- (15,4);
-    \draw (20,9) -- (9,20);
-    \draw (5,12) -- (12,19);
-    \draw (8.5,8.5) -- (15.5,15.5);
-    \draw (12,5) -- (19,12);
+  \raisebox{-0.16em}{%
+    \tikz[x=0.078em,y=0.078em,line width=0.13em,line cap=round,line join=round]{
+      \draw (0,5) -- (11,16);
+      \draw (16,11) -- (5,0);
+      \draw (1,8) -- (8,1);
+      \draw (4.5,11.5) -- (11.5,4.5);
+      \draw (8,15) -- (15,8);
+    }%
   }%
 }
 
@@ -74,7 +76,7 @@
 \usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
-{\texorpdfstring{\trailtitleicon\hspace{0.25em}}{}TRAIL: Learning Intent-Aligned Latent Residuals for Language-Conditioned Robot Manipulation}}
+{\texorpdfstring{\trailtitleicon\hspace{0.32em}}{}TRAIL: Learning Intent-Aligned Latent Residuals for Language-Conditioned Robot Manipulation}}
 
 \author{Anonymous submission
 }
