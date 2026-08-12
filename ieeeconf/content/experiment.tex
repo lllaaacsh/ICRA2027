@@ -9,10 +9,10 @@
 
 
 
-Our experiments are designed to answer the following questions: 
-\textbf{Q1:} Can LARM effectively learn dynamics from human-only videos and generalize to out-of-domain robotic embodiments? 
-\textbf{Q2:} Does the intent-aligned latent residual improve downstream policy learning compared to static representations and unconstrained predictive models?
-\textbf{Q3:} How does LARM perform across diverse policy architectures?
+Our experiments are designed to answer three questions:
+\textbf{Q1:} Can human-video pre-training produce representations that transfer to robot control without robot pre-training data?
+\textbf{Q2:} Does retaining the intent-aligned latent residual improve policy learning beyond static visual features or absolute future features?
+\textbf{Q3:} Does the same representation remain useful across single-task simulation, multi-task simulation, and real-world manipulation?
 
 
 \subsection{Analysis of pre-trained representations}
@@ -20,7 +20,7 @@ Our experiments are designed to answer the following questions:
 We first investigate whether LARM successfully learns to extract intent-aligned dynamics during the human-video pre-training phase.
 
 \noindent\textbf{Pre-training details.} 
-We pre-train LARM strictly on human-centric videos using the Kinetics-400 training split~\cite{kay2017kinetics, carreira2017quo}, without any in-domain robotic manipulation data. To construct the dataset for our prediction-based self-supervised learning, we sample pairs of frames from each video. Specifically, we select the $1^{\text{st}}$ frame as the initial observation and the $96^{\text{th}}$ frame as the target future state. This specific temporal gap ($k=96$) is chosen to capture meaningful, long-horizon state transitions rather than trivial, high-frequency motions, as in~\cite{kim2025token}. \rev{Kinetics-400 is stored at $25$--$30$\,fps, so $k=96$ spans roughly $3$--$4$ seconds of human activity. The gap has to be large enough that the transition is not dominated by encoding noise: frames a fraction of a second apart are near-identical under a frozen DINOv3 encoder, so the prediction target would degenerate towards an identity map and the resulting residual would carry little task signal. We stress that $k$ is a hyper-parameter of pre-training on web video and \emph{not} a control horizon; at deployment the predictor is executed at every control step and its output is consumed as a direction, with magnitude and time scale absorbed by the action decoder (Sec.~\ref{subsec:deployment}).}
+We pre-train LARM strictly on human-centric videos using the Kinetics-400 training split~\cite{kay2017kinetics, carreira2017quo}, without any in-domain robotic manipulation data. To construct the dataset for our prediction-based self-supervised learning, we sample pairs of frames from each video. Specifically, we select the $1^{\text{st}}$ frame as the initial observation and the $96^{\text{th}}$ frame as the target future state. This specific temporal gap ($k=96$) is chosen to capture meaningful, long-horizon state transitions rather than trivial, high-frequency motions, as in~\cite{kim2025token}. Kinetics-400 is stored at $25$--$30$\,fps, so $k=96$ spans roughly $3$--$4$ seconds of human activity. The gap has to be large enough that the transition is not dominated by encoding noise: frames a fraction of a second apart are near-identical under a frozen DINOv3 encoder, so the prediction target would degenerate towards an identity map and the resulting residual would carry little task signal. We stress that $k$ is a hyper-parameter of pre-training on web video and \emph{not} a control horizon; at deployment the predictor is executed at every control step and its output is consumed as a direction, with magnitude and time scale absorbed by the action decoder (Sec.~\ref{subsec:deployment}).
 We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visual backbone, and DistilBERT-Base-Uncased~\cite{sanh2019distilbert} as the text backbone. To provide stable and high-quality latent targets without pixel-level reconstruction, as depicted in Fig.~\ref{fig:ab_probe}, we employ self-distillation on our visual backbone and formalize a frozen, pre-trained DINOv3 model as a  \textit{Teacher} model~\cite{grill2020bootstrap, caron2021emerging}. Simultaneously, our trainable LARM modules process the initial frame with the language instruction to predict this latent future and optimize the loss $\mathcal{L}_{\text{total}}$ defined in Eq.~\ref{eq:total}. 
 
 
@@ -30,11 +30,11 @@ We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visu
 \begin{figure}[t]  
     \centering
     \includegraphics[width=\linewidth]{ieeeconf/figure/vis_attn_cropped.pdf}
-    \caption{\textbf{To be written}}
+    \caption{\textbf{Qualitative language grounding after human-video pre-training.} We visualize instruction-conditioned cross-attention maps from LARM. Warmer regions indicate larger attention weights and concentrate on task-relevant manipulated objects without bounding-box supervision, providing a qualitative sanity check for the language-conditioned prediction objective.}
     \label{fig:vis_attn}
 \end{figure}
 
-In Fig.~\ref{fig:vis_attn}, we validate the visual-language grounding capability of LARM by visualizing the cross-attention maps generated by our bidirectional cross-attention given language instructions. The warmer regions (yellow) demonstrate that LARM localizes the task-related moving objects without any bounding-box supervision. This confirms that the model successfully grounds the language intent into the visual space and filters out task-irrelevant background distractors before prediction.
+Fig.~\ref{fig:vis_attn} provides a qualitative sanity check for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the intended role of language as an intent filter before latent future prediction, while the quantitative evidence for policy transfer is reported in the downstream control benchmarks below.
 
 
 
@@ -42,32 +42,32 @@ In Fig.~\ref{fig:vis_attn}, we validate the visual-language grounding capability
 
 \subsection{Simulation results}
 \label{sec:exp_franka}
-We validate our model on five long-horizon visuomotor tasks in Franka Kitchen~\cite{franka_kitchen}, a widely adopted continuous control benchmark using a simulated 9-DoF Franka Emika arm. 
+Franka Kitchen tests whether dynamics learned from human videos can support long-horizon robot manipulation with a different embodiment. We evaluate five visuomotor tasks in a simulated 9-DoF Franka Emika arm~\cite{franka_kitchen}.
 
 
 
 
 \noindent\textbf{Setup.}
-As shown in Table~\ref{tab:franka}, we compare our method against three major categories of baselines: standard visual representation models, vision-only predictive models, and vision-language predictive models. To ensure a fair comparison, all downstream policies employ the same standard behavioral cloning (BC) architecture, utilizing the respective frozen backbones.
+As shown in Table~\ref{tab:franka}, we compare against three categories of baselines: standard visual representation models, vision-only predictive models, and vision-language predictive models. All methods use the same downstream behavioral cloning (BC) architecture with frozen visual backbones, so the policy-learning protocol is held fixed while the representation and its pre-training data differ. Table~\ref{tab:dif} separately summarizes the robot-data and annotation requirements of the closest predictive baselines.
 
 
 \input{ieeeconf/tables/dif}
 
 
-LARM achieves an 81.2\% average success rate, which significantly outperforms standard visual backbones, surpassing MVP \cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M \cite{nair2022r3m} (69.5\%) by +9.5\% and +11.7\%, respectively. Despite being pre-trained exclusively on human videos without robot embodiment data, LARM successfully generalizes to out-of-domain robotic control, providing a strong affirmative answer to \textbf{Q1}.
+LARM achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the intent-aligned predictor learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
 
 
 % \vspace{-1pt}
 
 
-Compared to recent vision-language predictive models like LaVA-Man \cite{zhu2025lava} (79.2\%) and MPI \cite{zeng2024learning} (78.9\%), LARM outperforms on complex articulation tasks. For instance, it achieves \textbf{62.0\%} on ``Open microwave'' and \textbf{95.7\%} on ``Flip switch,'' outperforming all predictive baselines. This confirms that explicitly isolating intent-aligned future transitions simplifies downstream policy optimization.
+Compared with recent vision-language predictive models such as LaVA-Man~\cite{zhu2025lava} (79.2\%) and MPI~\cite{zeng2024learning} (78.9\%), LARM is competitive on the average and is strongest on several complex articulation tasks. For example, it reaches \textbf{62.0\%} on ``Open microwave'' and \textbf{95.7\%} on ``Flip switch,'' outperforming all predictive baselines on these tasks. These per-task gains are consistent with the design goal of LARM: the policy receives an explicit intent-aligned transition direction instead of having to infer the relevant future change implicitly from a static feature alone.
 
 
 \vspace{-1pt}
 
 % \vspace{-2pt}
 
-Table~\ref{tab:dif} compares pre-training configurations of the predictive models that show similar performance on Franka Kitchen. While MPI and LaVA-Man rely heavily on in-domain robot data, with MPI further requiring expensive fine-grained annotations (e.g., bounding boxes), our method operates without robot data, using self-supervised learning on internet-scale human videos. Despite this strictly scalable setup, LARM systematically outperforms robot data-dependent baselines. By sharing the future-conditioning paradigm with LaVA-Man but removing the reliance on in-domain data, we demonstrate that constrained future prediction is effective for extracting task-relevant physical dynamics from human videos.
+Table~\ref{tab:dif} clarifies why this comparison is more than a leaderboard difference. MPI and LaVA-Man use robot-domain pre-training data, and MPI additionally requires fine-grained supervision such as bounding boxes; LARM instead uses self-supervised pre-training on human-centric internet videos. Under this more scalable data assumption, matching or exceeding the closest predictive baselines on Franka Kitchen supports our central claim that constrained future prediction can extract robot-useful physical dynamics from human behavior videos.
 
 
 % \vspace{-1pt}
@@ -82,7 +82,7 @@ Franka Kitchen evaluates five tasks that share a single kitchen scene and a comm
 \noindent\textbf{Setup.}
 We collect 100 expert demonstrations per task with the benchmark's scripted policies and train a single language-conditioned multi-task policy by offline behavioral cloning, with no reinforcement learning and no online interaction. As in Sec.~\ref{sec:exp_franka}, every backbone is kept frozen and only the action decoder is trained. All methods, including ours, use the identical pooled action decoder, so the only quantity that differs across rows of Table~\ref{tab:metaworld} is the representation supplied to it. We report closed-loop success over 50 episodes per task using an evaluation seed that is disjoint from all demonstration-collection seeds, which prevents the policy from being scored on object configurations it has already seen.
 
-\noindent\rev{\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy consumes a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth channel and no frame stacking are used. Object positions are randomised by the benchmark at every reset, and the evaluation seed controls that randomisation.}
+\noindent\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy consumes a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth channel and no frame stacking are used. Object positions are randomised by the benchmark at every reset, and the evaluation seed controls that randomisation.
 
 \input{ieeeconf/tables/metaworld}
 
@@ -93,16 +93,16 @@ We collect 100 expert demonstrations per task with the benchmark's scripted poli
     \label{fig:failure_stages}
 \end{figure}
 
-\rev{LARM reaches a \textbf{75.6\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
+LARM reaches a \textbf{75.6\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
 
 These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorised opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the intent-aligned residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
 
-The baseline ordering also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite a larger backbone, consistent with the view that MAE features are strong for reconstruction but less linearly separable under a frozen-backbone, shallow-decoder protocol.}
+The baseline ordering also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite a larger backbone, consistent with the view that MAE features are strong for reconstruction but less linearly separable under a frozen-backbone, shallow-decoder protocol.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
-\caption{ \textbf{Evaluation of real-world multi-task manipulation}. We compare the success rates of our intent-aligned model against CLIPort, MPI, and LaVA-Man across seven language-conditioned tasks. The right panel details our robot hardware setup and the diverse set of experimental objects. Our approach outperforms the baselines in average success rate, exhibiting particularly strong zero-shot generalization on \textit{unseen tasks}. }
+\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare LARM with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. LARM obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
 \label{fig:robot_results}
 \end{figure}
 
@@ -111,7 +111,7 @@ The baseline ordering also differs from Franka Kitchen in an informative way. VC
 \begin{figure}[t]  
     \centering
     \includegraphics[width=\linewidth]{ieeeconf/figure/setup_cropped.pdf}
-    \caption{\textbf{Real-robot experiment setup}. We used various object (left) and a UR5 robot arm with a Robotiq-2F-85 gripper for tabletop manipulation tasks..}
+    \caption{\textbf{Real-robot experiment setup}. We use a diverse set of tabletop objects and a UR5 robot arm with a Robotiq 2F-85 gripper.}
     \label{fig:setup}
 \end{figure}
 
@@ -127,12 +127,12 @@ The baseline ordering also differs from Franka Kitchen in an informative way. VC
     % To further assess the robustness of our learned representations and their sim-to-real transferability, we deploy LARM on a physical UR5 robotic arm. Real-world environments introduce severe challenges for representation learning, including varying lighting conditions, complex visual distractors, and partial occlusions—factors that frequently degrade the performance of policies relying on standard static visual features. 
 
 
-We validate LARM in the real-robot environment using seven tabletop manipulation tasks. 
+We further validate LARM on a physical UR5 setup where language-conditioned control must handle object appearance shifts, clutter, and contact-rich motions.
 
 
-\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a Robotiq 2F-85 gripper and an Intel RealSense RGB-D camera capturing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). To adapt our model to real-world control, we collect 200 language-annotated expert demonstrations. We use this dataset to jointly fine-tune our method and three baselines (CLIPort, MPI, and LaVA-Man) into a single unified multi-task policy, requiring the models to condition their actions on language instructions. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data. We evaluate the co-trained policy across seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 5 independent evaluation trials. 
+\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a Robotiq 2F-85 gripper and an Intel RealSense RGB-D camera capturing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). We collect 200 language-annotated expert demonstrations and train each method under the same multi-task protocol, comparing LARM with CLIPort, MPI, and LaVA-Man using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data and introduced only at evaluation time. We evaluate seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 5 independent evaluation trials.
 
-As shown in Fig.~\ref{fig:robot_results}, our method successfully executes the tasks and consistently outperforms the baselines. On average, our model achieves an overall success rate of over 85\%, significantly surpassing the strongest baseline, LaVA-Man ($\sim$70\%), as well as CLIPort and MPI ($\sim$50\%). In Fig.~\ref{fig:affordance_maps}, we demonstrate example pick-and-place affordance maps. Our method exhibits strong zero-shot generalization, achieving a 100\% success rate on ``Packing unseen objects'' (vs. 80\% for LaVA-Man) and an 80\% success rate on ``Packing unseen blocks'' (a 20\% absolute improvement over LaVA-Man). Furthermore, for tasks with complex contact dynamics like ``Pushing piles,'' our method reaches an 80\% success rate, doubling the performance of MPI and LaVA-Man. These results confirm that our intent-aligned pre-training effectively grounds language instructions to visual features, enabling robust continuous control without overfitting.
+As shown in Fig.~\ref{fig:robot_results}, LARM consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate above 85\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$70\%), and well above CLIPort and MPI ($\sim$50\%). The strongest evidence appears in the held-out settings: LARM reaches 100\% success on ``Packing unseen objects'' (vs.\ 80\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). On the contact-rich ``Pushing piles'' task, LARM also reaches 80\%, doubling the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that intent-aligned pre-training improves robust real-world language-conditioned control and reduces overfitting to the training objects.
 
 
 
@@ -140,22 +140,23 @@ As shown in Fig.~\ref{fig:robot_results}, our method successfully executes the t
 \begin{figure}[t]  
     \centering
     \includegraphics[width=\linewidth]{ieeeconf/figure/aff_cropped.pdf}
-\caption{\textbf{Sampled affordance maps.} We obtain the predicted affordance maps of the LARM model at the start and end stages in real-robot tabletop manipulation tasks.}
+\caption{\textbf{Sampled affordance maps.} We visualize LARM's predicted affordance maps at the start and end stages of real-robot tabletop manipulation tasks. The responses follow the commanded object and target regions, providing qualitative evidence for language-conditioned spatial grounding.}
 \label{fig:affordance_maps}
 \end{figure}
 
 \subsection{Ablation study}
 \label{sec:ablation}
-A core contribution of LARM is challenging the standard representation learning paradigm, which typically discards the predictive decoder after pre-training~\cite{he2022masked, nair2022r3m}. We validate the impact of explicitly retaining the intent-aligned predictor by conducting an ablation study on Franka Kitchen~\cite{franka_kitchen}. 
+A core contribution of LARM is to retain the intent-aligned predictor instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction.
 
-We compare three variants:
+We compare four variants:
 \begin{itemize}
     \item \textbf{LARM (Encoder-Only):} The downstream policy is conditioned only on static current visual features $z_t$.
     \item \textbf{LARM (Predictor-Only):} The policy is conditioned exclusively on the predicted future latent state $z_{t+1}$ generated by the predictor.
+    \item \textbf{LARM (Absolute pair):} The policy receives both $z_t$ and $z_{t+1}$, but the action decoder must infer their difference implicitly.
     \item \textbf{LARM (Full):} The policy is conditioned on both the current state and the explicitly computed intent-aware latent residual: $\pi(z_t, \Delta_z)$.
 \end{itemize}
 
 
 \input{ieeeconf/tables/abl}
 
-As shown in Table~\ref{tab:ablation_residual}, while the \textit{Encoder-Only} variant achieves a competitive average success rate of 74.5\%, it struggles with complex, long-horizon articulation tasks such as ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Interestingly, the \textit{Predictor-Only} variant provides only a marginal improvement (75.5\% average), indicating that simply supplying the policy with a raw predicted future state is insufficient for precise motor control. By explicitly computing the actionable latent residual $\Delta_z$, the \textit{Full} LARM model achieves a dramatic $+6.7\%$ absolute improvement over the baseline, reaching an 81.2\% average success rate. This confirms that providing a direct, intent-aligned directional vector effectively simplifies the downstream policy learning objective compared to implicitly forcing the network to infer the difference between $z_t$ and $z_{t+1}$.
+Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,z_{t+1})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results answer \textbf{Q2}: the gain is not merely from adding a future feature, but from making the intent-aligned transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
