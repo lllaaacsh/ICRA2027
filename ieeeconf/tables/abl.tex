@@ -1,21 +1,27 @@
 \begin{table}[t]
 \centering
-\caption{\textbf{Ablation study on latent residuals.} Average closed-loop success on Franka Kitchen and Meta-World MT10. MT10 uses the same frozen-backbone, pooled-decoder protocol as Table~\ref{tab:metaworld}; the Absolute pair variant has not been run on Franka Kitchen.}
-\setlength{\tabcolsep}{2.6pt}
-\footnotesize
-\renewcommand{\arraystretch}{1.03}
+\caption{\textbf{Ablation study on latent residuals.} Franka Kitchen reports per-task and average success rates; Meta-World MT10 reports the average under the same frozen-backbone, pooled-decoder protocol as Table~\ref{tab:metaworld}. The Absolute pair variant has not been run on Franka Kitchen.}
+\setlength{\tabcolsep}{2.0pt}
+\scriptsize
+\renewcommand{\arraystretch}{1.02}
 
-\begin{tabular}{@{}llcc@{}}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}llccccccc@{}}
 \toprule
-\bf Variant & \bf Input & \bf Franka & \bf MT10 \\
-& & \bf Avg. & \bf Avg. \\
+\multirow{2}{*}{\bf Variant} &
+\multirow{2}{*}{\bf Input} &
+\multicolumn{6}{c}{\bf Franka Kitchen} &
+\multirow{2}{*}{\bf MT10 Avg.} \\
+\cmidrule(lr){3-8}
+& & Knob & Door & Switch & Micro. & Slide & \bf Avg. & \\
 \midrule
-Encoder-Only & $z_t$ & 74.5 & 57.0 \\
-Predictor-Only & $z_{t+1}$ & 75.5 & \bf 79.0 \\
-Absolute pair & $z_t,z_{t+1}$ & -- & 75.0 \\
+Encoder-Only & $z_t$ & 79.3 & 46.0 & 91.0 & 56.3 & 100.0 & 74.5 & 57.0 \\
+Predictor-Only & $z_{t+1}$ & 86.3 & 46.3 & 89.7 & 55.3 & 100.0 & 75.5 & \bf 79.0 \\
+Absolute pair & $z_t,z_{t+1}$ & -- & -- & -- & -- & -- & -- & 75.0 \\
 \rowcolor[HTML]{DCD5E0}
-\bf Full & \bf $z_t,\Delta_z$ & \bf 81.2 & 75.6 \\
+\bf Full & \bf $z_t,\Delta_z$ & \bf 91.7 & \bf 56.7 & \bf 95.7 & \bf 62.0 & \bf 100.0 & \bf 81.2 & 75.6 \\
 \bottomrule
 \end{tabular}
+}
 \label{tab:ablation_residual}
 \end{table}
