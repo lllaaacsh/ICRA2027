@@ -25,30 +25,35 @@ As shown in Eq.~\ref{eq:vision_update} and Eq.~\ref{eq:language_update}, these l
 \subsection{Asymmetric intent-aligned prediction}
 \label{subsec:pretraing}
 
-We aim to ensure that the learned representations capture dynamics relevant to the task rather than random environmental variations. Existing predictive models forecast the future from past inputs and therefore inevitably entangle controllable transitions with uncontrollable passive dynamics~\cite{he2022masked, gupta2023siamese}. \rev{We isolate task-relevant change without pixel-level decoding by making two forecasts of the \emph{same} future under two different levels of access to the current observation, and by tying them together.}
-
 {\color{revcolor}
+This subsection trains a deployable predictor for task-conditioned future latents rather than generic video extrapolation. A predictor with dense access to the current frame can model future tokens from local appearance and passive scene motion, but a robot policy needs the part of that future that is implied by the instruction. LARM therefore evaluates one shared predictor under two access conditions: a full-information pass that can read dense visual memory, and an intent-aligned pass that must forecast from language-grounded global context. The full pass provides a memory-conditioned training reference, while the intent pass is the one retained for downstream control.
+
 \noindent\textbf{Prediction target.}
-Let $z^{\text{gt}}_{t+1}$ denote the ground-truth future latent state, obtained by applying a frozen DINOv3 \textit{teacher} to the future frame (Fig.~\ref{fig:ab_probe}). The future frame is the one $k$ frames ahead of $I_t$; the subscript $t{+}1$ denotes \emph{the next state at the pre-training horizon}, not the next control step. The teacher is frozen and so is the backbone that produces $V$, so $z_t$ and $z^{\text{gt}}_{t+1}$ lie in the same feature space and their difference is well defined.
+Given the current frame $I_t$ and instruction $c$, the pre-training target is the frozen-teacher representation of the frame $k$ steps later,
+$z^{\text{gt}}_{t+k}=[\,g_{\texttt{cls}},g_1,\dots,g_N\,]$.
+The offset $k$ is a web-video pre-training gap, not a robot control horizon. The DINOv3 backbone that produces the current tokens $z_t=[\,v_{\texttt{cls}},v_1,\dots,v_N\,]$ is also frozen, so $z_t$ and $z^{\text{gt}}_{t+k}$ are defined in the same feature space and token-wise residuals are meaningful.
 
 \noindent\textbf{One predictor, two access conditions.}
-The two streams are not two networks. They are the same predictor $F_\theta$ evaluated twice with different memory. $F_\theta$ is a stack of decoder blocks, each composed of (i) a cross-attention layer that reads a memory set $M$, (ii) a self-attention layer, and (iii) an MLP. Its queries $Q = [\,q_{\texttt{cls}}, q_1, \dots, q_N\,]$ are \emph{learned}, content-free tokens: a single future token broadcast over $N{+}1$ positions and distinguished only by a positional embedding. The queries therefore carry no information about $I_t$, and all knowledge of the current scene must be read from $M$. We define
+The two streams are not two networks; they are two calls to the same predictor $F_\theta$ with different memory sets. $F_\theta$ is a stack of decoder blocks, each containing cross-attention from query tokens to memory, query self-attention, and an MLP. Its queries $Q=[\,q_{\texttt{cls}},q_1,\dots,q_N\,]$ are learned, content-free future tokens distinguished by positional embeddings, so the queries themselves do not carry current-frame appearance. All scene information must enter through the memory $M$:
 %
 \begin{align}
-    \hat z^{\text{full}}_{t+1} &= F_\theta\big(Q \mid M_{\text{full}}\big), &
+    \hat z^{\text{full}}_{t+k} &= F_\theta\big(Q \mid M_{\text{full}}\big), &
     M_{\text{full}} &= [\,v'_{\texttt{cls}},\, v'_{1:N},\, L'\,], \label{eq:stream_full}\\
-    \hat z^{\text{int}}_{t+1}  &= F_\theta\big(Q \mid M_{\text{int}}\big),  &
+    \hat z^{\text{int}}_{t+k}  &= F_\theta\big(Q \mid M_{\text{int}}\big),  &
     M_{\text{int}}  &= [\,v'_{\texttt{cls}},\, L'\,]. \label{eq:stream_int}
 \end{align}
 %
-The \textit{full-information} stream reads dense spatial evidence and can model the physical evolution of the scene in detail. The \textit{intent-aligned} stream sees the current observation only through the single language-grounded token $v'_{\texttt{cls}}$: it must infer what will change from task context and a global summary, without access to fine-grained appearance. Two properties of this construction matter. First, the bottleneck is imposed on the \emph{memory}, not on the queries, so the intent-aligned stream still emits a full patch-level forecast --- spatial resolution is supplied by $Q$ rather than decompressed out of $v'_{\texttt{cls}}$. Second, the two streams execute an identical sequence of operations and share every parameter, so the only variable that distinguishes them is what they are allowed to read.
+The full-information stream can read dense spatial evidence $v'_{1:N}$ at every decoder block. The intent-aligned stream removes that dense visual memory and keeps only the language-grounded visual class token $v'_{\texttt{cls}}$ together with the language tokens $L'$. This creates a visual bottleneck without reducing the output resolution: the intent stream still predicts $N{+}1$ future tokens because spatial slots are supplied by $Q$. Since the two calls share $\theta$ and execute the same operations, the controlled variable is memory access rather than parameter capacity.
+
+\noindent\textbf{The instruction reaches the predictor twice.}
+Language affects the forecast both through fused visual tokens and through the retained language memory. Eq.~\ref{eq:vision_update} makes $v'_{\texttt{cls}}$ a task-conditioned visual summary, which determines what scene information can survive the intent bottleneck. Eq.~\ref{eq:language_update} keeps the instruction available as $L'$, so the predictor does not have to spend the single visual token on storing the task specification itself. Thus the bottleneck is placed on dense visual evidence, not on the instruction.
 }
 
 Both streams are supervised against the same target with a dual objective combining Mean Squared Error (MSE) and cosine distance, \rev{computed per token}:
 %
 \begin{align}
-    \mathcal{L}_{\text{full}} &= \big\| \hat z^{\text{full}}_{t+1} - z^{\text{gt}}_{t+1} \big\|^2 + \big(1 - \cos(\hat z^{\text{full}}_{t+1}, z^{\text{gt}}_{t+1})\big), \label{eq:loss_full} \\
-    \mathcal{L}_{\text{int}} &= \big\| \hat z^{\text{int}}_{t+1} - z^{\text{gt}}_{t+1} \big\|^2 + \big(1 - \cos(\hat z^{\text{int}}_{t+1}, z^{\text{gt}}_{t+1})\big). \label{eq:loss_intent}
+    \mathcal{L}_{\text{full}} &= \big\| \hat z^{\text{full}}_{t+k} - z^{\text{gt}}_{t+k} \big\|^2 + \big(1 - \cos(\hat z^{\text{full}}_{t+k}, z^{\text{gt}}_{t+k})\big), \label{eq:loss_full} \\
+    \mathcal{L}_{\text{int}} &= \big\| \hat z^{\text{int}}_{t+k} - z^{\text{gt}}_{t+k} \big\|^2 + \big(1 - \cos(\hat z^{\text{int}}_{t+k}, z^{\text{gt}}_{t+k})\big). \label{eq:loss_intent}
 \end{align}
 %
 The cosine term provides scale-invariant supervision that aligns the semantic direction of the prediction with the target, while MSE acts as a magnitude regulariser that keeps predictions on the DINOv3 feature manifold.
@@ -62,7 +67,7 @@ The cosine term provides scale-invariant supervision that aligns the semantic di
 
 Following asymmetric siamese designs~\cite{gupta2023siamese}, a consistency loss ties the two streams together:
 \begin{equation}
-    \mathcal{L}_{\text{cons}} = \alpha \cdot \big\| \hat z^{\text{int}}_{t+1} - \text{sg}\big(\hat z^{\text{full}}_{t+1}\big) \big\|^2, \label{eq:consistency}
+    \mathcal{L}_{\text{cons}} = \alpha \cdot \big\| \hat z^{\text{int}}_{t+k} - \text{sg}\big(\hat z^{\text{full}}_{t+k}\big) \big\|^2, \label{eq:consistency}
 \end{equation}
 where $\text{sg}(\cdot)$ is the stop-gradient operator and we empirically selected $\alpha=0.3$ to scale the term. \rev{The stop-gradient is placed on the \emph{teacher} side: the bottlenecked forecast is pulled towards the accurate one, while the accurate one is not dragged back towards a deliberately impoverished prediction, which would otherwise collapse both streams onto their average.} The total objective is
 \begin{equation}
@@ -71,7 +76,7 @@ where $\text{sg}(\cdot)$ is the stop-gradient operator and we empirically select
 
 {\color{revcolor}
 \noindent\textbf{What each term optimises.}
-Because $\theta$ is shared, all three terms update the same predictor and the same fusion module of Sec.~\ref{subsec:encoder}; their roles are separated by the memory and by the stop-gradient rather than by a partition of the parameters. Eq.~\ref{eq:loss_full} is the only term that trains the read-out of dense spatial evidence. Eq.~\ref{eq:loss_intent} supervises the same parameters when that evidence is withheld, forcing $v'_{\texttt{cls}}$ to become predictive on its own, which is what makes the fusion of Sec.~\ref{subsec:encoder} intent-aligned rather than merely descriptive. Eq.~\ref{eq:consistency} then distils the full-information forecast into the bottlenecked one. Since a future component that is visible only in fine-grained appearance cannot be recovered from $v'_{\texttt{cls}}$ and $L'$, minimising Eq.~\ref{eq:consistency} suppresses exactly those components: futures that cannot be explained by task context are not reproduced. The language backbone is frozen and contributes no gradient path; the coupling between the two streams is entirely through the shared fusion module and the shared predictor weights. Algorithm~\ref{alg:pretrain} states one training step in full.
+Because $\theta$ is shared, the losses are coupled through parameters even though the two forward passes read different memories. Eq.~\ref{eq:loss_full} trains the shared decoder blocks to use dense visual memory when it is available. Eq.~\ref{eq:loss_intent} applies supervision to the same decoder blocks and fusion module under the bottlenecked memory, forcing $v'_{\texttt{cls}}$ and $L'$ to carry enough task-conditioned context for future prediction. Eq.~\ref{eq:consistency} sends gradients only through the intent prediction branch because the full prediction is stopped; it distils the dense-memory forecast into the branch that will be used after pre-training. The language backbone is frozen and contributes no gradient path. The coupling that addresses the AE's concern therefore comes from the shared fusion module, the shared query tokens, and the shared predictor weights, as made explicit in Algorithm~\ref{alg:pretrain}.
 }
 
 \begin{algorithm}[t]
@@ -82,10 +87,11 @@ Because $\theta$ is shared, all three terms update the same predictor and the sa
 \State $V \gets \texttt{DINOv3}(I_t)$ \Comment{frozen}
 \State $L \gets \texttt{Proj}\big(\texttt{DistilBERT}(c)\big)$ \Comment{frozen encoder}
 \State $V', L' \gets \texttt{BiCrossAttn}(V, L)$ \Comment{trainable}
-\State $z^{\text{gt}}_{t+1} \gets \texttt{sg}\big(\texttt{DINOv3}(I_{t+k})\big)$ \Comment{frozen teacher}
-\State $\hat z^{\text{full}}_{t+1} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, v'_{1:N}, L']\big)$
-\State $\hat z^{\text{int}}_{t+1} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, L']\big)$ \Comment{same $\theta$, same $Q$}
-\State $\mathcal{L} \gets \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{int}} + \alpha\big\|\hat z^{\text{int}}_{t+1} - \texttt{sg}(\hat z^{\text{full}}_{t+1})\big\|^2$
+\State $Q \gets \texttt{FutureTokens} + \texttt{PosEmbed}$ \Comment{learned, content-free}
+\State $z^{\text{gt}}_{t+k} \gets \texttt{sg}\big(\texttt{DINOv3}(I_{t+k})\big)$ \Comment{frozen teacher}
+\State $\hat z^{\text{full}}_{t+k} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, v'_{1:N}, L']\big)$
+\State $\hat z^{\text{int}}_{t+k} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, L']\big)$ \Comment{same $\theta$, same $Q$}
+\State $\mathcal{L} \gets \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{int}} + \alpha\big\|\hat z^{\text{int}}_{t+k} - \texttt{sg}(\hat z^{\text{full}}_{t+k})\big\|^2$
 \State update $\{\texttt{Proj}, \texttt{BiCrossAttn}, F_\theta, Q\}$ by $\nabla\mathcal{L}$
 \end{algorithmic}
 \end{algorithm}
