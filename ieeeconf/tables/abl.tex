@@ -1,41 +1,21 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
-\caption{\textbf{Ablation study on latent residuals.} We evaluate how retaining the predictive module and exposing the residual signal affects closed-loop behavioral cloning. Franka Kitchen reports per-task success rates and the average; Meta-World reports the MT10 average under the same frozen-backbone, pooled-decoder protocol as Table~\ref{tab:metaworld}. MT10 averages use 50 episodes per task (500 total), giving a maximum standard error of about 2.2 percentage points for each average and 3.2 points for pairwise differences. The Absolute pair variant has not been run on Franka Kitchen.}
-\setlength{\tabcolsep}{4.5pt}
+\caption{\textbf{Ablation study on latent residuals.} Average closed-loop success on Franka Kitchen and Meta-World MT10. MT10 uses the same frozen-backbone, pooled-decoder protocol as Table~\ref{tab:metaworld}; the Absolute pair variant has not been run on Franka Kitchen.}
+\setlength{\tabcolsep}{2.6pt}
 \footnotesize
-\renewcommand{\arraystretch}{1.1}
+\renewcommand{\arraystretch}{1.03}
 
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lc ccccc c c}
+\begin{tabular}{@{}llcc@{}}
 \toprule
-\multirow{3}{*}{\bf Variant} &
-\multirow{3}{*}{\bf Input} &
-\multicolumn{6}{c}{\bf Franka Kitchen} &
-\multirow{3}{*}{\bf MT10 Avg.} \\
-\cmidrule(lr){3-8}
-& &
-Turn &
-Open &
-Flip &
-Open &
-Slide &
-\multirow{2}{*}{\bf Avg.} &
-\\
-& &
-knob &
-door &
-switch &
-micro. &
-door &
-&
-\\ \midrule
-Encoder-Only & $z_t$ & 79.3 & 46.0 & 91.0 & 56.3 & 100.0 & 74.5 & 57.0 \\
-Predictor-Only & $z_{t+1}$ &86.3 &46.3 &89.7 &55.3 &100.0 &75.5 & \bf 79.0 \\
-Absolute pair & $z_t, z_{t+1}$ & -- & -- & -- & -- & -- & -- & 75.0 \\
+\bf Variant & \bf Input & \bf Franka & \bf MT10 \\
+& & \bf Avg. & \bf Avg. \\
+\midrule
+Encoder-Only & $z_t$ & 74.5 & 57.0 \\
+Predictor-Only & $z_{t+1}$ & 75.5 & \bf 79.0 \\
+Absolute pair & $z_t,z_{t+1}$ & -- & 75.0 \\
 \rowcolor[HTML]{DCD5E0}
-\bf Full & \bf $z_t, \Delta_z$ & \bf 91.7 & \bf 56.7 & \bf 95.7 & \bf 62.0 & \bf 100.0 & \bf 81.2 & 75.6 \\
+\bf Full & \bf $z_t,\Delta_z$ & \bf 81.2 & 75.6 \\
 \bottomrule
 \end{tabular}
-}
 \label{tab:ablation_residual}
-\end{table*}
+\end{table}
