@@ -4,12 +4,12 @@
 \subsection{Overview}
 \label{subsec:method_overview}
 
-LARM learns a task-conditioned latent change predictor from action-free human videos and then uses the predicted change as policy context. The method has two stages. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec.~\ref{subsec:notation}--\ref{subsec:training_objective}). During downstream imitation learning, the retained predictor runs in the robot control loop and produces a latent residual, which is scale-normalised before conditioning the policy (Sec.~\ref{subsec:policy_learning}--\ref{subsec:deployment}). This organization is important: the full-information branch is a pre-training teacher branch, while the intent-aligned branch is the branch kept after pre-training.
+Trail learns a task-conditioned latent change predictor from action-free human videos and then uses the predicted change as policy context. The method has two stages. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec.~\ref{subsec:notation}--\ref{subsec:training_objective}). During downstream imitation learning, the retained predictor runs in the robot control loop and produces a latent residual, which is scale-normalised before conditioning the policy (Sec.~\ref{subsec:policy_learning}--\ref{subsec:deployment}). This organization is important: the full-information branch is a pre-training teacher branch, while the intent-aligned branch is the branch kept after pre-training.
 
 \subsection{Latent Space and Notation}
 \label{subsec:notation}
 
-LARM defines current and future states in a frozen visual feature space so that their difference is well posed. A frozen DINOv3 backbone~\cite{simeoni2025dinov3} maps the current RGB observation $I_t$ to visual tokens
+Trail defines current and future states in a frozen visual feature space so that their difference is well posed. A frozen DINOv3 backbone~\cite{simeoni2025dinov3} maps the current RGB observation $I_t$ to visual tokens
 $z_t = V = [\,v_{\texttt{cls}}, v_1, \dots, v_N\,] \in \mathbb{R}^{(N+1)\times d}$,
 where $v_{\texttt{cls}}$ is the visual class token and $N=196$ is the number of $16\times16$ patches at $224\times224$ resolution. A frozen DistilBERT~\cite{sanh2019distilbert} maps the instruction $c$ to language tokens, which are projected to the visual width as
 $L=[\,\ell_1,\dots,\ell_M\,]$. Throughout the paper, \texttt{[CLS]} refers only to the visual class token; language special tokens are not used as separate policy inputs.
@@ -34,7 +34,7 @@ where the first, second and third arguments of $\texttt{CrossAttn}(\cdot,\cdot,\
 \subsection{Asymmetric intent-aligned prediction}
 \label{subsec:pretraing}
 
-The second module separates task-conditioned future prediction from generic video extrapolation. A predictor with dense access to the current frame can model future tokens from local appearance and passive scene motion, but a robot policy needs the part of the future that is recoverable from the instruction and a task-conditioned scene summary. LARM therefore evaluates one shared predictor $F_\theta$ under two access conditions: a full-information pass that can read dense visual memory, and an intent-aligned pass that cannot.
+The second module separates task-conditioned future prediction from generic video extrapolation. A predictor with dense access to the current frame can model future tokens from local appearance and passive scene motion, but a robot policy needs the part of the future that is recoverable from the instruction and a task-conditioned scene summary. Trail therefore evaluates one shared predictor $F_\theta$ under two access conditions: a full-information pass that can read dense visual memory, and an intent-aligned pass that cannot.
 
 The two streams are not two networks. They are two calls to the same predictor $F_\theta$ with different memory sets. $F_\theta$ is a stack of decoder blocks, each containing cross-attention from query tokens to memory, query self-attention, and an MLP. Its queries $Q=[\,q_{\texttt{cls}},q_1,\dots,q_N\,]$ are learned, content-free future tokens distinguished by positional embeddings. Thus the query tokens provide output slots but no current-frame appearance; all scene information must enter through memory:
 
@@ -73,7 +73,7 @@ where $\text{sg}(\cdot)$ is the stop-gradient operator and $\alpha=0.3$. The sto
 The gradient flow is the key coupling mechanism. Eq.~\ref{eq:loss_full} trains the shared predictor to use dense visual memory when it is available. Eq.~\ref{eq:loss_intent} trains the same predictor and the same fusion module under the bottlenecked memory, making $v'_{\texttt{cls}}$ and $L'$ predictive without dense patches. Eq.~\ref{eq:consistency} sends gradients only through the intent-aligned branch because the full-information forecast is stopped. The language backbone is frozen and contributes no gradient path; the two streams are coupled through the shared fusion module, shared query tokens, and shared predictor weights. Algorithm~\ref{alg:pretrain} states the full pre-training step.
 
 \begin{algorithm}[t]
-\caption{LARM pre-training step}
+\caption{Trail pre-training step}
 \label{alg:pretrain}
 \begin{algorithmic}[1]
 \State $V \gets \texttt{DINOv3}(I_t)$ \Comment{frozen}
@@ -83,7 +83,9 @@ The gradient flow is the key coupling mechanism. Eq.~\ref{eq:loss_full} trains t
 \State $z^{\text{gt}}_{t+k} \gets \texttt{sg}\big(\texttt{DINOv3}(I_{t+k})\big)$ \Comment{frozen teacher}
 \State $\hat z^{\text{full}}_{t+k} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, v'_{1:N}, L']\big)$
 \State $\hat z^{\text{int}}_{t+k} \gets F_\theta\big(Q \mid [v'_{\texttt{cls}}, L']\big)$ \Comment{same $\theta$, same $Q$}
-\State $\mathcal{L} \gets \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{int}} + \alpha\big\|\hat z^{\text{int}}_{t+k} - \texttt{sg}(\hat z^{\text{full}}_{t+k})\big\|^2$
+\State $\mathcal{L}_{\text{pred}} \gets \mathcal{L}_{\text{full}} + \mathcal{L}_{\text{int}}$
+\State $\mathcal{L}_{\text{cons}} \gets \alpha\big\|\hat z^{\text{int}}_{t+k} - \texttt{sg}(\hat z^{\text{full}}_{t+k})\big\|^2$
+\State $\mathcal{L} \gets \mathcal{L}_{\text{pred}} + \mathcal{L}_{\text{cons}}$
 \State update $\{\texttt{Proj}, \texttt{BiCrossAttn}, F_\theta, Q\}$ by $\nabla\mathcal{L}$
 \end{algorithmic}
 \end{algorithm}
@@ -93,7 +95,7 @@ The gradient flow is the key coupling mechanism. Eq.~\ref{eq:loss_full} trains t
 
 The downstream policy needs a control-oriented signal rather than a full reconstructed future image. After pre-training, the full-information branch is dropped; it exists only to provide the stopped target in Eq.~\ref{eq:consistency}. The retained branch is the intent-aligned predictor. Given the current observation and instruction, it outputs a goal-directed latent forecast
 $\hat z^{\text{goal}}_t=\hat z^{\text{int}}(I_t,c)$
-in the same frozen DINOv3 feature space as $z_t$. LARM then forms the token-wise residual
+in the same frozen DINOv3 feature space as $z_t$. Trail then forms the token-wise residual
 
 \begin{equation}
     \Delta_z = \hat z^{\text{goal}}_t - z_t . \label{eq:residual}
@@ -120,7 +122,7 @@ where $q_t$ is proprioception. In our experiments, $\rho$ is chosen to match the
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth,height=0.55\textheight,keepaspectratio]{ieeeconf/figure/ACDINO_cropped}
-\caption{\textbf{Proposed residual-guided policy learning}. The retained intent-aligned predictor estimates a task-conditioned latent forecast from the current observation and instruction. LARM subtracts the current latent state to obtain $\Delta_z$, applies SNR-enhanced normalisation so the residual remains visible to the policy, and then fuses the result with proprioception for behavioral cloning.}
+\caption{\textbf{Proposed residual-guided policy learning}. The retained intent-aligned predictor estimates a task-conditioned latent forecast from the current observation and instruction. Trail subtracts the current latent state to obtain $\Delta_z$, applies SNR-enhanced normalisation so the residual remains visible to the policy, and then fuses the result with proprioception for behavioral cloning.}
 \label{fig:acdino}
 \end{figure}
 
@@ -129,4 +131,4 @@ where $q_t$ is proprioception. In our experiments, $\rho$ is chosen to match the
 
 The predictor is executed at every control step in closed loop. The robot observes the current image, encodes it with the instruction, runs the retained intent-aligned predictor once, computes $\Delta_z$, applies the SNR normalisation of Eq.~\ref{eq:snr_norm}, and then predicts an action; the same process repeats after the robot moves. The predictor is not rolled out over multiple future steps and is not run only once at the beginning of an episode. This directly separates the pre-training gap $k$ from the control frequency: $k$ defines the web-video target used to learn a directional residual, while the action decoder learns the magnitude and time scale of robot actions from labeled demonstrations.
 
-The retained predictor emits a sequence of $N{+}1$ tokens in the frozen DINOv3 feature space, aligned one-to-one with the teacher tokens: index $0$ is the predicted future \texttt{[CLS]} and indices $1{:}N$ are the predicted future patches. Eq.~\ref{eq:residual} is therefore applied token-wise, and $\Delta_z$ retains spatial structure. This single output supports both action spaces we consider, with different read-outs. For \textit{1-D continuous control} that predicts joint angles or end-effector poses~\cite{assran2025v}, we take the \texttt{[CLS]} residual as a $d$-dimensional vector and concatenate it with $z_t$ and $q_t$ as input to a multi-layer perceptron policy. For \textit{2-D spatial-action policies} designed for vision-based affordance models (e.g.\ tabletop pick-and-place~\cite{shridhar2022cliport}), we reshape the $N$ patch residuals into a $\sqrt{N}\times\sqrt{N}\times d$ spatial map and fuse it with the policy's visual backbone via convolutional layers, providing an explicit prior on where and how to interact. In both cases the predictor is unchanged; only the read-out differs, which allows LARM to integrate with low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification.
+The retained predictor emits a sequence of $N{+}1$ tokens in the frozen DINOv3 feature space, aligned one-to-one with the teacher tokens: index $0$ is the predicted future \texttt{[CLS]} and indices $1{:}N$ are the predicted future patches. Eq.~\ref{eq:residual} is therefore applied token-wise, and $\Delta_z$ retains spatial structure. This single output supports both action spaces we consider, with different read-outs. For \textit{1-D continuous control} that predicts joint angles or end-effector poses~\cite{assran2025v}, we take the \texttt{[CLS]} residual as a $d$-dimensional vector and concatenate it with $z_t$ and $q_t$ as input to a multi-layer perceptron policy. For \textit{2-D spatial-action policies} designed for vision-based affordance models (e.g.\ tabletop pick-and-place~\cite{shridhar2022cliport}), we reshape the $N$ patch residuals into a $\sqrt{N}\times\sqrt{N}\times d$ spatial map and fuse it with the policy's visual backbone via convolutional layers, providing an explicit prior on where and how to interact. In both cases the predictor is unchanged; only the read-out differs, which allows Trail to integrate with low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification.

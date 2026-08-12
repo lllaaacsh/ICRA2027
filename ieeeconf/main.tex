@@ -41,19 +41,6 @@
 \usepackage{adjustbox}
 \usepackage{hyperref}
 
-\newcommand{\trailtitleicon}{%
-  \raisebox{-0.16em}{%
-    \tikz[x=0.078em,y=0.078em,line width=0.13em,line cap=round,line join=round]{
-      \draw (0,5) -- (11,16);
-      \draw (16,11) -- (5,0);
-      \draw (1,8) -- (8,1);
-      \draw (4.5,11.5) -- (11.5,4.5);
-      \draw (8,15) -- (15,8);
-    }%
-  }%
-}
-
-
 \overrideIEEEmargins                                      % Needed to meet printer requirements.
 
 %In case you encounter the following error:
@@ -75,7 +62,7 @@
 \usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
-{\texorpdfstring{\trailtitleicon\hspace{0.32em}}{}TRAIL: Learning Task-Relevant Latent Residuals for Robot Manipulation}}
+{Learning Task-Relevant Latent Residuals for Robot Manipulation}}
 
 \author{Anonymous submission
 }
