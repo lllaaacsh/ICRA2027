@@ -26,5 +26,6 @@ Our experiments evaluate whether this retained latent residual improves downstre
 \begin{itemize}
     \item We introduce an asymmetric predictive representation learning framework that learns intent-aligned latent dynamics from action-free human videos, without robot pre-training data or dense manual supervision.
     \item We retain the predictor after pre-training and convert its output into an explicit latent residual $\Delta_z$, giving downstream policies a task-conditioned direction of change rather than only a static state descriptor.
-    \item We validate the representation across Franka Kitchen~\cite{franka_kitchen}, Meta-World MT10~\cite{yu2020meta}, and real-robot tabletop manipulation, and ablate the residual design against encoder-only, predictor-only, and absolute-pair alternatives.
+    \item We validate the representation across Franka Kitchen~\cite{franka_kitchen}, Meta-World MT10~\cite{yu2020meta}, residual design ablation and across 7 different real-robot manipulation tasks, where our model consistently outperforms
+existing models.
 \end{itemize}
