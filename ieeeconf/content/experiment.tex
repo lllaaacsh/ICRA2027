@@ -11,21 +11,17 @@
 
 Our experiments are designed to answer three questions:
 \textbf{Q1:} Can human-video pre-training produce representations that transfer to robot control without robot pre-training data?
-\textbf{Q2:} Does retaining the intent-aligned latent residual improve policy learning beyond static visual features or absolute future features?
+\textbf{Q2:} Does retaining the task-relevant latent residual improve policy learning beyond static visual features or absolute future features?
 \textbf{Q3:} Does the same representation remain useful across single-task simulation, multi-task simulation, and real-world manipulation?
 
 
 \subsection{Analysis of pre-trained representations}
 \label{sec:exp_visualization}
-We first investigate whether Trail successfully learns to extract intent-aligned dynamics during the human-video pre-training phase.
+We first investigate whether Trail successfully learns to extract task-relevant dynamics during the human-video pre-training phase.
 
 \noindent\textbf{Pre-training details.} 
 We pre-train Trail strictly on human-centric videos using the Kinetics-400 training split~\cite{kay2017kinetics, carreira2017quo}, without any in-domain robotic manipulation data. To construct the dataset for our prediction-based self-supervised learning, we sample pairs of frames from each video. Specifically, we select the $1^{\text{st}}$ frame as the initial observation and the $96^{\text{th}}$ frame as the target future state. This specific temporal gap ($k=96$) is chosen to capture meaningful, long-horizon state transitions rather than trivial, high-frequency motions, as in~\cite{kim2025token}. Kinetics-400 is stored at $25$--$30$\,fps, so $k=96$ spans roughly $3$--$4$ seconds of human activity. The gap has to be large enough that the transition is not dominated by encoding noise: frames a fraction of a second apart are near-identical under a frozen DINOv3 encoder, so the prediction target would degenerate towards an identity map and the resulting residual would carry little task signal. We stress that $k$ is a hyper-parameter of pre-training on web video and \emph{not} a control horizon; at deployment the predictor is executed at every control step and its output is consumed as a direction, with magnitude and time scale absorbed by the action decoder (Sec.~\ref{subsec:deployment}).
 We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visual backbone, and DistilBERT-Base-Uncased~\cite{sanh2019distilbert} as the text backbone. To provide stable and high-quality latent targets without pixel-level reconstruction, as depicted in Fig.~\ref{fig:ab_probe}, we employ self-distillation on our visual backbone and formalize a frozen, pre-trained DINOv3 model as a  \textit{Teacher} model~\cite{grill2020bootstrap, caron2021emerging}. Simultaneously, our trainable Trail modules process the initial frame with the language instruction to predict this latent future and optimize the loss $\mathcal{L}_{\text{total}}$ defined in Eq.~\ref{eq:total}.
-
-
-\input{ieeeconf/tables/franka}
-
 
 \begin{figure}[t]  
     \centering
@@ -34,7 +30,7 @@ We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visu
     \label{fig:vis_attn}
 \end{figure}
 
-Fig.~\ref{fig:vis_attn} provides a qualitative sanity check for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the intended role of language as an intent filter before latent future prediction, while the quantitative evidence for policy transfer is reported in the downstream control benchmarks below.
+Fig.~\ref{fig:vis_attn} provides a qualitative sanity check for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the role of language in selecting task-relevant visual evidence before latent future prediction, while the quantitative evidence for policy transfer is reported in the downstream control benchmarks below.
 
 
 
@@ -48,19 +44,20 @@ Franka Kitchen tests whether dynamics learned from human videos can support long
 
 
 \noindent\textbf{Setup.}
-As shown in Table~\ref{tab:franka}, we compare against three categories of baselines: standard visual representation models, vision-only predictive models, and vision-language predictive models. All methods use the same downstream behavioral cloning (BC) architecture with frozen visual backbones, so the policy-learning protocol is held fixed while the representation and its pre-training data differ. Table~\ref{tab:dif} separately summarizes the robot-data and annotation requirements of the closest predictive baselines.
+As shown in Table~\ref{tab:franka}, we compare against three categories of baselines: standard visual representation models, vision-only predictive models, and vision-language predictive models. All methods use the same downstream behavioral cloning (BC) architecture with frozen visual backbones, so the policy-learning protocol is held fixed while the representation and its pre-training data differ. We report average success rates over 25 demonstrations across the five tasks, two viewpoints, and three random seeds. Table~\ref{tab:dif} separately summarizes the robot-data and annotation requirements of the closest predictive baselines.
 
+\input{ieeeconf/tables/franka}
 
 \input{ieeeconf/tables/dif}
 
 
-Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the intent-aligned predictor learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
+Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the bottlenecked predictor learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
 
 
 % \vspace{-1pt}
 
 
-Compared with recent vision-language predictive models such as LaVA-Man~\cite{zhu2025lava} (79.2\%) and MPI~\cite{zeng2024learning} (78.9\%), Trail is competitive on the average and is strongest on several complex articulation tasks. For example, it reaches \textbf{62.0\%} on ``Open microwave'' and \textbf{95.7\%} on ``Flip switch,'' outperforming all predictive baselines on these tasks. These per-task gains are consistent with the design goal of Trail: the policy receives an explicit intent-aligned transition direction instead of having to infer the relevant future change implicitly from a static feature alone.
+Compared with recent vision-language predictive models such as LaVA-Man~\cite{zhu2025lava} (79.2\%) and MPI~\cite{zeng2024learning} (78.9\%), Trail is competitive on the average and is strongest on several complex articulation tasks. For example, it reaches \textbf{62.0\%} on ``Open microwave'' and \textbf{95.7\%} on ``Flip switch,'' outperforming all predictive baselines on these tasks. These per-task gains are consistent with the design goal of Trail: the policy receives an explicit task-relevant transition direction instead of having to infer the relevant future change implicitly from a static feature alone.
 
 
 \vspace{-1pt}
@@ -77,12 +74,12 @@ Table~\ref{tab:dif} clarifies why this comparison is more than a leaderboard dif
 
 \subsection{Multi-task generalization on Meta-World}
 \label{sec:exp_metaworld}
-Franka Kitchen evaluates five tasks that share a single kitchen scene and a common arm configuration. To test whether the intent-aligned residual also helps when a \emph{single} policy must cover heterogeneous scenes, objects and motion primitives, we additionally evaluate on Meta-World MT10~\cite{yu2020meta}, a ten-task multi-task benchmark on a simulated Sawyer arm.
+Franka Kitchen evaluates five tasks that share a single kitchen scene and a common arm configuration. To test whether the task-relevant residual also helps when a \emph{single} policy must cover heterogeneous scenes, objects and motion primitives, we additionally evaluate on Meta-World MT10~\cite{yu2020meta}, a ten-task multi-task benchmark on a simulated Sawyer arm.
 
 \noindent\textbf{Setup.}
-We collect 100 expert demonstrations per task with the benchmark's scripted policies and train a single language-conditioned multi-task policy by offline behavioral cloning, with no reinforcement learning and no online interaction. As in Sec.~\ref{sec:exp_franka}, every backbone is kept frozen and only the action decoder is trained. All methods, including ours, use the identical pooled action decoder, so the only quantity that differs across rows of Table~\ref{tab:metaworld} is the representation supplied to it. We report closed-loop success over 50 episodes per task using an evaluation seed that is disjoint from all demonstration-collection seeds, which prevents the policy from being scored on object configurations it has already seen.
+We collect 100 expert demonstrations per task with the benchmark's scripted policies and train a single language-conditioned multi-task policy by offline behavioral cloning, with no reinforcement learning and no online interaction. As in Sec.~\ref{sec:exp_franka}, every backbone is kept frozen and only the action decoder is trained. All methods, including ours, use the identical pooled action decoder, so the only quantity that differs across rows of Table~\ref{tab:metaworld} is the representation supplied to it. We report mean closed-loop success over three random seeds, evaluating 50 episodes per task and seed. All methods use the same demonstration splits, random seeds, action decoder, camera and proprioceptive inputs, and evaluation configurations. The evaluation seeds are disjoint from all demonstration-collection seeds, preventing policies from being scored on object configurations seen during data collection.
 
-\noindent\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy consumes a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth channel and no frame stacking are used. Object positions are randomised by the benchmark at every reset, and the evaluation seed controls that randomisation.
+\noindent\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy consumes a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth channel and no frame stacking are used. Object positions are randomised by the benchmark at every reset, and the evaluation seeds control that randomisation.
 
 \input{ieeeconf/tables/metaworld}
 
@@ -95,32 +92,9 @@ We collect 100 expert demonstrations per task with the benchmark's scripted poli
 
 Trail reaches a \textbf{75.6\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
 
-These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorised opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the intent-aligned residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
+These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorised opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the task-relevant residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
 
 The baseline ordering also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite a larger backbone, consistent with the view that MAE features are strong for reconstruction but less linearly separable under a frozen-backbone, shallow-decoder protocol.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
-\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare Trail with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. Trail obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
-\label{fig:robot_results}
-\end{figure}
-
-
-
-\begin{figure}[t]  
-    \centering
-    \includegraphics[width=\linewidth]{ieeeconf/figure/setup_cropped.pdf}
-    \caption{\textbf{Real-robot experiment setup}. We use a diverse set of tabletop objects and a UR5 robot arm with a Robotiq 2F-85 gripper.}
-    \label{fig:setup}
-\end{figure}
-
-
-
-% \input{ieeeconf/tables/REG}
-
-
-
 
 \subsection{Real-robot experiment}
 \label{sec:real_robot_tabletop}
@@ -130,9 +104,23 @@ The baseline ordering also differs from Franka Kitchen in an informative way. VC
 We further validate Trail on a physical UR5 setup where language-conditioned control must handle object appearance shifts, clutter, and contact-rich motions.
 
 
-\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a Robotiq 2F-85 gripper and an Intel RealSense RGB-D camera capturing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). We collect 200 language-annotated expert demonstrations and train each method under the same multi-task protocol, comparing Trail with CLIPort, MPI, and LaVA-Man using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data and introduced only at evaluation time. We evaluate seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 5 independent evaluation trials.
+\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a Robotiq 2F-85 gripper and a wrist-mounted Intel RealSense camera observing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). The policy uses RGB images only; depth measurements are not used. We collect 200 language-annotated expert demonstrations and train each method under the same multi-task protocol, comparing Trail with CLIPort, MPI, and LaVA-Man using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data and introduced only at evaluation time. We evaluate seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 5 independent evaluation trials.
 
-As shown in Fig.~\ref{fig:robot_results}, Trail consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate above 85\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$70\%), and well above CLIPort and MPI ($\sim$50\%). The strongest evidence appears in the held-out settings: Trail reaches 100\% success on ``Packing unseen objects'' (vs.\ 80\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). On the contact-rich ``Pushing piles'' task, Trail also reaches 80\%, doubling the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that intent-aligned pre-training improves robust real-world language-conditioned control and reduces overfitting to the training objects.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{ieeeconf/figure/setup_cropped.pdf}
+    \caption{\textbf{Real-robot experiment setup}. A wrist-mounted Intel RealSense camera provides RGB observations to a UR5 robot arm with a Robotiq 2F-85 gripper; depth is not used.}
+    \label{fig:setup}
+\end{figure}
+
+As shown in Fig.~\ref{fig:robot_results}, Trail consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate above 85\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$70\%), and well above CLIPort and MPI ($\sim$50\%). The strongest evidence appears in the held-out settings: Trail reaches 100\% success on ``Packing unseen objects'' (vs.\ 80\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). On the contact-rich ``Pushing piles'' task, Trail also reaches 80\%, doubling the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
+\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare Trail with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. Trail obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
+\label{fig:robot_results}
+\end{figure}
 
 
 
@@ -146,17 +134,17 @@ As shown in Fig.~\ref{fig:robot_results}, Trail consistently outperforms the bas
 
 \subsection{Ablation study}
 \label{sec:ablation}
-A core contribution of Trail is to retain the intent-aligned predictor instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction.
+A core contribution of Trail is to retain the bottlenecked predictor instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction.
 
 We compare four variants:
 \begin{itemize}
     \item \textbf{Trail (Encoder-Only):} The downstream policy is conditioned only on static current visual features $z_t$.
     \item \textbf{Trail (Predictor-Only):} The policy is conditioned exclusively on the predicted future latent state $z_{t+1}$ generated by the predictor.
     \item \textbf{Trail (Absolute pair):} The policy receives both $z_t$ and $z_{t+1}$, but the action decoder must infer their difference implicitly.
-    \item \textbf{Trail (Full):} The policy is conditioned on both the current state and the explicitly computed intent-aware latent residual: $\pi(z_t, \Delta_z)$.
+    \item \textbf{Trail (Full):} The policy is conditioned on both the current state and the explicitly computed task-relevant latent residual: $\pi(z_t, \Delta_z)$.
 \end{itemize}
 
 
 \input{ieeeconf/tables/abl}
 
-Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,z_{t+1})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results answer \textbf{Q2}: the gain is not merely from adding a future feature, but from making the intent-aligned transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
+Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,z_{t+1})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results answer \textbf{Q2}: the gain is not merely from adding a future feature, but from making the task-relevant transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
