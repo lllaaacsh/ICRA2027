@@ -9,7 +9,7 @@ Trail learns a task-relevant latent change predictor from action-free human vide
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{ieeeconf/figure/DiPredict_cropped.pdf}
-\caption{\textbf{Trail architecture}. Snowflakes mark frozen modules; all other modules are trained. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream directly reads dense patch tokens, whereas the bottlenecked stream retains the language-grounded visual class token and contextualized language tokens but has no direct access to dense patch tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the bottlenecked prediction. At deployment, only the bottlenecked stream is retained to produce the latent forecast used to compute $\Delta_z$.}
+\caption{\textbf{Trail architecture}. Snowflakes mark frozen modules; all other modules are trained. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream directly reads dense patch tokens, whereas the intent stream retains the language-grounded visual class token and contextualized language tokens but has no direct access to dense patch tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the bottlenecked prediction. At deployment, only the inetent stream is retained to produce the latent forecast used to compute $\Delta_z$.}
 \label{fig:ab_probe}
 \end{figure*}
 
