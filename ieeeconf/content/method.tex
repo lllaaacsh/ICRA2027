@@ -21,29 +21,53 @@ Trail defines current and future states in the same frozen feature space. A froz
 \subsection{Language-Grounded Visual Encoding}
 \label{subsec:encoder}
 
-The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. The resulting visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
+The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual tokens by $z'_t=[v'_{\texttt{cls}},v'_{1:N}]$ and the contextualized language tokens by $L'$. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
 
 \subsection{Asymmetric Bottlenecked Prediction}
 \label{subsec:pretraing}
 
-The second module separates task-relevant future prediction from generic video extrapolation. Trail evaluates the same predictor under two memory-access conditions: a full-information pass with direct access to all language-grounded visual tokens, and a bottlenecked pass that retains only the visual class token and contextualized language tokens. The predictor is a stack of decoder blocks with cross-attention, self-attention, and MLP layers, driven by $N{+}1$ learned, content-free future queries.
+The second module separates task-relevant future prediction from generic video extrapolation. Trail evaluates the same predictor under two memory-access conditions. Let $P$ denote the shared predictor and $Q$ its $N{+}1$ learned, content-free future queries. The two passes are
 
-The full-information pass produces $\hat z^{\mathrm{full}}_{t+k}$ and provides the pre-training reference. The bottlenecked pass produces $\hat z^{\mathrm{btl}}_{t+k}$ without direct access to dense patch tokens. The bottleneck therefore changes only memory access: both passes share all predictor parameters, execute the same operations, and emit $N{+}1$ future tokens.
+\begin{align}
+\hat z^{\mathrm{full}}_{t+k}
+    &=P\!\left(Q\mid[z'_t,L']\right), \label{eq:full_stream}\\
+\hat z^{\mathrm{int}}_{t+k}
+    &=P\!\left(Q\mid[v'_{\texttt{cls}},L']\right). \label{eq:int_stream}
+\end{align}
+
+The full-information stream in Eq.~\ref{eq:full_stream} therefore reads both the class and dense patch tokens, whereas the bottlenecked stream in Eq.~\ref{eq:int_stream} has no direct access to $v'_{1:N}$. We use the superscript $\mathrm{int}$ for this retained, instruction-conditioned prediction. The bottleneck changes only memory access: both streams share $P$ and $Q$, execute the same operations, and emit $N{+}1$ future tokens.
 
 \subsection{Training Objective and Gradient Flow}
 \label{subsec:training_objective}
 
-Both predictions are supervised against the same frozen future target. Each prediction loss combines mean-squared error with per-token cosine distance, preserving both feature magnitude and semantic direction. The complete objective is
+Both predictions are supervised against the same frozen future target. The full and intent prediction losses each combine mean-squared error with cosine distance, while a third loss transfers the full-information forecast to the intent stream:
+
+\begin{align}
+\mathcal{L}_{\mathrm{full}}
+    &=\operatorname{MSE}\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right) \notag\\
+    &\quad+1-\operatorname{cos}\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right),
+      \label{eq:loss_full}\\
+\mathcal{L}_{\mathrm{int}}
+    &=\operatorname{MSE}\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right) \notag\\
+    &\quad+1-\operatorname{cos}\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right),
+      \label{eq:loss_int}\\
+\mathcal{L}_{\mathrm{cons}}
+    &=\left\|\hat z^{\mathrm{int}}_{t+k}
+      -\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2.
+      \label{eq:loss_cons}
+\end{align}
+
+In Eqs.~\ref{eq:loss_full}--\ref{eq:loss_cons}, MSE and cosine similarity are averaged over corresponding future tokens, and $\operatorname{sg}(\cdot)$ denotes stop-gradient. The complete objective is
 
 \begin{equation}
-\mathcal{L}_{\mathrm{total}}=
-\mathcal{L}^{\mathrm{full}}_{\mathrm{pred}}
-+\mathcal{L}^{\mathrm{btl}}_{\mathrm{pred}}
-+0.3\left\|\hat z^{\mathrm{btl}}_{t+k}
-    -\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2,
+\mathcal{L}_{\mathrm{total}}
+=\mathcal{L}_{\mathrm{full}}
++\mathcal{L}_{\mathrm{int}}
++\alpha\mathcal{L}_{\mathrm{cons}}.
 \label{eq:total}
 \end{equation}
-where the first two terms are the prediction losses described above and $\operatorname{sg}(\cdot)$ denotes stop-gradient. They train the shared predictor under both memory conditions. The final term distils the full-information forecast into the bottlenecked forecast; gradients from this term flow only through the bottlenecked evaluation path. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable. Algorithm~\ref{alg:pretrain} summarizes the procedure.
+
+The weight $\alpha$ controls the consistency term, and we empirically set $\alpha=0.3$. This term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable. Algorithm~\ref{alg:pretrain} summarizes the procedure.
 
 \begin{algorithm}[t]
 \caption{Trail pre-training step}
@@ -54,9 +78,9 @@ where the first two terms are the prediction losses described above and $\operat
 \State fuse the visual and language tokens with bidirectional cross-attention
 \State encode the future frame as the stopped target $z^{\mathrm{gt}}_{t+k}$
 \State $\hat z^{\text{full}}_{t+k} \gets$ shared predictor with all fused visual tokens
-\State $\hat z^{\text{btl}}_{t+k} \gets$ shared predictor with class and language tokens
+\State $\hat z^{\text{int}}_{t+k} \gets$ shared predictor with class and language tokens
 \Statex \hfill \Comment{no direct patch access}
-\State compute $\mathcal{L}_{\mathrm{total}}$ using Eq.~\ref{eq:total}
+\State compute the three losses and $\mathcal{L}_{\mathrm{total}}$ using Eqs.~\ref{eq:loss_full}--\ref{eq:total}
 \State update the projection, fusion module, future queries, and shared predictor
 \end{algorithmic}
 \end{algorithm}
@@ -64,10 +88,10 @@ where the first two terms are the prediction losses described above and $\operat
 \subsection{Residual-guided policy learning}
 \label{subsec:policy_learning}
 
-The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the bottlenecked predictor is retained. Given the current observation and instruction, it produces a task-relevant forecast $\hat z^{\mathrm{future}}_t$ in the same frozen DINOv3 feature space as $z_t$. Trail forms the token-wise residual
+The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the bottlenecked predictor is retained. Given the current observation and instruction, it produces the intent prediction $\hat z^{\mathrm{int}}_t$ in the same frozen DINOv3 feature space as $z_t$. Trail forms the token-wise residual
 
 \begin{equation}
-    \Delta_z = \hat z^{\mathrm{future}}_t-z_t. \label{eq:residual}
+    \Delta_z = \hat z^{\mathrm{int}}_t-z_t. \label{eq:residual}
 \end{equation}
 
 The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the bottlenecked predictor expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
