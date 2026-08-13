@@ -4,60 +4,57 @@
 \subsection{Overview}
 \label{subsec:method_overview}
 
-Trail learns a task-relevant latent change predictor from action-free human videos and then uses the predicted change as policy context. The method has two stages. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec.~\ref{subsec:notation}--\ref{subsec:training_objective}). During downstream imitation learning, the retained predictor runs in the robot control loop and produces a latent residual, which is scale-normalised before conditioning the policy (Sec.~\ref{subsec:policy_learning}--\ref{subsec:deployment}). The full-information branch provides a pre-training target, whereas the bottlenecked branch is retained for downstream control. Fig.~\ref{fig:ab_probe} summarizes the architecture.
+Trail learns a task-relevant latent change predictor from action-free human videos and then uses the predicted change as policy context. The method has two stages. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec.~\ref{subsec:notation}--\ref{subsec:training_objective}). During downstream imitation learning, the retained predictor runs in the robot control loop and produces a latent residual, which is scale-normalised before conditioning the policy (Sec.~\ref{subsec:policy_learning}--\ref{subsec:deployment}). The full-information stream provides a pre-training target, whereas the intent stream is retained for downstream control. Fig.~\ref{fig:ab_probe} summarizes the architecture.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{ieeeconf/figure/DiPredict_cropped.pdf}
-\caption{\textbf{Trail architecture}. Snowflakes mark frozen modules; all other modules are trained. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream directly reads dense patch tokens, whereas the bottlenecked stream retains the language-grounded visual class token and contextualized language tokens but has no direct access to dense patch tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the bottlenecked prediction. At deployment, only the bottlenecked stream is retained to produce the latent forecast used to compute $\Delta_z$.}
+\caption{\textbf{Trail architecture}. Snowflakes mark frozen modules; all other modules are trained. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream reads class, patch, and language tokens, whereas the intent stream reads only the class and language tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the intent prediction. At deployment, only the intent stream is retained to produce the latent forecast used to compute $\Delta_z$.}
 \label{fig:ab_probe}
 \end{figure*}
 
 \subsection{Latent Space}
 \label{subsec:notation}
 
-Trail defines current and future states in the same frozen feature space. A frozen DINOv3 visual encoder~\cite{simeoni2025dinov3} maps the current RGB frame to tokens $z_t=[v_{\texttt{cls}},v_{1:N}]$ and the future frame to the stopped training target $z^{\mathrm{gt}}_{t+k}$. A frozen DistilBERT encoder~\cite{sanh2019distilbert}, followed by a trainable projection to the visual feature width, maps the instruction to language tokens. At $224\times224$ resolution, $z_t$ contains one visual class token and $N=196$ patch tokens. Throughout the paper, \texttt{[CLS]} refers only to this visual class token. The offset $k$ is a web-video pre-training gap, not a robot control horizon.
+Trail defines current and future states in the same frozen feature space. A frozen DINOv3 visual encoder~\cite{simeoni2025dinov3} maps the current RGB frame to the token sequence $z_t$ and the future frame to the stopped training target $z^{\mathrm{gt}}_{t+k}$, where the superscript $\mathrm{gt}$ denotes ground truth. A frozen DistilBERT encoder~\cite{sanh2019distilbert}, followed by a trainable projection to the visual feature width, maps the instruction to language tokens. At $224\times224$ resolution, each visual sequence contains one class token and $N=196$ patch tokens. Throughout the paper, \texttt{[CLS]} refers only to this visual class token. The offset $k$ is a web-video pre-training gap, not a robot control horizon.
 
 \subsection{Language-Grounded Visual Encoding}
 \label{subsec:encoder}
 
-The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual tokens by $z'_t=[v'_{\texttt{cls}},v'_{1:N}]$ and the contextualized language tokens by $L'$. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
+The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual class token by $v'_{\texttt{cls}}$, the sequence of $N$ visual patch tokens by $v'_{1:N}$, and the contextualized language-token sequence by $L'$; the prime marks tokens after language--vision fusion. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
 
-\subsection{Asymmetric Bottlenecked Prediction}
+\subsection{Asymmetric Full and Intent Prediction}
 \label{subsec:pretraing}
 
 The second module separates task-relevant future prediction from generic video extrapolation. Trail evaluates the same predictor under two memory-access conditions. Let $P$ denote the shared predictor and $Q$ its $N{+}1$ learned, content-free future queries. The two passes are
 
 \begin{align}
 \hat z^{\mathrm{full}}_{t+k}
-    &=P\!\left(Q\mid[z'_t,L']\right), \label{eq:full_stream}\\
+    &=P\!\left(Q\mid[v'_{\texttt{cls}},v'_{1:N},L']\right), \label{eq:full_stream}\\
 \hat z^{\mathrm{int}}_{t+k}
     &=P\!\left(Q\mid[v'_{\texttt{cls}},L']\right). \label{eq:int_stream}
 \end{align}
 
-The full-information stream in Eq.~\ref{eq:full_stream} therefore reads both the class and dense patch tokens, whereas the bottlenecked stream in Eq.~\ref{eq:int_stream} has no direct access to $v'_{1:N}$. We use the superscript $\mathrm{int}$ for this retained, instruction-conditioned prediction. The bottleneck changes only memory access: both streams share $P$ and $Q$, execute the same operations, and emit $N{+}1$ future tokens.
+Here $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$ are the two predicted future-token sequences; $t$ is the current-frame index, $k$ is the pre-training frame offset, and the superscripts identify the full-information and intent streams. $P$ is the shared predictor, and $Q$ is its sequence of $N{+}1$ learned future queries. The terms $v'_{\texttt{cls}}$, $v'_{1:N}$, and $L'$ are respectively the language-grounded visual class token, the $N$ dense visual patch tokens, and the contextualized language tokens defined above. The brackets denote the memory supplied to $P$, and the vertical bar separates its queries from that memory. Thus, Eq.~\ref{eq:full_stream} receives class, patch, and language tokens, whereas Eq.~\ref{eq:int_stream} receives only class and language tokens, with no direct dense-patch access. Both streams share $P$ and $Q$ and emit the same number of future tokens; only their input memory differs.
 
 \subsection{Training Objective and Gradient Flow}
 \label{subsec:training_objective}
 
-Both predictions are supervised against the same frozen future target. The full and intent prediction losses each combine mean-squared error with cosine distance, while a third loss transfers the full-information forecast to the intent stream:
+Both predictions are supervised against the same frozen future target. To keep the three losses readable, let $d(x,y)=\operatorname{MSE}(x,y)+1-\operatorname{cos}(x,y)$ denote the sum of token-averaged mean-squared error and cosine distance between two aligned token sequences $x$ and $y$. The full prediction loss, intent prediction loss, and consistency loss are
 
-\begin{align}
-\mathcal{L}_{\mathrm{full}}
-    &=\operatorname{MSE}\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right) \notag\\
-    &\quad+1-\operatorname{cos}\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right),
-      \label{eq:loss_full}\\
-\mathcal{L}_{\mathrm{int}}
-    &=\operatorname{MSE}\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right) \notag\\
-    &\quad+1-\operatorname{cos}\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right),
-      \label{eq:loss_int}\\
-\mathcal{L}_{\mathrm{cons}}
-    &=\left\|\hat z^{\mathrm{int}}_{t+k}
-      -\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2.
-      \label{eq:loss_cons}
-\end{align}
+\begin{equation}
+\mathcal{L}_{\mathrm{full}}=d\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right). \label{eq:loss_full}
+\end{equation}
 
-In Eqs.~\ref{eq:loss_full}--\ref{eq:loss_cons}, MSE and cosine similarity are averaged over corresponding future tokens, and $\operatorname{sg}(\cdot)$ denotes stop-gradient. The complete objective is
+\begin{equation}
+\mathcal{L}_{\mathrm{int}}=d\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right). \label{eq:loss_int}
+\end{equation}
+
+\begin{equation}
+\mathcal{L}_{\mathrm{cons}}=\left\|\hat z^{\mathrm{int}}_{t+k}-\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2. \label{eq:loss_cons}
+\end{equation}
+
+In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ and $\mathcal{L}_{\mathrm{int}}$ measure the prediction errors of the full-information and intent streams, $d$ is the prediction distance defined above, and $z^{\mathrm{gt}}_{t+k}$ is the frozen DINOv3 target for the future frame at offset $k$. In Eq.~\ref{eq:loss_cons}, $\mathcal{L}_{\mathrm{cons}}$ measures agreement between the intent and full-information predictions, $\operatorname{sg}(\cdot)$ stops gradients through its argument, and $\|\cdot\|_2^2$ is the squared Euclidean norm. The complete objective is
 
 \begin{equation}
 \mathcal{L}_{\mathrm{total}}
@@ -67,7 +64,7 @@ In Eqs.~\ref{eq:loss_full}--\ref{eq:loss_cons}, MSE and cosine similarity are av
 \label{eq:total}
 \end{equation}
 
-The weight $\alpha$ controls the consistency term, and we empirically set $\alpha=0.3$. This term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable. Algorithm~\ref{alg:pretrain} summarizes the procedure.
+Here $\mathcal{L}_{\mathrm{total}}$ is the complete pre-training objective and $\alpha$ weights the consistency loss; we empirically set $\alpha=0.3$. The consistency term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable. Algorithm~\ref{alg:pretrain} summarizes the procedure.
 
 \begin{algorithm}[t]
 \caption{Trail pre-training step}
@@ -88,13 +85,13 @@ The weight $\alpha$ controls the consistency term, and we empirically set $\alph
 \subsection{Residual-guided policy learning}
 \label{subsec:policy_learning}
 
-The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the bottlenecked predictor is retained. Given the current observation and instruction, it produces the intent prediction $\hat z^{\mathrm{int}}_t$ in the same frozen DINOv3 feature space as $z_t$. Trail forms the token-wise residual
+The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the intent stream is retained. Given the current observation and instruction, it produces $\hat z^{\mathrm{int}}_t$ in the same frozen DINOv3 feature space as $z_t$. Trail forms the token-wise residual
 
 \begin{equation}
     \Delta_z = \hat z^{\mathrm{int}}_t-z_t. \label{eq:residual}
 \end{equation}
 
-The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the bottlenecked predictor expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
+In Eq.~\ref{eq:residual}, $\Delta_z$ is the task-relevant latent residual, $\hat z^{\mathrm{int}}_t$ is the intent-stream forecast at the current control step, and $z_t$ is the current visual-token sequence. The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the intent stream expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
 
 \noindent\textbf{Residual scale balancing.}
 Because the residual can have a smaller magnitude than the current-state features, we normalize the two token sequences independently before policy readout. This prevents a simple scale difference from suppressing the residual during fusion. Behavioral cloning then predicts the action from the balanced state and residual features together with proprioception. Low-dimensional control uses a vector readout, whereas spatial affordance policies use a patch-map readout. Table~\ref{tab:ablation_residual} compares this residual context with the current state alone, the predicted future alone, and the absolute current--future pair. Fig.~\ref{fig:acdino} illustrates the resulting policy input.
@@ -102,13 +99,13 @@ Because the residual can have a smaller magnitude than the current-state feature
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth,height=0.55\textheight,keepaspectratio]{ieeeconf/figure/ACDINO_cropped}
-\caption{\textbf{Proposed residual-guided policy learning}. The retained bottlenecked predictor estimates a task-relevant latent forecast from the current observation and instruction. Trail subtracts the current latent state to obtain $\Delta_z$, balances the state and residual feature scales, and fuses them with proprioception for behavioral cloning.}
+\caption{\textbf{Proposed residual-guided policy learning}. The retained intent stream estimates a task-relevant latent forecast from the current observation and instruction. Trail subtracts the current latent state to obtain $\Delta_z$, balances the state and residual feature scales, and fuses them with proprioception for behavioral cloning.}
 \label{fig:acdino}
 \end{figure}
 
 \subsection{Deployment}
 \label{subsec:deployment}
 
-The predictor is executed at every control step in closed loop. The robot observes the current image, encodes it with the instruction, runs the retained bottlenecked predictor once, computes $\Delta_z$, balances the state and residual feature scales, and then predicts an action; the same process repeats after the robot moves. The predictor is not rolled out over multiple future steps and is not run only once at the beginning of an episode. This directly separates the pre-training gap $k$ from the control frequency: $k$ defines the web-video target used to learn a directional residual, while the action decoder learns the magnitude and time scale of robot actions from labeled demonstrations.
+The predictor is executed at every control step in closed loop. The robot observes the current image, encodes it with the instruction, runs the retained intent stream once, computes $\Delta_z$, balances the state and residual feature scales, and then predicts an action; the same process repeats after the robot moves. The predictor is not rolled out over multiple future steps and is not run only once at the beginning of an episode. This directly separates the pre-training gap $k$ from the control frequency: $k$ defines the web-video target used to learn a directional residual, while the action decoder learns the magnitude and time scale of robot actions from labeled demonstrations.
 
 The retained predictor emits one future class token and a sequence of future patch tokens aligned one-to-one with the frozen DINOv3 teacher. Eq.~\ref{eq:residual} is therefore applied token-wise, and $\Delta_z$ retains spatial structure. This single output supports both action spaces we consider, with different read-outs. For \textit{1-D continuous control} that predicts joint angles or end-effector poses~\cite{assran2025v}, we concatenate the \texttt{[CLS]} residual with the current-state features and proprioception as input to a multi-layer perceptron policy. For \textit{2-D spatial-action policies} designed for vision-based affordance models (e.g.\ tabletop pick-and-place~\cite{shridhar2022cliport}), we reshape the patch residuals into a spatial map and fuse it with the policy's visual backbone via convolutional layers, providing an explicit prior on where and how to interact. In both cases the predictor is unchanged; only the read-out differs, which allows Trail to integrate with low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification.

@@ -51,7 +51,7 @@ As shown in Table~\ref{tab:franka}, we compare against three categories of basel
 \input{ieeeconf/tables/dif}
 
 
-Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the bottlenecked predictor learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
+Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the intent stream learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
 
 
 % \vspace{-1pt}
@@ -129,14 +129,14 @@ As shown in Fig.~\ref{fig:robot_results}, Trail consistently outperforms the bas
 
 \begin{figure}[t]  
     \centering
-    \includegraphics[width=\linewidth]{ieeeconf/figure/aff_cropped.pdf}
+    \includegraphics[width=0.9\linewidth]{ieeeconf/figure/aff_cropped.pdf}
 \caption{\textbf{Sampled affordance maps.} We visualize Trail's predicted affordance maps at the start and end stages of real-robot tabletop manipulation tasks. The responses follow the commanded object and target regions, providing qualitative evidence for language-conditioned spatial grounding.}
 \label{fig:affordance_maps}
 \end{figure}
 
 \subsection{Ablation study}
 \label{sec:ablation}
-A core contribution of Trail is to retain the bottlenecked predictor instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction.
+A core contribution of Trail is to retain the intent stream instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction.
 
 We compare four variants:
 \begin{itemize}
