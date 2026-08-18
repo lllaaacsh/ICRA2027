@@ -91,7 +91,7 @@ We collect 100 expert demonstrations per task with the benchmark's scripted poli
     \label{fig:failure_stages}
 \end{figure}
 
-Trail reaches a \textbf{77.2\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
+Trail reaches a \textbf{78.2\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
 
 Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. Trail reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
 
