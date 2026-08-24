@@ -64,23 +64,8 @@ In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ 
 \label{eq:total}
 \end{equation}
 
-Here $\mathcal{L}_{\mathrm{total}}$ is the complete pre-training objective and $\alpha$ weights the consistency loss; we empirically set $\alpha=0.3$. The consistency term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable. Algorithm~\ref{alg:pretrain} summarizes the procedure.
+Here $\mathcal{L}_{\mathrm{total}}$ is the complete pre-training objective and $\alpha$ weights the consistency loss; we empirically set $\alpha=0.3$. The consistency term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable.
 
-\begin{algorithm}[t]
-\caption{Trail pre-training step}
-\label{alg:pretrain}
-\begin{algorithmic}[1]
-\State encode the current frame with frozen DINOv3
-\State encode the instruction with frozen DistilBERT and project it
-\State fuse the visual and language tokens with bidirectional cross-attention
-\State encode the future frame as the stopped target $z^{\mathrm{gt}}_{t+k}$
-\State $\hat z^{\text{full}}_{t+k} \gets$ shared predictor with all fused visual tokens
-\State $\hat z^{\text{int}}_{t+k} \gets$ shared predictor with class and language tokens
-\Statex \hfill \Comment{no direct patch access}
-\State compute the three losses and $\mathcal{L}_{\mathrm{total}}$ using Eqs.~\ref{eq:loss_full}--\ref{eq:total}
-\State update the projection, fusion module, future queries, and shared predictor
-\end{algorithmic}
-\end{algorithm}
 
 \subsection{Residual-guided policy learning}
 \label{subsec:policy_learning}
