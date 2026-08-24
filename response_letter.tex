@@ -1,5 +1,9 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
+
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{amsmath}
@@ -14,7 +18,7 @@
 \newlist{qa}{enumerate}{1}
 \setlist[qa]{label=\textbf{\arabic*.}, leftmargin=2.2em, itemsep=8pt, topsep=6pt}
 
-\newcommand{\C}[1]{\textit{#1}\par\vspace{2pt}}
+\newcommand{\C}[1]{\textbf{#1}\par\vspace{2pt}}
 \newcommand{\R}[1]{\textbf{Response.}~#1}
 
 \begin{document}
@@ -80,9 +84,7 @@ stream survives pre-training.}
 path. The coupling is entirely through the shared language projection, fusion module,
 queries, and predictor. This is now stated in Sec.~III-E and marked in Fig.~2.}
 
-\item \C{The video is a good teaser.}
-\R{Thank you. We have kept it and added the playback-speed and task labels requested by
-Reviewer 9.}
+
 
 \end{qa}
 
@@ -144,7 +146,7 @@ both cases; only the read-out differs (Sec.~III-G).}
 
 \item \C{Figure 2 is hard to follow: the text backbone is not marked frozen or
 trainable, and the information flow through the bidirectional attention is not shown.}
-\R{Figure~2 has been redrawn. Frozen modules (visual backbone, teacher, text backbone)
+\R{Figure~2 has been redrawn. Frozen modules (teacher, text backbone)
 are marked with snowflakes and all remaining modules are trained; the bidirectional
 fusion now shows its two directed updates; and the caption terminology
 (intent stream, full-information stream, stop-gradient, retained stream) appears in the
