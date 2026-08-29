@@ -9,10 +9,7 @@
 
 
 
-Our experiments are designed to answer three questions:
-\textbf{Q1:} Can human-video pre-training produce representations that transfer to robot control without robot pre-training data?
-\textbf{Q2:} Does retaining the task-relevant latent residual improve policy learning beyond static visual features or absolute future features?
-\textbf{Q3:} Does the same representation remain useful across single-task simulation, multi-task simulation, and real-world manipulation?
+Our experiments evaluate Trail through representation analysis, simulated control, real-robot manipulation, and ablation. We first inspect language grounding after human-video pre-training, then measure downstream control on Franka Kitchen, Meta-World MT10, and a physical UR5 setup, and finally isolate the contribution of the retained latent residual.
 
 
 \subsection{Analysis of pre-trained representations}
@@ -51,7 +48,7 @@ As shown in Table~\ref{tab:franka}, we compare against three categories of basel
 \input{ieeeconf/tables/dif}
 
 
-Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. This result directly addresses \textbf{Q1}: even without robot-video pre-training data, the intent stream learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
+Trail achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. Even without robot-video pre-training data, the intent stream learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
 
 
 % \vspace{-1pt}
@@ -150,4 +147,4 @@ We compare four variants:
 
 \input{ieeeconf/tables/abl}
 
-Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,z_{t+1})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results answer \textbf{Q2}: the gain is not merely from adding a future feature, but from making the task-relevant transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
+Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,z_{t+1})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results show that the gain is not merely from adding a future feature, but from making the task-relevant transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
