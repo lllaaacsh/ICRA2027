@@ -96,6 +96,14 @@ These two tasks share a property that the saturated ones lack: the target object
 
 The baseline ordering also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite a larger backbone. Under our frozen-backbone, shallow-decoder protocol, this result suggests that reconstruction-oriented features are less linearly separable for these control tasks.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
+\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare Trail with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. Trail obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
+\label{fig:robot_results}
+\end{figure*}
+
+
 \subsection{Real-robot experiment}
 \label{sec:real_robot_tabletop}
     % To further assess the robustness of our learned representations and their sim-to-real transferability, we deploy Trail on a physical UR5 robotic arm. Real-world environments introduce severe challenges for representation learning, including varying lighting conditions, complex visual distractors, and partial occlusions—factors that frequently degrade the performance of policies relying on standard static visual features.
@@ -115,12 +123,6 @@ We further validate Trail on a physical UR5 setup where language-conditioned con
 
 As shown in Fig.~\ref{fig:robot_results}, Trail consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate above 85\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$70\%), and well above CLIPort and MPI ($\sim$50\%). The strongest evidence appears in the held-out settings: Trail reaches 100\% success on ``Packing unseen objects'' (vs.\ 80\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). On the contact-rich ``Pushing piles'' task, Trail also reaches 80\%, doubling the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
-\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare Trail with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. Trail obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
-\label{fig:robot_results}
-\end{figure}
 
 
 
