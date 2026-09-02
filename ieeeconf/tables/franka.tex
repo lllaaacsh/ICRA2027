@@ -102,7 +102,7 @@
 \caption{\textbf{Results on Franka Kitchen~\cite{franka_kitchen}}. We report average success rates over 25 demonstrations across five tasks, two viewpoints, and three random seeds. All rows use the same frozen-backbone behavioral-cloning downstream and evaluation protocol, while the backbone and pre-training dataset columns expose the upstream data/model differences. Baselines are grouped by representation paradigm; success rates are reported in percent and the best result in each task column is bolded.}
 \setlength{\tabcolsep}{3pt}
 \resizebox{\textwidth}{!}{%
-\renewcommand{\arraystretch}{1.05} 
+\renewcommand{\arraystretch}{1.0} 
 \begin{tabular}{lllcccccc}
 \toprule
 \bf Method &
@@ -118,7 +118,7 @@
 \midrule
 
 \rowcolor[HTML]{EFEFEF} 
-\multicolumn{9}{l}{\textbf{Visual Representation Models} } \\ \midrule
+\multicolumn{9}{l}{\textit{Visual Representation Models} } \\ 
 DINOv3~\cite{simeoni2025dinov3}       & ViT-Base & Internet scale      & 79.3 & 43.7 & 92.3 & 40.3 & \bf 100.0 & 71.3 \\
 R3M~\cite{nair2022r3m}                & ResNet50 & Ego4D~\cite{grauman2022ego4d}  & 53.3 & 50.7 & 86.3 & 59.3 & 97.0 & 69.5 \\
 MVP~\cite{radosavovic2023real}        & ViT-Base & Multi-dataset       & 79.0 & 48.0 & 90.7 & 41.0 & \bf 100.0 & 71.7 \\
@@ -126,7 +126,7 @@ MVP~\cite{radosavovic2023real}        & ViT-Base & Multi-dataset       & 79.0 & 
 \midrule
 % 同样去掉 [0pt][0pt] 和 @{}
 \rowcolor[HTML]{EFEFEF} 
-\multicolumn{9}{l}{\textbf{Vision-only Predictive Models}} \\ \midrule
+\multicolumn{9}{l}{\textit{Vision-only Predictive Models}} \\ 
 SiamMAE~\cite{gupta2023siamese}       & ViT-Base & Kinetics~\cite{kay2017kinetics} & 16.8 & 68.0 & 36.5 & 13.5 & 68.0 & 40.6 \\
 V-JEPA~\cite{bardes2024revisiting}             & ViT-Base & Kinetics & 21.3 & 28.0 & 41.3 & 12.7 & 78.7 & 36.4 \\
 ToBo~\cite{kim2025token}              & ViT-Base & Kinetics & 57.0 & 51.0 & 82.0 & 55.0 & 95.0 & 68.0 \\
@@ -134,7 +134,7 @@ ToBo~\cite{kim2025token}              & ViT-Base & Kinetics & 57.0 & 51.0 & 82.0
 \midrule
 % 同样去掉 [0pt][0pt] 和 @{}
 \rowcolor[HTML]{EFEFEF} 
-\multicolumn{9}{l}{\textbf{Vision-Language Predictive Models} } \\ \midrule
+\multicolumn{9}{l}{\textit{Vision-Language Predictive Models} } \\ 
 Voltron~\cite{karamcheti2023language} & ViT-Base & Something-V2~\cite{goyal2017something} & 76.0 & 45.3 & 91.0 & 41.0 & 99.3 & 70.5 \\
 MPI~\cite{zeng2024learning}           & ViT-Base & Ego4D Hand-Obj~\cite{grauman2022ego4d} & 89.0 & \bf 57.7 & 93.7 & 54.0 & \bf 100.0 & 78.9 \\
 LaVA-Man~\cite{zhu2025lava}           & ViT-Base & OOPP~\cite{zhu2025lava}, DROID~\cite{khazatsky2024droid}, Bridge~\cite{walke2023bridgedata}       & 90.0 & 50.7 & 94.0 & 61.3 & \bf 100.0 & 79.2 \\

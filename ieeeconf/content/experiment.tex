@@ -5,11 +5,12 @@ We evaluate TRAIL through representation analysis, simulated control, real-robot
 
 \subsection{Analysis of pre-trained representations}
 \label{sec:exp_visualization}
-We first investigate whether TRAIL successfully learns to extract task-relevant dynamics during the human-video pre-training phase.
+We first validate whether TRAIL successfully learns to extract task-relevant dynamics during pre-training.
 
 \noindent\textbf{Pre-training details.} 
-We pre-train TRAIL strictly on human-centric videos using the Kinetics-400 training split~\cite{kay2017kinetics, carreira2017quo}, without any in-domain robotic manipulation data. To construct the dataset for our prediction-based self-supervised learning, we sample pairs of frames from each video. Specifically, we select the $1^{\text{st}}$ frame as the initial observation and the $96^{\text{th}}$ frame as the target future state. This specific temporal gap ($k=96$) is chosen to capture meaningful, long-horizon state transitions rather than trivial, high-frequency motions, as in~\cite{kim2025token}. Kinetics-400 is stored at $25$--$30$\,fps, so $k=96$ spans roughly $3$--$4$ seconds of human activity. The gap has to be large enough that the transition is not dominated by encoding noise: frames a fraction of a second apart are near-identical under a frozen DINOv3 encoder, so the prediction target would degenerate towards an identity map and the resulting residual would carry little task signal. We stress that $k$ is a hyper-parameter of pre-training on web video and \emph{not} a control horizon; at deployment the predictor is executed at every control step and its output is consumed as a direction, with magnitude and time scale absorbed by the action decoder (Sec.~\ref{subsec:policy_learning}).
-We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visual backbone, and DistilBERT-Base-Uncased~\cite{sanh2019distilbert} as the text backbone. To provide stable and high-quality latent targets without pixel-level reconstruction, as depicted in Fig.~\ref{fig:ab_probe}, we employ self-distillation on our visual backbone and formalize a frozen, pre-trained DINOv3 model as a  \textit{Teacher} model~\cite{grill2020bootstrap, caron2021emerging}. Simultaneously, our trainable TRAIL modules process the initial frame with the language instruction to predict this latent future and optimize the loss $\mathcal{L}_{\text{total}}$ defined in Eq.~\ref{eq:total}.
+We pre-train TRAIL on human-centric videos using the Kinetics-400 training split~\cite{kay2017kinetics, carreira2017quo}, without any in-domain robotic manipulation data. To construct the dataset for our prediction-based self-supervised learning, we sample pairs of frames from each video. Specifically, we select the $1^{\text{st}}$ frame as the initial observation and the $96^{\text{th}}$ frame as the target future state. This specific temporal gap ($k=96$) is chosen to capture meaningful, long-horizon state transitions rather than trivial, high-frequency motions~\cite{kim2025token}. Kinetics-400 is stored at $25$--$30$\,fps, so $k=96$ spans roughly $3$--$4$ seconds of human activity. The gap is large enough so that the transition is not dominated by encoding noise. $k$ is a hyper-parameter of pre-training on web video and \emph{not} a control horizon, i.e. at deployment the predictor is executed at every control step and its output is consumed as a direction, with magnitude and time scale by the action decoder (Sec.~\ref{subsec:policy_learning}).
+We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3} as our foundational visual backbone, and DistilBERT-Base-Uncased~\cite{sanh2019distilbert} as the text backbone. To provide stable and high-quality latent targets without pixel-level reconstruction, as shown in Fig.~\ref{fig:ab_probe}, we employ self-distillation on our visual backbone and formalize a frozen, pre-trained DINOv3 model as a  \textit{Teacher} model~\cite{grill2020bootstrap, caron2021emerging}. 
+% Simultaneously, our trainable TRAIL modules process the initial frame with the language instruction to predict this latent future and optimize the loss $\mathcal{L}_{\text{total}}$ defined in Eq.~\ref{eq:total}.
 
 \begin{figure}[t]  
     \centering
@@ -18,15 +19,15 @@ We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3}  as our foundational visu
     \label{fig:vis_attn}
 \end{figure}
 
-Fig.~\ref{fig:vis_attn} provides a qualitative sanity check for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the role of language in selecting task-relevant visual evidence before latent future prediction, while the quantitative evidence for policy transfer is reported in the downstream control benchmarks below.
+Fig.~\ref{fig:vis_attn} shows qualitative samples for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the role of language in selecting task-relevant visual evidence before latent future prediction.
 
 
 
 
 
-\subsection{Simulation results}
+\subsection{Simulation results on Franka Kitchen}
 \label{sec:exp_franka}
-Franka Kitchen tests whether dynamics learned from human videos can support long-horizon robot manipulation with a different embodiment. We evaluate five visuomotor tasks in a simulated 9-DoF Franka Emika arm~\cite{franka_kitchen}.
+We validate whether dynamics learned from human videos supports long-horizon robot manipulation across five visuomotor tasks with a simulated 9-DoF Franka Emika arm~\cite{franka_kitchen}.
 
 
 
@@ -39,20 +40,18 @@ As shown in Table~\ref{tab:franka}, we compare against three categories of basel
 \input{ieeeconf/tables/dif}
 
 
-TRAIL achieves the highest average success rate on Franka Kitchen, reaching 81.2\%. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. Even without robot-video pre-training data, the intent stream learned from human videos transfers to an out-of-domain robotic arm and produces a representation that is useful for closed-loop control.
+TRAIL achieves the highest average success rate on Franka Kitchen as shown in Table~\ref{tab:franka}. It improves over strong frozen-representation baselines such as MVP~\cite{radosavovic2023real} (71.7\%) and Ego4D-trained R3M~\cite{nair2022r3m} (69.5\%) by +9.5 and +11.7 percentage points, respectively. Even without robot-video pre-training data, the intent stream learned from human videos transfers to an out-of-domain robotic arm and produces a representation useful for closed-loop control.
+Compared with recent vision-language predictive models such as LaVA-Man~\cite{zhu2025lava} (79.2\%) and MPI~\cite{zeng2024learning} (78.9\%), TRAIL is competitive on the average and is strongest on several complex articulation tasks. For example, TRAIL reaches {62.0\%} on ``Open microwave'' and {95.7\%} on ``Flip switch,'' outperforming all predictive baselines on these tasks. 
+These results show that our approach to explicitly modeling task-relevant transition directions can be effective.
 
-
-% \vspace{-1pt}
-
-
-Compared with recent vision-language predictive models such as LaVA-Man~\cite{zhu2025lava} (79.2\%) and MPI~\cite{zeng2024learning} (78.9\%), TRAIL is competitive on the average and is strongest on several complex articulation tasks. For example, it reaches \textbf{62.0\%} on ``Open microwave'' and \textbf{95.7\%} on ``Flip switch,'' outperforming all predictive baselines on these tasks. These per-task gains are consistent with the design goal of TRAIL: the policy receives an explicit task-relevant transition direction instead of having to infer the relevant future change implicitly from a static feature alone.
+% These improvements are consistent with the design goal of TRAIL: the policy receives an explicit task-relevant transition direction instead of having to infer the relevant future change implicitly from a static feature alone.
 
 
 \vspace{-1pt}
 
 % \vspace{-2pt}
 
-Table~\ref{tab:dif} clarifies why this comparison is more than a leaderboard difference. MPI and LaVA-Man use robot-domain pre-training data, and MPI additionally requires fine-grained supervision such as bounding boxes; TRAIL instead uses self-supervised pre-training on human-centric internet videos. Under this more scalable data assumption, matching or exceeding the closest predictive baselines on Franka Kitchen supports our central claim that constrained future prediction can extract robot-useful physical dynamics from human behavior videos.
+Table~\ref{tab:dif} summarizes the pre-training data and supervision used by the predictive models. MPI and LaVA-Man use robot-domain pre-training data, and MPI additionally requires fine-grained supervision such as bounding boxes. TRAIL uses \textit{human-centric internet videos} for self-supervised pre-training. Under this more scalable pre-training setting, TRAIL matches or outperforms existing predictive models. This supports our central claim that constrained future prediction can extract robot-relevant physical dynamics from human behavior videos.
 
 
 % \vspace{-1pt}
@@ -90,7 +89,7 @@ The baseline ordering also differs from Franka Kitchen in an informative way. VC
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
-\caption{\textbf{Evaluation of real-world multi-task manipulation}. We compare TRAIL with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Held-out colored blocks and novel objects are excluded from training and used only for zero-shot evaluation. TRAIL obtains the highest average success rate and the largest gains on unseen-object and contact-rich tasks.}
+\caption{\textbf{Evaluation of real-robot manipulation}. We compare our method with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks.}
 \label{fig:robot_results}
 \end{figure*}
 
@@ -108,7 +107,7 @@ We further validate TRAIL on a physical UR5 setup where language-conditioned con
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{ieeeconf/figure/setup_cropped.pdf}
-    \caption{\textbf{Real-robot experiment setup}. A wrist-mounted Intel RealSense camera provides RGB observations to the UR5; depth is not used.}
+    \caption{\textbf{Real-robot setup}. A wrist-mounted camera provides RGB observations for UR5. Depth is not used.}
     \label{fig:setup}
 \end{figure}
 
@@ -132,7 +131,7 @@ A core contribution of TRAIL is to retain the intent stream instead of discardin
 We compare four variants:
 \begin{itemize}
     \item \textbf{TRAIL (Encoder-Only):} The downstream policy is conditioned only on static current visual features $z_t$.
-    \item \textbf{TRAIL (Predictor-Only):} The policy is conditioned exclusively on the predicted future latent state $z_{t+1}$ generated by the predictor.
+    \item \textbf{TRAIL (Predictor-Only):} The policy is conditioned exclusively on the predicted future latent state $z_{t+1}$ \CO{predicted:::: $\hat{z}^{\mathrm{int}}_{t+1}$??? } generated by the predictor.
     \item \textbf{TRAIL (Absolute pair):} The policy receives both $z_t$ and $z_{t+1}$, but the action decoder must infer their difference implicitly.
     \item \textbf{TRAIL (Full):} The policy is conditioned on both the current state and the explicitly computed task-relevant latent residual: $\pi(z_t, \Delta_z)$.
 \end{itemize}
