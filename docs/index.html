@@ -1,255 +1,293 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="TRAIL learns task-relevant latent residuals from action-free human videos and uses them as explicit policy context for robot manipulation.">
-    <meta name="theme-color" content="#f6f3ed">
-    <meta property="og:title" content="TRAIL — Learning Task-Relevant Latent Residuals for Robot Manipulation">
-    <meta property="og:description" content="Task-relevant residuals as an action prior for robot manipulation.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="assets/teaser.png">
-    <title>TRAIL — Task-Relevant Latent Residuals for Robot Manipulation</title>
-    <link rel="stylesheet" href="styles.css">
-    <script defer src="script.js"></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TRAIL learns task-relevant latent residuals from action-free human videos for language-conditioned robot manipulation.">
+  <meta name="theme-color" content="#fcfcfc">
+  <meta property="og:title" content="TRAIL: Learning Task-Relevant Latent Residuals for Robot Manipulation">
+  <meta property="og:description" content="Task-relevant residuals as an action prior for robot manipulation.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/teaser.png">
+  <title>TRAIL: Learning Task-Relevant Latent Residuals for Robot Manipulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
 
-    <header class="site-header" data-header>
-      <div class="nav-shell">
-        <a class="wordmark" href="#top" aria-label="TRAIL home">
-          <span>TRA</span><i>I</i><span>L</span>
-          <b aria-hidden="true">Δ</b>
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="#abstract">Abstract</a>
-          <a href="#approach">Approach</a>
-          <a href="#results">Results</a>
-          <a href="#analysis">Analysis</a>
-        </nav>
-        <a class="nav-paper" href="#results">Results <span aria-hidden="true">↓</span></a>
-      </div>
-    </header>
+  <main id="content">
+    <section class="hero publication-header">
+      <div class="container">
+        <h1 class="publication-title">
+          <span class="method-name">TRAIL:</span>
+          Learning Task-Relevant Latent Residuals<br class="desktop-break">
+          for Robot Manipulation
+        </h1>
+        <p class="publication-subtitle">
+          <strong>T</strong>ask-<strong>R</strong>elevant residuals as an
+          <strong>A</strong>ction prior for robot man<strong>I</strong>pu<strong>L</strong>ation
+        </p>
 
-    <main id="main">
-      <section class="hero" id="top">
-        <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
-        <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
-        <div class="shell hero-inner">
-          <p class="eyebrow"><span></span> Anonymous project page</p>
-          <h1>
-            <span class="trail-mark"><span>TRA</span><em>I</em><span>L</span></span>
-            <small>Learning Task-Relevant Latent Residuals<br>for Robot Manipulation</small>
-          </h1>
-          <p class="hero-copy">
-            TRAIL turns prediction into an explicit control signal. It learns task-relevant
-            visual dynamics from action-free human videos, retains the intent predictor at
-            deployment, and exposes the predicted latent change to the robot policy.
-          </p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="#approach">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-              Explore the approach
-            </a>
-            <a class="button button-secondary" href="#results">View the results <span aria-hidden="true">↓</span></a>
-          </div>
-          <div class="hero-meta" aria-label="Project highlights">
-            <span>Action-free human-video pre-training</span>
-            <span>Frozen DINOv3 feature space</span>
-            <span>Closed-loop policy context</span>
-          </div>
+        <div class="publication-authors" aria-label="Authors">
+          <span>Anonymous Authors</span>
         </div>
-      </section>
+        <div class="publication-venue">Anonymous submission</div>
 
-      <section class="teaser-section shell" aria-label="Method overview">
-        <figure class="media-card teaser-card">
-          <img src="assets/teaser.png" width="1340" height="807" alt="Comparison between a policy using only a static current-state representation and TRAIL using a task-relevant residual learned from human videos.">
+        <div class="publication-links" aria-label="Page sections">
+          <a class="button" href="#abstract">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 11h6M9 15h6"/></svg>
+            <span>Abstract</span>
+          </a>
+          <a class="button" href="#method">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 11l7-4M8.5 13l7 4"/></svg>
+            <span>Method</span>
+          </a>
+          <a class="button" href="#experiments">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+            <span>Experiments</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section teaser-section">
+      <div class="container container-wide">
+        <figure class="figure-card teaser-figure">
+          <a href="assets/teaser.png" target="_blank" rel="noopener" aria-label="Open overview figure at full resolution">
+            <img src="assets/teaser.png" width="1340" height="807" alt="Comparison of a policy using only static current-state features and TRAIL using a task-relevant residual learned from action-free human videos.">
+          </a>
+          <figcaption>
+            <strong>Figure 1. Overview.</strong>
+            Static visual representations provide only the current state, leaving the policy to infer task-relevant changes from demonstrations. TRAIL retains its intent predictor and supplies the explicit latent residual <span class="math">Δz</span> as closed-loop policy context.
+          </figcaption>
         </figure>
-        <div class="teaser-caption">
-          <span class="figure-label">In one view</span>
-          <p>Static features say <em>where the scene is</em>. TRAIL also tells the policy <em>how the task-relevant state should change</em>.</p>
-        </div>
-      </section>
-
-      <section class="section shell narrow" id="abstract">
-        <div class="section-heading centered">
-          <p class="kicker">Overview</p>
-          <h2>Prediction that stays useful at deployment</h2>
-        </div>
-        <div class="abstract-copy">
-          <p>
-            Learning language-conditioned robot manipulation policies requires representations
-            that capture not only the current scene but also how it changes under task
-            instructions. While general-purpose visual representations have improved robotic
-            perception, they mainly encode static scenes and provide limited guidance about the
-            temporal dynamics relevant to action.
-          </p>
-          <p>
-            TRAIL learns task-relevant temporal dynamics as latent residuals through an
-            information-access bottleneck. A shared future predictor runs with and without direct
-            access to dense patch tokens; the intent stream is distilled from the full-information
-            stream so that prediction emphasizes changes associated with the instruction. During
-            policy learning, TRAIL retains this predictor and computes an explicit latent residual
-            between the current observation and predicted future state. This lightweight,
-            control-oriented context improves policy learning across simulation and real-robot
-            manipulation.
-          </p>
-        </div>
-      </section>
-
-      <section class="section approach-section" id="approach">
-        <div class="shell">
-          <div class="section-heading split-heading">
-            <div>
-              <p class="kicker">Approach</p>
-              <h2>Learn the change.<br>Keep the predictor.</h2>
-            </div>
-            <p>
-              The same shared predictor is trained under asymmetric information access. This
-              creates a compact intent stream that can be retained as policy context instead of
-              being discarded after pre-training.
-            </p>
-          </div>
-
-          <figure class="media-card method-card">
-            <img loading="lazy" decoding="async" src="assets/method.png" width="2463" height="762" alt="TRAIL pre-training architecture with DINOv3 and DistilBERT encoders, bidirectional cross-attention, intent and full prediction streams, and future latent supervision.">
-            <figcaption>TRAIL pre-training: language-grounded visual encoding followed by asymmetric latent future prediction.</figcaption>
-          </figure>
-
-          <div class="steps-grid">
-            <article class="step-card">
-              <span class="step-index">01</span>
-              <h3>Ground the current state</h3>
-              <p>Bidirectional cross-attention fuses frozen visual tokens with the task instruction before future prediction.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-index">02</span>
-              <h3>Constrain future access</h3>
-              <p>The full stream reads dense patch tokens; the intent stream sees only the visual class token and grounded language context.</p>
-            </article>
-            <article class="step-card accent-step">
-              <span class="step-index">03</span>
-              <h3>Expose the residual</h3>
-              <p>At every control step, the retained intent stream predicts a future latent and forms <span class="math">Δz = ẑ<sup>int</sup> − z<sub>t</sub></span>.</p>
-            </article>
-          </div>
-
-          <div class="equation-strip" aria-label="TRAIL policy representation">
-            <div><span>current state</span><strong>z<sub>t</sub></strong></div>
-            <b aria-hidden="true">+</b>
-            <div class="residual-pill"><span>task-relevant change</span><strong>Δz</strong></div>
-            <b aria-hidden="true">→</b>
-            <div><span>closed-loop</span><strong>policy</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section results-section" id="results">
-        <div class="shell">
-          <div class="section-heading centered results-heading">
-            <p class="kicker">Results</p>
-            <h2>One representation, three evaluation settings</h2>
-            <p>TRAIL is evaluated with frozen visual backbones and controlled downstream policy-learning protocols.</p>
-          </div>
-
-          <div class="metric-grid">
-            <article class="metric-card metric-blue">
-              <div class="metric-top"><span>Franka Kitchen</span><small>Simulation</small></div>
-              <strong>81.2<span>%</span></strong>
-              <p>Average success across five long-horizon tasks, two viewpoints, and three random seeds.</p>
-              <div class="comparison"><span>TRAIL</span><b style="--score:81.2%"></b><em>81.2</em></div>
-              <div class="comparison muted"><span>LaVA-Man</span><b style="--score:79.2%"></b><em>79.2</em></div>
-            </article>
-
-            <article class="metric-card metric-green">
-              <div class="metric-top"><span>Meta-World MT10</span><small>Multi-task</small></div>
-              <strong>78.2<span>%</span></strong>
-              <p>Average success for one language-conditioned policy across ten heterogeneous tasks.</p>
-              <div class="comparison"><span>TRAIL</span><b style="--score:78.2%"></b><em>78.2</em></div>
-              <div class="comparison muted"><span>R3M</span><b style="--score:70%"></b><em>70.0</em></div>
-            </article>
-
-            <article class="metric-card metric-purple">
-              <div class="metric-top"><span>Physical UR5</span><small>Real robot</small></div>
-              <strong>90<span>%</span></strong>
-              <p>Average success across seven language-conditioned tabletop manipulation tasks.</p>
-              <div class="comparison"><span>TRAIL</span><b style="--score:90%"></b><em>90</em></div>
-              <div class="comparison muted"><span>LaVA-Man</span><b style="--score:79%"></b><em>79</em></div>
-            </article>
-          </div>
-
-          <figure class="media-card wide-results-card">
-            <img loading="lazy" decoding="async" src="assets/real-robot-results.jpg" width="3000" height="640" alt="Real-robot task examples and success rates comparing TRAIL with CLIPort, MPI, and LaVA-Man across seven tasks.">
-            <figcaption>Real-robot evaluation across seen compositions, held-out objects, and contact-rich tasks. TRAIL achieves the highest average success.</figcaption>
-          </figure>
-
-          <div class="benchmark-grid">
-            <article>
-              <span class="benchmark-no">A</span>
-              <div><h3>Franka Kitchen</h3><p>Long-horizon continuous control across articulated kitchen tasks and viewpoints.</p></div>
-            </article>
-            <article>
-              <span class="benchmark-no">B</span>
-              <div><h3>Meta-World MT10</h3><p>A single offline behavior-cloning policy across ten tasks, objects, and motion primitives.</p></div>
-            </article>
-            <article>
-              <span class="benchmark-no">C</span>
-              <div><h3>Physical UR5</h3><p>Seven tabletop tasks covering unseen objects, compositional variation, and contact-rich pushing.</p></div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section analysis-section" id="analysis">
-        <div class="shell">
-          <div class="section-heading split-heading">
-            <div>
-              <p class="kicker">Representation analysis</p>
-              <h2>Where does the gain come from?</h2>
-            </div>
-            <p>
-              Qualitative grounding checks whether language selects relevant visual evidence;
-              stage-level evaluation shows where policies make progress on dynamic manipulation.
-            </p>
-          </div>
-
-          <div class="analysis-grid">
-            <figure class="media-card analysis-card grounding-card">
-            <img loading="lazy" decoding="async" src="assets/grounding.jpg" width="1247" height="606" alt="Instruction-conditioned attention maps on human activities and robot scenes highlighting task-relevant regions.">
-              <figcaption>
-                <strong>Instruction-conditioned grounding.</strong>
-                Cross-attention concentrates on manipulated objects without bounding-box supervision.
-              </figcaption>
-            </figure>
-            <figure class="media-card analysis-card failure-card">
-              <img loading="lazy" decoding="async" src="assets/failure-stages.png" width="838" height="848" alt="Failure-stage decomposition for Meta-World Pick-Place and Push comparing TRAIL with baselines.">
-              <figcaption>
-                <strong>Failure-stage decomposition.</strong>
-                On Push and Pick-Place, TRAIL reduces early failures before object contact and shifts remaining failures later.
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      <section class="section closing-section">
-        <div class="shell closing-card">
-          <p class="kicker">Core idea</p>
-          <blockquote>Do not ask the downstream policy to rediscover temporal structure from a static feature. Give it the predicted, task-relevant change directly.</blockquote>
-          <a class="button button-light" href="#top">Back to overview <span aria-hidden="true">↑</span></a>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <div class="shell footer-inner">
-        <div>
-          <a class="wordmark footer-mark" href="#top" aria-label="Back to top"><span>TRA</span><i>I</i><span>L</span></a>
-          <p>Task-Relevant Residuals as an Action Prior for Robot Manipulation</p>
-        </div>
-        <p>Anonymous project page · Materials provided for peer review</p>
       </div>
-    </footer>
-  </body>
+    </section>
+
+    <section class="section section-alt" id="abstract">
+      <div class="container container-text">
+        <h2 class="section-title">Abstract</h2>
+        <div class="abstract-box">
+          <p>
+            Learning language-conditioned robot manipulation policies requires representations that capture not only the current scene but also how it changes under task instructions. While general-purpose visual representations have improved robotic perception, they are mainly focused on encoding static scenes and provide limited guidance on the temporal dynamics relevant to robotic actions.
+          </p>
+          <p>
+            We propose a self-supervised framework that extracts task-relevant temporal dynamics as latent residuals that provide a clear and direct target for the robot actions. They are learned through an information-access bottleneck: a single future predictor is run both with and without direct access to dense patch tokens, and the intent stream is distilled from the full-information stream so that prediction emphasizes changes associated with the instruction.
+          </p>
+          <p>
+            During policy learning, our method bridges the gap between pre-training and deployment by retaining the predictive module to compute an explicit latent residual between the current observation and the predicted future state. This lightweight, control-oriented signal highlights the necessary actions directly and hence simplifies the policy learning process. Experiments on two simulation benchmarks and seven real-robot tasks demonstrate that these latent residuals serve as an effective prior for policy learning.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <h2 class="section-title">Methodology</h2>
+        <p class="section-intro">
+          TRAIL learns a task-relevant latent change predictor from action-free human videos and retains the predictor to provide an explicit transition direction to downstream policies.
+        </p>
+
+        <figure class="figure-card method-figure">
+          <a href="assets/method.png" target="_blank" rel="noopener" aria-label="Open method figure at full resolution">
+            <img loading="lazy" decoding="async" src="assets/method.png" width="2463" height="762" alt="TRAIL pre-training architecture with frozen visual and language encoders, bidirectional cross-attention, asymmetric intent and full prediction streams, and future latent supervision.">
+          </a>
+          <figcaption>
+            <strong>Figure 2. TRAIL pre-training architecture.</strong>
+            Frozen DINOv3 and DistilBERT encoders produce visual and language tokens. A shared predictor is evaluated with full dense visual access and with a constrained intent stream; both predict the frozen future latent target, while consistency distillation transfers the full-information forecast to the intent stream.
+          </figcaption>
+        </figure>
+
+        <div class="method-grid">
+          <article class="method-box method-box-blue">
+            <span class="step-number">01</span>
+            <h3>Language-grounded encoding</h3>
+            <p>Bidirectional cross-attention grounds current visual tokens in the task instruction before future prediction.</p>
+          </article>
+          <article class="method-box method-box-purple">
+            <span class="step-number">02</span>
+            <h3>Asymmetric prediction</h3>
+            <p>The full stream reads class, patch, and language tokens; the intent stream has no direct access to dense patch tokens.</p>
+          </article>
+          <article class="method-box method-box-green">
+            <span class="step-number">03</span>
+            <h3>Residual-guided policy</h3>
+            <p>The retained intent stream forms <span class="math">Δz = ẑ<sup>int</sup><sub>t</sub> − z<sub>t</sub></span> at every control step.</p>
+          </article>
+        </div>
+
+        <div class="policy-equation" aria-label="Residual-guided policy representation">
+          <div><span>Current latent</span><strong>z<sub>t</sub></strong></div>
+          <b aria-hidden="true">+</b>
+          <div><span>Predicted change</span><strong class="residual">Δz</strong></div>
+          <b aria-hidden="true">→</b>
+          <div><span>Behavior cloning</span><strong>π(a<sub>t</sub>)</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="experiments">
+      <div class="container">
+        <h2 class="section-title">Experimental Results</h2>
+        <p class="section-intro">
+          We evaluate TRAIL on Franka Kitchen, Meta-World MT10, and seven physical UR5 tasks under controlled downstream policy-learning protocols.
+        </p>
+
+        <div class="table-container summary-table-container">
+          <table class="academic-table summary-table">
+            <caption>Average success rates across the three evaluation settings.</caption>
+            <thead>
+              <tr>
+                <th>Benchmark</th>
+                <th>Evaluation setting</th>
+                <th>Strongest compared baseline</th>
+                <th>TRAIL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Franka Kitchen</td>
+                <td>5 tasks, 2 viewpoints, 3 seeds</td>
+                <td>79.2 <span class="method-note">(LaVA-Man)</span></td>
+                <td class="ours-cell"><strong>81.2</strong></td>
+              </tr>
+              <tr>
+                <td>Meta-World MT10</td>
+                <td>1 policy, 10 tasks, 3 seeds</td>
+                <td>70.0 <span class="method-note">(R3M)</span></td>
+                <td class="ours-cell"><strong>78.2</strong></td>
+              </tr>
+              <tr>
+                <td>Physical UR5</td>
+                <td>7 tasks, 5 trials per task</td>
+                <td>79.0 <span class="method-note">(LaVA-Man)</span></td>
+                <td class="ours-cell"><strong>90.0</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="subsection-title">Simulation benchmarks</h3>
+
+        <div class="results-block">
+          <h4>Franka Kitchen</h4>
+          <p>Average success rates over 25 demonstrations across five tasks, two viewpoints, and three random seeds.</p>
+          <div class="table-container">
+            <table class="academic-table task-table">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Turn knob</th>
+                  <th>Open door</th>
+                  <th>Flip switch</th>
+                  <th>Open microwave</th>
+                  <th>Slide door</th>
+                  <th>Average</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>DINOv3</td><td>79.3</td><td>43.7</td><td>92.3</td><td>40.3</td><td><strong>100.0</strong></td><td>71.3</td></tr>
+                <tr><td>R3M</td><td>53.3</td><td>50.7</td><td>86.3</td><td>59.3</td><td>97.0</td><td>69.5</td></tr>
+                <tr><td>MVP</td><td>79.0</td><td>48.0</td><td>90.7</td><td>41.0</td><td><strong>100.0</strong></td><td>71.7</td></tr>
+                <tr><td>ToBo</td><td>57.0</td><td>51.0</td><td>82.0</td><td>55.0</td><td>95.0</td><td>68.0</td></tr>
+                <tr><td>MPI</td><td>89.0</td><td><strong>57.7</strong></td><td>93.7</td><td>54.0</td><td><strong>100.0</strong></td><td>78.9</td></tr>
+                <tr><td>LaVA-Man</td><td>90.0</td><td>50.7</td><td>94.0</td><td>61.3</td><td><strong>100.0</strong></td><td>79.2</td></tr>
+                <tr class="ours-row"><td><strong>TRAIL</strong></td><td><strong>91.7</strong></td><td>56.7</td><td><strong>95.7</strong></td><td><strong>62.0</strong></td><td><strong>100.0</strong></td><td><strong>81.2</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="results-block">
+          <h4>Meta-World MT10</h4>
+          <p>One language-conditioned policy is trained by offline behavior cloning on 100 expert demonstrations per task. Results are mean success over three seeds and 50 episodes per task and seed.</p>
+          <div class="table-container wide-table-container">
+            <table class="academic-table task-table mt10-table">
+              <thead>
+                <tr>
+                  <th>Method</th><th>Reach</th><th>Push</th><th>Pick-Place</th><th>Door</th><th>Drawer-O</th><th>Drawer-C</th><th>Button</th><th>Peg-Insert</th><th>Window-O</th><th>Window-C</th><th>Average</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>DINOv3</td><td>36.0</td><td>38.0</td><td>18.0</td><td><strong>100.0</strong></td><td>92.0</td><td><strong>100.0</strong></td><td>96.0</td><td>28.0</td><td>80.0</td><td><strong>100.0</strong></td><td>68.8</td></tr>
+                <tr><td>R3M</td><td><strong>50.0</strong></td><td>32.0</td><td>2.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>26.0</td><td>90.0</td><td><strong>100.0</strong></td><td>70.0</td></tr>
+                <tr><td>VC-1</td><td>32.0</td><td>2.0</td><td>0.0</td><td>80.0</td><td>86.0</td><td>36.0</td><td>28.0</td><td>2.0</td><td>22.0</td><td><strong>100.0</strong></td><td>38.8</td></tr>
+                <tr><td>ToBo</td><td>28.0</td><td>38.0</td><td>2.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>34.0</strong></td><td><strong>96.0</strong></td><td><strong>100.0</strong></td><td>69.8</td></tr>
+                <tr><td>MPI</td><td>36.0</td><td>24.0</td><td>4.0</td><td>80.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>12.0</td><td>72.0</td><td><strong>100.0</strong></td><td>62.8</td></tr>
+                <tr class="ours-row"><td><strong>TRAIL</strong></td><td>44.0</td><td><strong>70.0</strong></td><td><strong>40.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>33.0</td><td>95.0</td><td><strong>100.0</strong></td><td><strong>78.2</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">Drawer-O/C denote drawer open/close; Window-O/C denote window open/close. Success rates are reported in percent.</p>
+        </div>
+
+        <h3 class="subsection-title">Real-robot manipulation</h3>
+        <p class="section-intro compact-intro">
+          A physical UR5 policy is evaluated on seven language-conditioned tabletop tasks, including held-out blocks and objects that are excluded from training.
+        </p>
+        <figure class="figure-card real-robot-figure">
+          <a href="assets/real-robot-results.jpg" target="_blank" rel="noopener" aria-label="Open real-robot results figure at full resolution">
+            <img loading="lazy" decoding="async" src="assets/real-robot-results.jpg" width="3000" height="640" alt="Real-robot task examples and success rates comparing TRAIL with CLIPort, MPI, and LaVA-Man across seven tasks.">
+          </a>
+          <figcaption>
+            <strong>Figure 3. Real-world multi-task manipulation.</strong>
+            Comparison with CLIPort, MPI, and LaVA-Man across seven tabletop tasks. Held-out colored blocks and novel objects are used only for zero-shot evaluation.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="analysis">
+      <div class="container">
+        <h2 class="section-title">Representation Analysis</h2>
+
+        <figure class="figure-card grounding-figure">
+          <a href="assets/grounding.jpg" target="_blank" rel="noopener" aria-label="Open grounding figure at full resolution">
+            <img loading="lazy" decoding="async" src="assets/grounding.jpg" width="1247" height="606" alt="Instruction-conditioned cross-attention maps on human activities and robot scenes highlighting task-relevant regions.">
+          </a>
+          <figcaption>
+            <strong>Figure 4. Qualitative language grounding.</strong>
+            Instruction-conditioned cross-attention concentrates on manipulated objects without bounding-box supervision, providing a qualitative sanity check for language-conditioned prediction.
+          </figcaption>
+        </figure>
+
+        <figure class="figure-card failure-figure">
+          <a href="assets/failure-stages.png" target="_blank" rel="noopener" aria-label="Open failure-stage figure at full resolution">
+            <img loading="lazy" decoding="async" src="assets/failure-stages.png" width="838" height="848" alt="Failure-stage decomposition for Meta-World Pick-Place and Push comparing TRAIL with baselines.">
+          </a>
+          <figcaption>
+            <strong>Figure 5. Failure stages on Meta-World Push and Pick-Place.</strong>
+            TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
+          </figcaption>
+        </figure>
+
+        <h3 class="subsection-title">Ablation on the policy representation</h3>
+        <div class="table-container ablation-container">
+          <table class="academic-table ablation-table">
+            <caption>Effect of retaining future information and explicitly constructing the latent residual.</caption>
+            <thead>
+              <tr><th>Variant</th><th>Policy input</th><th>Franka Kitchen</th><th>MT10</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Encoder-Only</td><td><span class="math">z<sub>t</sub></span></td><td>74.5</td><td>57.0</td></tr>
+              <tr><td>Predictor-Only</td><td><span class="math">ẑ<sup>int</sup><sub>t</sub></span></td><td>75.5</td><td>77.0</td></tr>
+              <tr><td>Absolute pair</td><td><span class="math">z<sub>t</sub>, ẑ<sup>int</sup><sub>t</sub></span></td><td>76.1</td><td>76.0</td></tr>
+              <tr class="ours-row"><td><strong>TRAIL (Full)</strong></td><td><span class="math"><strong>z<sub>t</sub>, Δz</strong></span></td><td><strong>81.2</strong></td><td><strong>78.2</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p><strong>TRAIL</strong> — Learning Task-Relevant Latent Residuals for Robot Manipulation</p>
+      <p class="footer-note">Anonymous project page · Materials provided for peer review</p>
+    </div>
+  </footer>
+</body>
 </html>
