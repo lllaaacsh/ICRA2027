@@ -63,13 +63,13 @@ Here $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$ are the tw
 \CO{\textbf{[Losses]}} Both predictions are supervised against the same frozen future target. To keep the three losses readable, let $d(x,y)=\operatorname{MSE}(x,y)+1-\operatorname{cos}(x,y)$ denote the sum of token-averaged mean-squared error and cosine distance between two aligned token sequences $x$ and $y$. The full prediction loss, intent prediction loss, and consistency loss are
 
 \begin{equation}
-\mathcal{L}_{\mathrm{full}}=d\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right). \label{eq:loss_full}
+\mathcal{L}_{\mathrm{full}}=d\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right), \label{eq:loss_full}
 \end{equation}
-
+%
 \begin{equation}
-\mathcal{L}_{\mathrm{int}}=d\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right). \label{eq:loss_int}
+\mathcal{L}_{\mathrm{int}}=d\!\left(\hat z^{\mathrm{int}}_{t+k},z^{\mathrm{gt}}_{t+k}\right), \label{eq:loss_int}
 \end{equation}
-
+%
 \begin{equation}
 \mathcal{L}_{\mathrm{cons}}=\left\|\hat z^{\mathrm{int}}_{t+k}-\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2. \label{eq:loss_cons}
 \end{equation}
