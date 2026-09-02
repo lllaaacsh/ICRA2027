@@ -18,7 +18,9 @@ TRAIL learns a task-relevant latent change predictor from action-free human vide
 \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
 
 
-\CO{\textbf{[Problem formulation of pretraining]}} In Fig.~\ref{fig:ab_probe}, we illustrate the overview of our pre-training strategies. Given a current frame $I_t$, a future frame $I_{t+k}$, and a language instruction $l$, we train our model to predict the latent representation of $I_{t+k}$. A frozen visual encoder~\cite{simeoni2025dinov3} maps the current frame to the token sequence $z_t$ and the future frame to the target $z^{\mathrm{gt}}_{t+k}$. A frozen text encoder~\cite{sanh2019distilbert}, followed by a trainable projection, maps $l$ to the language-token sequence $L$.
+\CO{\textbf{[Problem formulation of pretraining]}}
+
+As shown in Fig.~\ref{fig:ab_probe}, given a current frame $I_t$, a future frame $I_{t+k}$ and a language instruction $l$, TRAIL learns to predict the future latent target $z^{\mathrm{gt}}_{t+k}$ from the current latent $z_t$ and $l$. Its full-information and intent streams produce two predictions, $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$, both of which are supervised by $z^{\mathrm{gt}}_{t+k}$. The future frame $I_{t+k}$ is used only as a latent target supervision and is not reconstructed at the pixel level. Here, $k$ denotes the frame offset used during video pre-training.
 
 
 
@@ -27,8 +29,9 @@ TRAIL learns a task-relevant latent change predictor from action-free human vide
 \CO{\textbf{[Language grounded encoding, define $V_{cls}$,$V_{patch} x 196 $]}} The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual class token by $v'_{\texttt{cls}}$, the sequence of $N$ visual patch tokens by $v'_{1:N}$, and the contextualized language-token sequence by $L'$; the prime marks tokens after language--vision fusion. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
 
 
+A trainable DINOv3 visual encoder~\cite{simeoni2025dinov3} maps the current frame $I_t$ to the visual-token sequence $z_t$, whereas a same encoder is froze to encode the future frame $I_{t+k}$ as the supervision target $z^{\mathrm{gt}}_{t+k}$. At an input resolution of $224\times224$, each visual sequence contains one class token $V_{cls}$ and 196 patch tokens $V_{patch}$. In the mean time, a frozen DistilBERT encoder~\cite{sanh2019distilbert} maps the instruction $l$ to the language-token sequence $L$.
 
-
+The current visual tokens and $L$ are then fused through bidirectional cross-attention. The visual tokens first query $L$ with a residual connection, producing the instruction-conditioned class token $v'_{\texttt{cls}}$ and patch tokens $v'_{patch}$. The language tokens subsequently query these updated visual tokens, producing the scene-conditioned language tokens $L'$. The class token provides a compact task-conditioned representation, while the patch tokens preserve dense spatial information.
 
 % \subsection{\CO{Latent Space}}
 % \label{subsec:notation}
