@@ -92,8 +92,15 @@ Both predictions are anchored to the frozen future target. In addition, the stop
 \end{equation}
 %
 \begin{equation}
-\mathcal{L}_{\mathrm{cons}}=\left\|\hat z^{\mathrm{int}}_{t+k}-\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2. \label{eq:loss_cons}
+\mathcal{L}_{\mathrm{cons}}
+=
+\operatorname{MSE}\!\left(
+\hat z^{\mathrm{int}}_{t+k},
+\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)
+\right).
+\label{eq:loss_cons}
 \end{equation}
+
 
 In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ and $\mathcal{L}_{\mathrm{int}}$ measure the prediction errors of the full-information and intent streams with respect to the frozen DINOv3 future target $z^{\mathrm{gt}}_{t+k}$. In Eq.~\ref{eq:loss_cons}, $\mathcal{L}_{\mathrm{cons}}$ encourages the intent prediction to agree with the patch-informed full-information prediction, while $\operatorname{sg}(\cdot)$ stops gradients through the full-information output. The complete objective is
 
