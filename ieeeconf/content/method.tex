@@ -13,25 +13,25 @@ TRAIL learns a task-relevant latent change predictor from action-free human vide
 
 \subsection{Language-guided asymmetric prediction}
 \label{subsec:pretrain}
-\CO{Make this section have a following order: formulation, encoding, prediction, losses.}
+% \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
 
-\CO{Make this section have a following order: formulation, encoding, prediction, losses.}
-
-
-\CO{\textbf{[Problem formulation of pretraining]}}
-
-As shown in Fig.~\ref{fig:ab_probe}, given a current frame $I_t$, a future frame $I_{t+k}$ and a language instruction $l$, TRAIL learns to predict the future latent target $z^{\mathrm{gt}}_{t+k}$ from the current latent $z_t$ and $l$. Its full-information and intent streams produce two predictions, $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$, both of which are supervised by $z^{\mathrm{gt}}_{t+k}$. The future frame $I_{t+k}$ is used only as a latent target supervision and is not reconstructed at the pixel level. Here, $k$ denotes the frame offset used during video pre-training.
+% \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
 
 
+%
+
+ \CO{\textbf{[Problem formulation of pretraining]}}As shown in Fig.~\ref{fig:ab_probe}, given a current frame $I_t$, a future frame $I_{t+k}$ and a language instruction $l$, TRAIL learns to predict the future latent target $z^{\mathrm{gt}}_{t+k}$ from the current latent $z_t$ and $l$. Its full-information and intent streams produce two predictions, $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$, both of which are supervised by $z^{\mathrm{gt}}_{t+k}$. The future frame $I_{t+k}$ is used only as a latent target supervision and is not reconstructed at the pixel level. Here, $k$ denotes the frame offset used during video pre-training.
 
 
 
-\CO{\textbf{[Language grounded encoding, define $V_{cls}$,$V_{patch} x 196 $]}} The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual class token by $v'_{\texttt{cls}}$, the sequence of $N$ visual patch tokens by $v'_{1:N}$, and the contextualized language-token sequence by $L'$; the prime marks tokens after language--vision fusion. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
 
 
-A trainable DINOv3 visual encoder~\cite{simeoni2025dinov3} maps the current frame $I_t$ to the visual-token sequence $z_t$, whereas a same encoder is froze to encode the future frame $I_{t+k}$ as the supervision target $z^{\mathrm{gt}}_{t+k}$. At an input resolution of $224\times224$, each visual sequence contains one class token $V_{cls}$ and 196 patch tokens $V_{patch}$. In the mean time, a frozen DistilBERT encoder~\cite{sanh2019distilbert} maps the instruction $l$ to the language-token sequence $L$.
+% The first module grounds the current visual state in the instruction before future prediction. The visual tokens first query the language tokens through cross-attention with a residual connection, making both the class and patch tokens instruction-conditioned. The language tokens then query these updated visual tokens, incorporating the current scene into the language context. We denote the resulting visual class token by $v'_{\texttt{cls}}$, the sequence of $N$ visual patch tokens by $v'_{1:N}$, and the contextualized language-token sequence by $L'$; the prime marks tokens after language--vision fusion. The visual class token provides a compact task-relevant summary, while the patch tokens preserve dense spatial evidence.
 
-The current visual tokens and $L$ are then fused through bidirectional cross-attention. The visual tokens first query $L$ with a residual connection, producing the instruction-conditioned class token $v'_{\texttt{cls}}$ and patch tokens $v'_{patch}$. The language tokens subsequently query these updated visual tokens, producing the scene-conditioned language tokens $L'$. The class token provides a compact task-conditioned representation, while the patch tokens preserve dense spatial information.
+\CO{\textbf{[Language grounded encoding, define $V_{cls}$,$V_{patch} x 196 $]}}
+A trainable DINOv3 visual encoder~\cite{simeoni2025dinov3} maps the current frame $I_t$ to the visual-token sequence $z_t$, whereas a same encoder is froze to encode the future frame $I_{t+k}$ as the supervision target $z^{\mathrm{gt}}_{t+k}$. At an input resolution of $224\times224$, each visual sequence contains one class token $V_{cls}$ and 196 patch tokens $V_{patch}$. Meanwhile, a frozen DistilBERT encoder~\cite{sanh2019distilbert} maps the instruction $l$ to the language-token sequence $L$.
+
+The current visual tokens and $L$ are then fused through bidirectional cross-attention. The visual tokens first query $L$ with a residual connection, producing the instruction-conditioned class token $V'_{\texttt{cls}}$ and patch tokens $V'_{patch}$. The language tokens subsequently query these updated visual tokens, producing the scene-conditioned language tokens $L'$. The class token provides a compact task-conditioned representation, while the patch tokens preserve dense spatial information.
 
 % \subsection{\CO{Latent Space}}
 % \label{subsec:notation}
@@ -52,18 +52,36 @@ The current visual tokens and $L$ are then fused through bidirectional cross-att
 % \subsection{Asymmetric Full and Intent Prediction}
 % \label{subsec:pretraing}
 
-\CO{\textbf{[asymmetric prediction]}} The second module separates task-relevant future prediction from generic video extrapolation. TRAIL evaluates the same predictor under two memory-access conditions. Let $P$ denote the shared predictor and $Q$ its $N{+}1$ learned, content-free future queries. The two passes are
+%  The second module separates task-relevant future prediction from generic video extrapolation. TRAIL evaluates the same predictor under two memory-access conditions. Let $P$ denote the shared predictor and $Q$ its $N{+}1$ learned, content-free future queries. The two passes are
 
+% \begin{align}
+% \hat z^{\mathrm{full}}_{t+k}
+%     &=P\!\left(Q\mid[V'_{\texttt{cls}},V'_{\texttt{cls}},L']\right), \label{eq:full_stream}\\
+% \hat z^{\mathrm{int}}_{t+k}
+%     &=P\!\left(Q\mid[V'_{\texttt{cls}},L']\right). \label{eq:int_stream}
+% \end{align}
+
+% Here $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$ are the two predicted future-token sequences; $t$ is the current-frame index, $k$ is the pre-training frame offset, and the superscripts identify the full-information and intent streams. $P$ is the shared predictor, and $Q$ is its sequence of $N{+}1$ learned future queries. The terms $V'_{\texttt{cls}}$, $V'_{\texttt{patch}}$, and $L'$ are respectively the language-grounded visual class token, the $N$ dense visual patch tokens, and the contextualized language tokens defined above. The brackets denote the memory supplied to $P$, and the vertical bar separates its queries from that memory. Thus, Eq.~\ref{eq:full_stream} receives class, patch, and language tokens, whereas Eq.~\ref{eq:int_stream} receives only class and language tokens, with no direct dense-patch access. Both streams share $P$ and $Q$ and emit the same number of future tokens; only their input memory differs.
+
+
+\CO{\textbf{[asymmetric prediction]}}Although both streams are supervised by the same future target \(z^{\mathrm{gt}}_{t+k}\), they differ in the information available for prediction. The intent stream must forecast the full future token sequence from only the compact instruction-conditioned class token and language tokens, while the patch-level structure of the current scene is withheld. We therefore introduce a full-information stream that additionally accesses the current patch tokens during pre-training. This stream uses the spatially detailed current state to form a state-aware prediction of the same future target, which is then used as an auxiliary consistency target for the intent stream.
+
+The two streams share the predictor \(P\) and future queries \(Q\), differing only in their memory inputs:
+%
 \begin{align}
 \hat z^{\mathrm{full}}_{t+k}
-    &=P\!\left(Q\mid[v'_{\texttt{cls}},v'_{1:N},L']\right), \label{eq:full_stream}\\
+&=P\!\left(Q\mid[V'_{\texttt{cls}},V'_{\texttt{patch}}\times 196,L']\right),
+\label{eq:full_stream}\\
 \hat z^{\mathrm{int}}_{t+k}
-    &=P\!\left(Q\mid[v'_{\texttt{cls}},L']\right). \label{eq:int_stream}
+&=P\!\left(Q\mid[V'_{\texttt{cls}},L']\right).
+\label{eq:int_stream}
 \end{align}
+%
+Both predictions are anchored to the frozen future target. In addition, the stopped full-information prediction regularizes the intent prediction, encouraging the compact intent representation to preserve future-relevant information that is consistent with the detailed current scene. The full-information stream is used only during pre-training; downstream policy learning retains only the intent stream.
 
-Here $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$ are the two predicted future-token sequences; $t$ is the current-frame index, $k$ is the pre-training frame offset, and the superscripts identify the full-information and intent streams. $P$ is the shared predictor, and $Q$ is its sequence of $N{+}1$ learned future queries. The terms $v'_{\texttt{cls}}$, $v'_{1:N}$, and $L'$ are respectively the language-grounded visual class token, the $N$ dense visual patch tokens, and the contextualized language tokens defined above. The brackets denote the memory supplied to $P$, and the vertical bar separates its queries from that memory. Thus, Eq.~\ref{eq:full_stream} receives class, patch, and language tokens, whereas Eq.~\ref{eq:int_stream} receives only class and language tokens, with no direct dense-patch access. Both streams share $P$ and $Q$ and emit the same number of future tokens; only their input memory differs.
 
-\CO{\textbf{[Losses]}} Both predictions are supervised against the same frozen future target. To keep the three losses readable, let $d(x,y)=\operatorname{MSE}(x,y)+1-\operatorname{cos}(x,y)$ denote the sum of token-averaged mean-squared error and cosine distance between two aligned token sequences $x$ and $y$. The full prediction loss, intent prediction loss, and consistency loss are
+
+\CO{\textbf{[Losses]}} Both predictions are supervised against the same frozen future target. To keep the three losses readable, let $d(x,y)=\operatorname{MSE}(x,y)+1-\operatorname{cos}(x,y)$ denote the sum of mean-squared error and cosine distance between two aligned token sequences $x$ and $y$. The full prediction loss, intent prediction loss, and consistency loss are
 
 \begin{equation}
 \mathcal{L}_{\mathrm{full}}=d\!\left(\hat z^{\mathrm{full}}_{t+k},z^{\mathrm{gt}}_{t+k}\right), \label{eq:loss_full}
@@ -77,7 +95,7 @@ Here $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$ are the tw
 \mathcal{L}_{\mathrm{cons}}=\left\|\hat z^{\mathrm{int}}_{t+k}-\operatorname{sg}\!\left(\hat z^{\mathrm{full}}_{t+k}\right)\right\|_2^2. \label{eq:loss_cons}
 \end{equation}
 
-In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ and $\mathcal{L}_{\mathrm{int}}$ measure the prediction errors of the full-information and intent streams, $d$ is the prediction distance defined above, and $z^{\mathrm{gt}}_{t+k}$ is the frozen DINOv3 target for the future frame at offset $k$. In Eq.~\ref{eq:loss_cons}, $\mathcal{L}_{\mathrm{cons}}$ measures agreement between the intent and full-information predictions, $\operatorname{sg}(\cdot)$ stops gradients through its argument, and $\|\cdot\|_2^2$ is the squared Euclidean norm. The complete objective is
+In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ and $\mathcal{L}_{\mathrm{int}}$ measure the prediction errors of the full-information and intent streams with respect to the frozen DINOv3 future target $z^{\mathrm{gt}}_{t+k}$. In Eq.~\ref{eq:loss_cons}, $\mathcal{L}_{\mathrm{cons}}$ encourages the intent prediction to agree with the patch-informed full-information prediction, while $\operatorname{sg}(\cdot)$ stops gradients through the full-information output. The complete objective is
 
 \begin{equation}
 \mathcal{L}_{\mathrm{total}}
@@ -87,21 +105,28 @@ In Eqs.~\ref{eq:loss_full} and~\ref{eq:loss_int}, $\mathcal{L}_{\mathrm{full}}$ 
 \label{eq:total}
 \end{equation}
 
-Here $\mathcal{L}_{\mathrm{total}}$ is the complete pre-training objective and $\alpha$ weights the consistency loss; we empirically set $\alpha=0.3$. The consistency term sends gradients only through the intent stream, distilling the full-information forecast without updating it as a target. The frozen visual and language backbones contribute no gradient path, while the language projection, fusion module, future queries, and predictor are shared and trainable.
+Here $\mathcal{L}_{\mathrm{total}}$is the complete pre-training objective and $\alpha$ weights the consistency loss; we empirically set $\alpha=0.3$. Gradients from the consistency term flow only through the intent-side prediction, encouraging it to match a forecast made with access to the detailed current visual state. The future-frame visual encoder and language encoder remain frozen, while the current-frame visual encoder, language projection, fusion module, future queries, and shared predictor are trainable.
+
+
+
+
+
+
 
 
 \subsection{Residual-guided policy learning}
 \label{subsec:policy_learning}
 
-The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the intent stream is retained. Given the current observation and instruction, it produces $\hat z^{\mathrm{int}}_t$ in the same frozen DINOv3 feature space as $z_t$. TRAIL forms the token-wise residual
+The downstream policy needs a control-oriented signal rather than a reconstructed future image. After pre-training, the full-information stream is dropped and the intent stream is retained. Given the current observation and instruction, it produces $\hat z^{\mathrm{int}}_{t+k}$ in the same frozen DINOv3 feature space as $z_t$. TRAIL forms the token-wise residual
 
 \begin{equation}
-    \Delta_z = \hat z^{\mathrm{int}}_t-z_t. \label{eq:residual}
+    \Delta_z = \hat z^{\mathrm{int}}_{t+k}-z_t. \label{eq:residual}
 \end{equation}
 
-In Eq.~\ref{eq:residual}, $\Delta_z$ is the task-relevant latent residual, $\hat z^{\mathrm{int}}_t$ is the intent-stream forecast at the current control step, and $z_t$ is the current visual-token sequence. The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the intent stream expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
+In Eq.~\ref{eq:residual}, $\Delta_z$ is the task-relevant latent residual, $\hat z^{\mathrm{int}}_{t+k}
+$ is the intent-stream forecast at the current control step, and $z_t$ is the current visual-token sequence. The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the intent stream expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
 
-\noindent\textbf{Residual scale balancing.}
+
 Because the residual can have a smaller magnitude than the current-state features, we normalize the two token sequences independently before policy readout. This prevents a simple scale difference from suppressing the residual during fusion. Behavioral cloning then predicts the action from the balanced state and residual features together with proprioception. Low-dimensional control uses a vector readout, whereas spatial affordance policies use a patch-map readout. Table~\ref{tab:ablation_residual} compares this residual context with the current state alone, the predicted future alone, and the absolute current--future pair. Fig.~\ref{fig:acdino} illustrates the resulting policy input.
 
 \begin{figure}[t]
