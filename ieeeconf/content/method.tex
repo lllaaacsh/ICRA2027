@@ -1,7 +1,7 @@
 \section{Method}
 \label{sec:method}
 
-TRAIL learns a task-relevant latent change predictor from action-free human videos and uses the predicted change as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec. XX). During downstream imitation learning, the retained intent stream produces a latent residual, which is scale-normalised before conditioning the policy (Sec. XX). 
+TRAIL learns a task-relevant latent change predictor from action-free human videos and uses the predicted change as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec. XX). During downstream imitation learning, the retained intent stream produces a latent residual that conditions the policy for XXX (Sec. XX). 
 
 
 \begin{figure*}[t]
@@ -20,7 +20,12 @@ TRAIL learns a task-relevant latent change predictor from action-free human vide
 
 %
 
- \CO{\textbf{[Problem formulation of pretraining]}}As shown in Fig.~\ref{fig:ab_probe}, given a current frame $I_t$, a future frame $I_{t+k}$ and a language instruction $l$, TRAIL learns to predict the future latent target $z^{\mathrm{gt}}_{t+k}$ from the current latent $z_t$ and $l$. Its full-information and intent streams produce two predictions, $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$, both of which are supervised by $z^{\mathrm{gt}}_{t+k}$. The future frame $I_{t+k}$ is used only as a latent target supervision and is not reconstructed at the pixel level. Here, $k$ denotes the frame offset used during video pre-training.
+\CO{\textbf{[Overview]}} Fig.~\ref{fig:ab_probe} shows the pipeline of our pre-training by language-guided asymmetric prediction. Given a current frame $I_t$, a future frame $I_{t+k}$ at frame offset $k$, and a language instruction $l$, TRAIL learns to predict the future latent target $z^{\mathrm{gt}}_{t+k}$ from the current latent $z_t$ and $l$. To separate task-relevant future changes from general visual dynamics, our model predicts the same future target with different levels of visual access. XXXXX
+
+% The full predictor produces $\hat z^{\mathrm{full}}_{t+k}$ using dense visual tokens $V'_{patch}$ in addition to the language-grounded class tokens $V'_{cls}$ and the contextualized language tokens $L'$, while the intent predictor produces $\hat z^{\mathrm{int}}_{t+k}$ without direct access to $V'_{patch}$.
+
+
+% Its full-information and intent streams produce two predictions, $\hat z^{\mathrm{full}}_{t+k}$ and $\hat z^{\mathrm{int}}_{t+k}$, both of which are supervised by $z^{\mathrm{gt}}_{t+k}$. The future frame $I_{t+k}$ is used only as a latent target supervision and is not reconstructed at the pixel level. Here, $k$ denotes the frame offset used during video pre-training.
 
 
 
