@@ -254,7 +254,7 @@
         <div class="video-group">
           <h3>Meta-World MT10</h3>
           <p>Successful closed-loop TRAIL rollouts, one for each task.</p>
-          <div class="video-grid">
+          <div class="video-grid video-grid-five">
             <figure class="video-card">
               <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Reach"><source src="assets/videos/trail-metaworld-reach.mp4" type="video/mp4"></video>
               <figcaption>Reach</figcaption>
@@ -301,7 +301,7 @@
         <div class="video-group">
           <h3>Franka Kitchen</h3>
           <p>Expert demonstrations are shown temporarily and will be replaced by TRAIL rollouts.</p>
-          <div class="video-grid">
+          <div class="video-grid video-grid-five">
             <figure class="video-card">
               <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Turn Knob demonstration"><source src="assets/videos/trail-franka-turn-knob.mp4" type="video/mp4"></video>
               <figcaption>Turn Knob</figcaption>
@@ -327,36 +327,52 @@
 
         <div class="video-group">
           <h3>Real-World Manipulation</h3>
-          <p>The seven physical-robot rollout slots are ready for the recorded videos.</p>
-          <div class="video-grid">
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Stacking Blocks video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Stacking Blocks</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Packing Blocks video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Packing Blocks</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Packing Unseen Blocks video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Packing Unseen Blocks</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Packing Objects video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Packing Objects</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Packing Unseen Objects video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Packing Unseen Objects</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Pushing Piles video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Pushing Piles</figcaption>
-            </figure>
-            <figure class="video-card">
-              <div class="video-placeholder" aria-label="Pressing Buttons video coming soon"><span>Video coming soon</span></div>
-              <figcaption>Pressing Buttons</figcaption>
-            </figure>
+          <p>The seven physical-robot rollout slots are grouped by generalization setting.</p>
+
+          <div class="video-subgroup">
+            <h4>Seen Tasks</h4>
+            <div class="video-grid">
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Stacking Blocks video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Stacking Blocks</figcaption>
+              </figure>
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Packing Blocks video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Packing Blocks</figcaption>
+              </figure>
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Packing Objects video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Packing Objects</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="video-subgroup">
+            <h4>Unseen Object Tasks</h4>
+            <div class="video-grid video-grid-two">
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Packing Unseen Blocks video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Packing Unseen Blocks</figcaption>
+              </figure>
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Packing Unseen Objects video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Packing Unseen Objects</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="video-subgroup">
+            <h4>Unseen Tasks</h4>
+            <div class="video-grid video-grid-two">
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Pushing Piles video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Pushing Piles</figcaption>
+              </figure>
+              <figure class="video-card">
+                <div class="video-placeholder" aria-label="Pressing Buttons video coming soon"><span>Video coming soon</span></div>
+                <figcaption>Pressing Buttons</figcaption>
+              </figure>
+            </div>
           </div>
         </div>
       </div>

@@ -345,6 +345,16 @@ img { display: block; }
   gap: 18px;
 }
 
+.video-grid-five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.video-grid-two { max-width: 710px; }
+
+.video-subgroup { margin-top: 26px; }
+.video-subgroup h4 { margin: 0 0 11px; font-size: 17px; }
+
 .video-card {
   overflow: hidden;
   margin: 0;
@@ -417,6 +427,7 @@ img { display: block; }
   .academic-table th, .academic-table td { padding: 9px 10px; }
   .wide-table-container { width: calc(100vw - 24px); }
   .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .video-grid-two { max-width: none; }
   .video-group h3 { font-size: 20px; }
 }
 
