@@ -2,9 +2,9 @@
 \centering
 \caption{\textbf{Results on Meta-World MT10~\cite{yu2020meta}}. A language-conditioned policy is trained per method by offline behavioral cloning on 100 expert demonstrations per task with a \emph{frozen} visual backbone and an identical action decoder. We report mean success over three random seeds, with 50 closed-loop episodes per task and seed. All methods use the same demonstration splits, random seeds, camera and proprioceptive inputs, action decoder, and evaluation configurations; evaluation seeds are disjoint from demonstration-collection seeds. Methods are grouped by the representation paradigms of Table~\ref{tab:franka}. Task names abbreviate the MT10 suite: Drawer-O/C denote drawer open/close and Window-O/C denote window open/close.}
 \setlength{\tabcolsep}{5pt}
-\resizebox{0.95\textwidth}{!}{%
+\resizebox{\textwidth}{!}{%
 \renewcommand{\arraystretch}{1.0}
-\begin{tabular}{lcccccccccc>{\columncolor[HTML]{F5F2F7}}c}
+\begin{tabular}{lccccccccccc}
 \toprule
 \bf Method &
  Reach &
@@ -21,19 +21,19 @@
 
 \midrule
 
-\rowcolor[HTML]{EFEFEF}
+% \rowcolor[HTML]{EFEFEF}
 \multicolumn{12}{l}{\textit{Visual Representation Models}} \\ 
 DINOv3~\cite{simeoni2025dinov3}  & 36.0 & 38.0 & 18.0 & \bf 100.0 & 92.0 & \bf 100.0 & 96.0 & 28.0 & 80.0 & \bf 100.0 & 68.8 \\
 R3M~\cite{nair2022r3m}           & \bf 50.0 & 32.0 & 2.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & 26.0 & 90.0 & \bf 100.0 & 70.0 \\
 VC-1~\cite{majumdar2023we}       & 32.0 & 2.0 & 0.0 & 80.0 & 86.0 & 36.0 & 28.0 & 2.0 & 22.0 & \bf 100.0 & 38.8 \\
 
 \midrule
-\rowcolor[HTML]{EFEFEF}
+% \rowcolor[HTML]{EFEFEF}
 \multicolumn{12}{l}{\textit{Vision-only Predictive Models}} \\ 
 ToBo~\cite{kim2025token}         & 28.0 & 38.0 & 2.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & \bf 34.0 & \bf 96.0 & \bf 100.0 & 69.8 \\
 
 \midrule
-\rowcolor[HTML]{EFEFEF}
+% \rowcolor[HTML]{EFEFEF}
 \multicolumn{12}{l}{\textit{Vision-Language Predictive Models}} \\ 
 MPI~\cite{zeng2024learning}      & 36.0 & 24.0 & 4.0 & 80.0 & \bf 100.0 & \bf 100.0 & \bf 100.0 & 12.0 & 72.0 & \bf 100.0 & 62.8 \\
 

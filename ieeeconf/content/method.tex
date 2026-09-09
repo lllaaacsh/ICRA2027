@@ -1,13 +1,13 @@
 \section{Method}
 \label{sec:method}
 
-TRAIL learns a task-relevant latent change predictor from action-free human videos and uses the predicted change as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast frozen DINOv3 future tokens from Kinetics videos without robot actions (Sec. XX). During downstream imitation learning, the retained intent stream produces a latent residual that conditions the policy for XXX (Sec. XX). 
+TRAIL learns task-relevant latent changes from action-free human videos and uses the predicted change as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast future visual representations under different level of visual access (Sec.~\ref{subsec:pretrain}). During downstream imitation learning, the intent stream produces a latent residual that conditions the policy on task-relevant change (Sec.~\ref{subsec:policy_learning}). 
 
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{ieeeconf/figure/DiPredict_cropped.pdf}
-\caption{\textbf{TRAIL architecture}. Snowflakes mark frozen modules; all other modules are trained. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream reads class, patch, and language tokens, whereas the intent stream reads only the class and language tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the intent prediction. At deployment, only the intent stream is retained to produce the latent forecast used to compute $\Delta_z$.}
+\caption{\textbf{TRAIL architecture}. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream reads class, patch, and language tokens, whereas the intent stream reads only the class and language tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the intent prediction. The modules with snowflakes mark are frozen, and all other modules are set to trainable. At deployment, only the intent stream is retained to produce the predicted future latent $\hat z^{\mathrm{int}}_{t+k}$ for the downstream policy.}
 \label{fig:ab_probe}
 \end{figure*}
 
@@ -115,22 +115,24 @@ After pre-training, we keep only the intent stream and use its predicted future 
 \end{equation}
 where $\Delta_z$ represents the task-relevant change from the current latent state. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference implicitly.
 
-
-% $\hat z^{\mathrm{int}}_{t+k}
-% $ is the intent-stream forecast at the current control step, and $z_t$ is the current visual-token sequence. The residual exposes the predicted change from the current latent state, so the policy receives both where the scene is now and how the intent stream expects it to change. Unlike an absolute future feature, this representation makes the difference between current and predicted states explicit rather than leaving the policy to infer that difference internally.
+As $\Delta_z$ can have a smaller magnitude than the current-state features, we normalize the two token sequences independently before passing them to the downstream policy. This prevents their scale difference from suppressing the residual during feature fusion. We then train the downstream policy by imitation learning using action-labeled robot demonstrations. During downstream policy learning, the pre-trained visual encoder, language-fusion module, and intent predictor are kept frozen, while only the action decoder is trained.
 
 
-As $\Delta_z$ can have a smaller magnitude than the current-state features, we normalize the two token sequences independently before policy readout. This prevents a simple scale difference from suppressing the residual during fusion.\CO{ Behavioral cloning [????]} then predicts the action from the balanced state and residual features together with proprioception. Low-dimensional control uses a vector readout, whereas spatial affordance policies use a patch-map readout. Table~\ref{tab:ablation_residual} compares this residual context with the current state alone, the predicted future alone, and the absolute current--future pair. Fig.~\ref{fig:acdino} illustrates the overview of the proposed policy learning.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\linewidth,]{ieeeconf/figure/ACDINO_cropped}
-\caption{\textbf{Proposed residual-guided policy learning}. The retained intent stream estimates a task-relevant latent forecast from the current observation and instruction. TRAIL subtracts the current latent state to obtain $\Delta_z$, balances the state and residual feature scales, then fuses them with proprioception for behavioral cloning.}
-\label{fig:acdino}
-\end{figure}
+TRAIL can be integrated with different downstream policy architectures through the same residual representation. For simulation benchmarks, e.g. Franka Kitchen and Meta-World, we concatenate $z_t$ and $\Delta_z$ with proprioception use them as input to an action decoder that outputs continuous control commands. For real-robot tabletop tasks, we reshape he patch tokens from both $z_t$ and $\Delta_z$ into spatial feature maps and fuse them to predict language-conditioned affordance maps~\cite{shridhar2022cliport}. Thus, the same pre-trained TRAIL representations can be used across different action spaces by adapting only the downstream readout.
 
 At deployment, the intent stream is executed at every control step in closed loop. Given the current image and instruction, the model predicts $\hat z^{\mathrm{int}}_{t+k}$ and computes $\Delta_z$, and then predicts an action. This process is repeated after each robot action, and the predictor is not rolled out over multiple future steps. 
 Note that, during pre-training, $k$ specifies the frame gap between $I_t$ and $I_{t+k}$ and does not determine the robot action frequency. The downstream policy instead learns the action timescale from labeled demonstrations.
 
 
-\CO{\textbf{[Could you rewrite this paragraph. I'm not sure if all the information below and really useful and appropriate here]}} The intent predictor outputs one future class token and a sequence of future patch tokens aligned one-to-one with the \CO{frozen DINOv3 teacher [?????]}. Hence, $\Delta_z$ in Eq.~\ref{eq:residual} is computed token-wise and retains spatial structure. This single output supports both action spaces we consider, with different read-outs. For \textit{1-D continuous control} that predicts joint angles or end-effector poses~\cite{assran2025v}, we concatenate the \texttt{[CLS]} residual with the current-state features and proprioception as input to a multi-layer perceptron policy. For \textit{2-D spatial-action policies} designed for vision-based affordance models (e.g.\ tabletop pick-and-place~\cite{shridhar2022cliport}), we reshape the patch residuals into a spatial map and fuse it with the policy's visual backbone via convolutional layers, providing an explicit prior on where and how to interact. In both cases the predictor is unchanged; only the read-out differs, which allows TRAIL to integrate with low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification.
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth,]{ieeeconf/figure/ACDINO_cropped}
+\caption{\textbf{Proposed residual-guided policy learning}. The retained intent stream estimates a task-relevant latent forecast from the current observation and instruction. TRAIL subtracts the current latent state to obtain $\Delta_z$, balances the state and residual feature scales, and then fuses them with proprioception for imitation learning.}
+\label{fig:acdino}
+\end{figure}
+
+
+
+

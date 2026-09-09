@@ -1,6 +1,7 @@
 \section{Experiments}
 \label{sec:experiments}
-We evaluate TRAIL through representation analysis, simulated control, real-robot manipulation, and ablation. We first inspect language grounding after human-video pre-training, then measure downstream control on Franka Kitchen, Meta-World MT10, and a physical UR5 setup, and finally isolate the contribution of the retained latent residual.
+We evaluate TRAIL through representation analysis (Sec.~\ref{sec:exp_visualization}), simulated control (Secs.~\ref{sec:exp_franka},~\ref{sec:exp_metaworld}), real-robot manipulation (Sec.~\ref{sec:real_robot_tabletop}), and ablation analysis (Sec.~\ref{sec:ablation}). 
+% We first evaluate language grounding after human-video pre-training, then measure downstream control on Franka Kitchen, Meta-World MT10, and a physical UR5 setup, and finally isolate the contribution of the retained latent residual.
 
 
 \subsection{Analysis of pre-trained representations}
@@ -66,23 +67,21 @@ Franka Kitchen evaluates five tasks that share a single kitchen scene and a comm
 \noindent\textbf{Setup.}
 We collect 100 expert demonstrations per task with the benchmark's scripted policies and train a single language-conditioned multi-task policy by offline behavioral cloning, with no reinforcement learning and no online interaction. As in Sec.~\ref{sec:exp_franka}, every backbone is kept frozen and only the action decoder is trained. All methods, including ours, use the identical pooled action decoder, so the only quantity that differs across rows of Table~\ref{tab:metaworld} is the representation supplied to it. We report mean closed-loop success over three random seeds, evaluating 50 episodes per task and seed. All methods use the same demonstration splits, random seeds, action decoder, camera and proprioceptive inputs, and evaluation configurations. The evaluation seeds are disjoint from all demonstration-collection seeds, preventing policies from being scored on object configurations seen during data collection.
 
-\noindent\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy consumes a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth channel and no frame stacking are used. Object positions are randomised by the benchmark at every reset, and the evaluation seeds control that randomisation.
+\noindent\textbf{Visual input.} We render the \texttt{corner2} third-person camera at $224\times224$. The policy receives a single RGB frame together with a $4$-dimensional proprioceptive state (end-effector position and gripper aperture), and no wrist camera, no depth channel and no frame stacking are used. Object positions are randomized by the benchmark at every reset, and the evaluation seeds control that randomization.
 
 \input{ieeeconf/tables/metaworld}
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.9\linewidth]{ieeeconf/figure/failure_stages.pdf}
+    \includegraphics[width=0.95\linewidth]{ieeeconf/figure/failure_stages.pdf}
     \vspace{-2pt}
 \caption{\textbf{Failure stages on Meta-World Push and Pick-Place.} Episodes are grouped by the furthest stage reached. Push has no grasp stage.}
     \label{fig:failure_stages}
 \end{figure}
 
-TRAIL reaches a \textbf{78.2\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (\textbf{40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' (\textbf{70.0\%} vs.\ at most 38.0\%).
+TRAIL reaches a {78.2\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' ({40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' ({70.0\%} vs.\ at most 38.0\%). Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
 
-Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
-
-These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorised opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the task-relevant residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
+These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorized opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the task-relevant residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
 
 The baseline ordering also differs from Franka Kitchen in an informative way. VC-1~\cite{majumdar2023we} (38.8\%), a masked-autoencoding model, transfers markedly worse than the contrastively pre-trained R3M despite a larger backbone. Under our frozen-backbone, shallow-decoder protocol, this result suggests that reconstruction-oriented features are less linearly separable for these control tasks.
 
@@ -103,11 +102,11 @@ abbreviation: P-unseen blocks denote Packing unseen blocks and P-unseen objects 
 We further validate TRAIL on a physical UR5 setup where language-conditioned control must handle object appearance shifts, clutter, and contact-rich motions.
 
 
-\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a wrist-mounted Intel RealSense camera observing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). The policy uses RGB images only; depth measurements are not used. We collect 200 language-annotated expert demonstrations and train each method under the same multi-task protocol, comparing TRAIL with CLIPort~\cite{shridhar2022cliport}, MPI~\cite{zeng2024learning}, and LaVA-Man~\cite{zhu2025lava} using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data and introduced only at evaluation time. We evaluate seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 15 independent evaluation trials.
+\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a wrist-mounted Intel RealSense camera observing a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). The policy uses RGB images only, and depth measurements are not used. We collect 200 language-annotated expert demonstrations and train each method under the same multi-task protocol, comparing TRAIL with CLIPort~\cite{shridhar2022cliport}, MPI~\cite{zeng2024learning}, and LaVA-Man~\cite{zhu2025lava} using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone. To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data and introduced only at evaluation time. We evaluate seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct 15 independent evaluation trials.
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.9\linewidth]{ieeeconf/figure/setup_cropped.pdf}
+    \includegraphics[width=0.95\linewidth]{ieeeconf/figure/setup_cropped.pdf}
     \caption{\textbf{Real-robot setup}. A wrist-mounted camera provides RGB observations for UR5. Depth is not used.}
     \label{fig:setup}
 \end{figure}
@@ -120,15 +119,15 @@ As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the bas
 
 \begin{figure}[t]  
     \centering
-    \includegraphics[width=0.9\linewidth]{ieeeconf/figure/aff_cropped.pdf}
+    \includegraphics[width=\linewidth]{ieeeconf/figure/aff_cropped.pdf}
 \caption{\textbf{Sampled affordance maps.} We visualize TRAIL's predicted affordance maps at the start and end stages of real-robot tabletop manipulation tasks. The responses follow the commanded object and target regions, providing qualitative evidence for language-conditioned spatial grounding.}
 \label{fig:affordance_maps}
 \end{figure}
 
 \subsection{Ablation study}
 \label{sec:ablation}
-A core contribution of TRAIL is to retain the intent stream instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction. We compare four variants of TRAIL based on the inputs provided to the downstream policy: \textit{Encoder-Only}, using only $z_t$, \textit{Predictor-Only}, using $\hat{z}^{\mathrm{int}}_{t+k}$ generated by the predictor, \textit{Absolute pair}, using both $z_t$ and $\hat{z}^{\mathrm{int}}_{t+k}$, and the \textit{Full model} $\pi(z_t, \Delta_z)$.
-%
+TRAIL keeps the intent stream instead of discarding the predictive head after pre-training~\cite{he2022masked, nair2022r3m}. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction. We compare four variants of TRAIL based on the inputs provided to the downstream policy: \textit{Encoder-Only}, using only $z_t$, \textit{Predictor-Only}, using $\hat{z}^{\mathrm{int}}_{t+k}$ generated by the predictor, \textit{Absolute pair}, using both $z_t$ and $\hat{z}^{\mathrm{int}}_{t+k}$, and the \textit{Full model} $\pi(z_t, \Delta_z)$.
+
 \input{ieeeconf/tables/abl}
-%
+
 Table~\ref{tab:ablation_residual} shows that future information is useful, but the residual form is the most effective way to expose it to the policy. On Franka Kitchen, \textit{Encoder-Only} reaches 74.5\% average success but remains weak on ``Open door'' (46.0\%) and ``Open microwave'' (56.3\%). Supplying only the predicted future state improves little on Franka (75.5\%), and giving the absolute pair $(z_t,\hat{z}^{\mathrm{int}}_{t+k})$ is still below the full residual representation (76.1\% vs.\ 81.2\%). The same pattern appears in the MT10 ablation column, where the full model obtains the best average among the four variants. These results show that the gain is not merely from adding a future feature, but from making the task-relevant transition $\Delta_z$ explicit so that the downstream decoder receives both the current state and a direction of task progress.
