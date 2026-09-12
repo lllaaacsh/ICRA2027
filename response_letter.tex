@@ -14,7 +14,8 @@
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
 \titlespacing*{\section}{0pt}{16pt}{6pt}
 
-\newcommand{\pending}[1]{\textcolor{red}{\textbf{[TO FILL: #1]}}}
+% Red marker for text that still needs the authors' confirmation.
+\newcommand{\pending}[1]{\textcolor{red}{\textbf{[CONFIRM: #1]}}}
 
 \newlist{qa}{enumerate}{1}
 \setlist[qa]{label=\textbf{\arabic*.}, leftmargin=2.2em, itemsep=8pt, topsep=6pt}
@@ -32,90 +33,148 @@
 
 \vspace{6pt}
 \noindent
-Please find enclosed the revised version of the manuscript ``Learning Task-Relevant Latent Residuals for Robot Manipulation'', previously submitted to IEEE/RSJ IROS 2026. We have substantially modified the manuscript and addressed the comments from the reviewers and the Associate Editor, including the following main changes:
+Please find enclosed the revised version of the manuscript ``Learning Task-Relevant Latent Residuals for Robot Manipulation'', previously submitted to IEEE/RSJ IROS 2026 (Submission \#2433). We thank the Associate Editor and the reviewers for their careful and constructive reading. The comments identified two genuine problems --- an unclear description of how the two prediction streams are coupled and which one survives pre-training, and an experimental section that was too thin to support the claims --- and both have driven substantial revisions. The main changes are:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=4pt]
-  \item \CO{\textbf{abc}.} The two streams are now presented as \emph{one} shared predictor evaluated under two memory-access conditions, with an explicit gradient-flow paragraph and a pre-training algorithm.
-  \item \CO{\textbf{abc}.} The stream retained at deployment is corrected, and a Deployment subsection
-        specifies the output structure, the read-outs, and the execution frequency.
-  \item \textbf{Additional simulation experiment:} Meta-World MT10 is added as a second simulation benchmark; Franka Kitchen and MT10 results are now averaged over three random seeds.
-  \item \CO{\textbf{abc}.} Figures 2 and 3 are redrawn; the related-work and introduction wording flagged by Reviewer 9 is revised.
+  \item \textbf{The asymmetric prediction mechanism is re-described.} The two streams are now
+        presented as \emph{one} shared predictor $P$ with shared future queries $Q$, evaluated
+        under two memory-access conditions (Eqs.~1--2), and the section closes with an explicit
+        statement of where gradients stop and which modules are frozen versus trainable
+        (Sec.~III-A).
+  \item \textbf{The stream retained at deployment is corrected.} It is the \emph{intent} stream,
+        not the full-information stream, that is kept after pre-training. Sec.~III-B now specifies
+        the output structure of the retained predictor, the read-outs used by the two policy
+        classes, and the closed-loop execution frequency.
+  \item \textbf{A second simulation benchmark.} Meta-World MT10 is added (Sec.~IV-C,
+        Table~III): ten heterogeneous tasks covered by a single language-conditioned policy
+        trained by offline behavioural cloning. Both simulation benchmarks are now averaged over
+        three random seeds, and the real-robot evaluation has been extended from 5 to 15 trials
+        per subtask.
+  \item \textbf{Experimental protocols are specified.} Camera, image resolution, proprioceptive
+        dimension, frame stacking, depth usage, object randomisation and the separation between
+        demonstration and evaluation seeds are now stated for each benchmark.
+  \item \textbf{Figures and wording.} The pre-training architecture figure has been redrawn with a
+        frozen/trainable legend, shared-weight markers, an explicit stop-gradient marker and the
+        two memory-access conditions drawn separately; the affordance visualisation has been
+        replaced; and the introduction's claim about discarded predictive decoders no longer
+        cites R3M as an instance of it.
 \end{itemize}
 
 \vspace{2pt}
 \noindent
-This Statement of Changes includes our point-by-point response to each comment of the associate editor and the reviewers. We also include a version of the paper with changes from the previous version highlighted at the end of this document.
+\textbf{A note on naming.} The method was called \emph{LARM} in the IROS submission and is called
+\emph{TRAIL} (\textbf{T}ask-\textbf{R}elevant residuals as an \textbf{A}ction prior for robot
+man\textbf{I}pu\textbf{L}ation) in this version; the title was shortened accordingly. The method
+itself is unchanged apart from the corrections described above. We use the new name throughout this
+letter.
 
-% In this letter, the references to the literature, figures and tables correspond to those in the revised manuscript, unless stated otherwise. 
+\vspace{2pt}
+\noindent
+This Statement of Changes includes our point-by-point response to each comment of the Associate
+Editor and the reviewers. Section, equation, figure and table numbers refer to the revised
+manuscript unless stated otherwise.
 
 % ------------------------------------------------------------------
 \section{Associate Editor}
 
-\begin{qa}
+% ------------------------------------------------------------------------------
+% INTENTIONALLY LEFT EMPTY FOR NOW -- to be written after the reviewer responses
+% are settled. The AE raised: (i) overall lack of clarity, (ii) no loss affecting
+% F_full depends on F_intent, (iii) the stop-gradient in Eq. 5 may be on the wrong
+% side, (iv) possible coupling through the text backbone.
+% ------------------------------------------------------------------------------
 
-\item \C{The main weakness is a lack of clarity.}
-\R{Section III has been reorganised into Overview, Latent Space, Language-Grounded
-Encoding, Asymmetric Prediction, Training Objective and Gradient Flow, Residual-Guided
-Policy Learning, and Deployment, so that the mechanics no longer have to be inferred.}
-
-\item \C{If $F_{\text{intent}}$ is discarded after training, no loss affecting
-$F_{\text{full}}$ depends on it, so the training loop is unclear.}
-\R{The two streams are not two networks. They are the same predictor $P$ with the same
-learned queries $Q$, evaluated with two different memory sets (Eqs.~1--2). All three
-losses therefore update the same shared parameters --- the language projection, the
-fusion module, $Q$, and $P$. This is stated in Sec.~III-E and shown in Algorithm~1.}
-
-\item \C{The stop-gradient in Eq.~5 may be on the wrong side.}
-\R{The reviewer's inference was correct given what the paper said; the error was in the
-sentence describing deployment, not in the equation. The full-information stream is the
-\emph{teacher} and the intent stream the \emph{student}, and it is the \emph{intent}
-stream that is retained at deployment. With that corrected, the stop-gradient belongs
-on the teacher side as written. Sec.~III-F and the Fig.~2 caption now state which
-stream survives pre-training.}
-
-\item \C{There may also be coupling via the text backbone.}
-\R{There is not: DistilBERT is frozen and used under no-grad, so it carries no gradient
-path. The coupling is entirely through the shared language projection, fusion module,
-queries, and predictor. This is now stated in Sec.~III-E and marked in Fig.~2.}
-
-
-
-\end{qa}
+\vspace{4pt}
+\noindent\textcolor{red}{\textbf{[To be completed.]}}
 
 % ------------------------------------------------------------------
 \section{Reviewer 8}
 
 \begin{qa}
 
-\item \C{Clarify the similarities, differences and advantages relative to latent action
-training, and explain how dynamics are learned without training latent actions.}
-\R{We have added Sec.~II-C, ``Relation to latent action models'', which discusses both
-references the reviewer gives, together with the earlier work they build on. In short: we
-do not learn an action variable at all. Latent action methods constrain the \emph{action}
-variable $u_t$ with an unsupervised bottleneck and then need an alignment stage to map
-$u_t$ to real commands; Trail instead constrains \emph{visual memory access}, and
-$\Delta_z$ is an observation-space residual consumed directly as policy conditioning.
-Dynamics are supervised by the future-latent prediction objective itself, so $\Delta_z$
-is the $k$-step transition the instruction implies; the downstream policy is trained
-with real action labels, so the residual only has to indicate where the scene should go,
-not which command produces it. We also state the cost: because $\Delta_z$ is not an
-action it cannot be rolled out for planning, which latent action models can do.}
+\item \C{This paper should clarify the similarities, differences, and advantages compared to
+latent action training. Prior works [1, 2] have utilised a latent action representation for policy
+training with action-free video datasets. However, this work does not train this latent
+information; how could this method make the model learn the dynamics information?}
+\R{We thank the reviewer for raising this comparison, which sharpens what our contribution is and
+is not.
 
-\item \C{Franka Kitchen is too simple; more simulation results are needed.}
-\R{We have added Meta-World MT10 (Sec.~IV-C, Table~II): ten tasks with distinct scenes,
-objects and motion primitives, covered by a \emph{single} language-conditioned policy
-trained by offline behavioural cloning. All backbones are frozen and every method uses
-the identical pooled action decoder, so the representation is the only variable. Results
-are averaged over three random seeds with 50 episodes per task and seed. Franka Kitchen
-is also now reported over three seeds and two viewpoints.}
+\emph{Where the capacity constraint is placed.} Latent action methods (LAPA~[1] and the
+inverse-dynamics/bottleneck line it builds on, and the AgiBot World generalist policy~[2]) infer an
+\emph{action} variable $u_t$ from an observation pair $(o_t,o_{t+k})$, force $u_t$ through a
+low-capacity bottleneck so that it retains the controllable part of the transition, and then
+require an alignment stage on action-labelled data to map $u_t$ onto real commands. TRAIL never
+introduces an action variable. The constraint is placed on \emph{visual memory access} instead: the
+intent stream retains the language-grounded class token and the contextualised language tokens but
+is denied the dense patch tokens (Eq.~2). Compression is forced by the capacity limit, and
+\emph{which} information survives compression is determined by the language grounding.
 
-\item \C{$k=96$ is too long a horizon for precise manipulation.}
-\R{$k$ is a pre-training gap over web video, not a control horizon. Kinetics-400 is
-stored at 25--30\,fps, so $k=96$ spans roughly 3--4 seconds of human activity; a much
-smaller gap makes consecutive frames near-identical under a frozen DINOv3 encoder and
-degenerates the target towards an identity map. At deployment the predictor is executed
-at \emph{every control step} and $\Delta_z$ is consumed as a direction, with magnitude
-and time scale absorbed by the action decoder. Clarified in Sec.~IV-A and Sec.~III-G.}
+\emph{How dynamics are learned without latent-action supervision.} The supervision is the
+future-prediction objective itself. The model must map the current observation and the instruction
+onto a frozen encoder's embedding of the frame $k$ steps later (Eqs.~3--4), so the quantity we
+extract, $\Delta_z=\hat z^{\mathrm{int}}_{t+k}-z_t$ (Eq.~7), \emph{is} the $k$-step transition that
+the instruction implies. TRAIL does not need to identify \emph{which command} produced that
+transition, because the downstream policy is trained with real action labels; the residual only has
+to indicate where the scene should go, not what to send to the controller. The ablation in
+Table~IV isolates exactly this: a policy given only the current state $z_t$ reaches 74.5\% on
+Franka Kitchen and 57.0\% on MT10, whereas the same policy given $(z_t,\Delta_z)$ reaches 81.2\%
+and 78.2\%, so the prediction objective demonstrably supplies dynamics information that the static
+embedding does not carry.
+
+\emph{The advantage, and the cost.} A latent action inferred from human hands in web video is
+defined relative to the human embodiment, and transferring it to a parallel-jaw gripper is exactly
+what the alignment stage has to absorb. A state residual carries no embodiment: it is a direction
+in a perceptual space shared by both, which is what allows TRAIL to pre-train on Kinetics-400 with
+no in-domain robot data at all and still transfer to a simulated Franka, a simulated Sawyer and a
+physical UR5 (Tables~I and~III, Fig.~6). The cost is equally explicit, and we state it rather than
+hide it: because $\Delta_z$ is not an action, it cannot be rolled out for planning or used as a
+policy target on its own, which latent action models can do. The two lines are therefore
+complementary --- TRAIL is a representation-side prior, not a substitute for a learned action
+space.
+
+\pending{whether this comparison is also added to the manuscript. The bibliography already contains
+LAPA, Genie, AgiBot World and the inverse-dynamics bottleneck work, but no section currently cites
+them; we recommend adding a short paragraph at the end of Sec.~II-B so that the reviewer's point is
+addressed in the paper and not only in this letter.}}
+
+\item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
+The authors should provide more simulation results.}
+\R{We agree, and we have added a second and considerably harder simulation benchmark. Sec.~IV-C
+and Table~III report Meta-World MT10: ten tasks with distinct scenes, objects and motion
+primitives, covered by a \emph{single} language-conditioned policy trained by offline behavioural
+cloning with no reinforcement learning and no online interaction. Every backbone is frozen and
+every method --- ours included --- uses the identical pooled action decoder, so the representation
+supplied to the decoder is the only quantity that varies across rows. We report mean success over
+three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits,
+seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
+methods; the evaluation seeds are disjoint from the demonstration-collection seeds. Franka Kitchen
+is now also reported over three random seeds and two viewpoints.
+
+TRAIL reaches 78.2\% against 70.0\% for the strongest baseline. We think the more informative
+observation is that the aggregate understates the effect: six of the ten tasks are at or near
+saturation for every usable representation and carry no discriminative signal, and essentially the
+whole gap comes from the two tasks in which the target object moves while the gripper approaches it
+--- Pick-Place (40.0\% versus at most 18.0\% for any baseline) and Push (70.0\% versus at most
+38.0\%). These are precisely the tasks in which the correct action depends on where the scene is
+going rather than only on where it currently is. Fig.~5 decomposes the failures of these two tasks
+by the furthest stage reached and shows that TRAIL reduces failures before object contact and
+shifts the remaining Pick-Place failures towards the later placement stage.}
+
+\item \C{The hyper-parameters are strange. It does not make sense to select $k=96$ to provide the
+target future state, since it is a long time for precise robotic manipulation tasks.}
+\R{This was a genuine ambiguity in our writing and we have fixed it. $k$ is a frame gap used when
+sampling pre-training pairs from web video; it is \emph{not} a control horizon, and no robot ever
+executes a 96-step open-loop motion. Kinetics-400 is stored at 25--30\,fps, so $k=96$ spans roughly
+3--4 seconds of human activity. A much smaller gap would make the two sampled frames nearly
+identical under the frozen DINOv3 target encoder, the transition would be dominated by encoding
+noise, and the prediction target would degenerate towards an identity map --- which is why the gap
+is chosen to be long rather than short.
+
+At deployment the time scale is set by the downstream policy, not by $k$. The retained intent
+stream is executed at \emph{every} control step in closed loop, $\Delta_z$ is consumed as a
+\emph{direction}, and its magnitude and time scale are absorbed by the action decoder, which learns
+the action time scale from the labelled demonstrations. Both points are now stated explicitly, in
+Sec.~IV-A where $k$ is introduced and in Sec.~III-B where deployment is described.}
 
 \end{qa}
 
@@ -124,79 +183,171 @@ and time scale absorbed by the action decoder. Clarified in Sec.~IV-A and Sec.~I
 
 \begin{qa}
 
-\item \C{The \texttt{[CLS]} notation is ambiguous about which modality it comes from.}
-\R{Sec.~III-B now states that \texttt{[CLS]} refers \emph{only} to the visual class
-token, and that the language encoder's special tokens are never used as separate inputs.
-The notation $v'_{\texttt{cls}}$, $v'_{1:N}$, $L'$ is used consistently thereafter.}
+\item \C{The notation around the \texttt{[CLS]} token is ambiguous. Section III-A refers to a
+\texttt{[CLS]} token without clearly specifying from which modality it originates. Eq.~(4) uses
+$V_{\mathrm{cls}}'$, which suggests the visual-side CLS token, but this should be stated
+explicitly, especially since the language encoder may also contain special tokens.}
+\R{The reviewer is right, and we have removed the ambiguity at its source by making the modality
+part of the symbol. Sec.~III-A now introduces the visual sequence as one class token
+$V_{\texttt{cls}}$ and $196$ patch tokens $V_{\texttt{patch}}$, and the instruction separately as
+the language-token sequence $L$; the primed forms $V'_{\texttt{cls}}$, $V'_{\texttt{patch}}$ and
+$L'$ denote the same quantities after bidirectional cross-attention. No unqualified
+``\texttt{[CLS]}'' remains in the text, and the language encoder's special tokens are never used as
+separate inputs to the predictor. The same symbols are used in Eqs.~1--2, in Fig.~2 and in the
+deployment description, so a reader can follow one token through the whole pipeline.}
 
-\item \C{It is unclear what output structure the retained predictor produces at control
-time, and how the \texttt{[CLS]} token used for 1-D control is obtained.}
-\R{The retained stream is the \emph{intent} stream (the earlier statement was
-incorrect). It emits one future class token and $N$ future patch tokens, aligned
-one-to-one with the frozen teacher, so Eq.~7 is applied token-wise and $\Delta_z$ keeps
-its spatial structure. 1-D control uses the class-token residual; 2-D spatial-action
-policies reshape the patch residuals into a spatial map. The predictor is identical in
-both cases; only the read-out differs (Sec.~III-G).}
+\item \C{The paper states that the intent predictor is discarded at deployment, while the
+full-information predictor is retained to produce $z_{t+1}$. However, it remains unclear what
+output structure this retained predictor produces during control. In particular, since Sec.~III-C
+uses a ``\texttt{[CLS]} residual'' for 1-D control, could the authors clarify how the
+\texttt{[CLS]} token is obtained at deployment?}
+\R{This comment exposed an error in the submitted manuscript, and we are grateful for it. The
+sentence was simply wrong: it is the \emph{intent} stream that is retained after pre-training, and
+the full-information stream that is discarded. The full-information stream exists only to provide
+the stopped consistency target during pre-training, which is also what makes the stop-gradient in
+Eq.~5 consistent (see the Associate Editor's related comment). Sec.~III-A, Sec.~III-B and the
+Fig.~2 caption now all state which stream survives.
 
-\item \C{Figure 2 is hard to follow: the text backbone is not marked frozen or
-trainable, and the information flow through the bidirectional attention is not shown.}
-\R{Figure~2 has been redrawn. Frozen modules (teacher, text backbone)
-are marked with snowflakes and all remaining modules are trained; the bidirectional
-fusion now shows its two directed updates; and the caption terminology
-(intent stream, full-information stream, stop-gradient, retained stream) appears in the
-figure itself.}
+On the output structure: the retained predictor emits the full future token sequence --- one future
+class token and $N=196$ future patch tokens --- aligned one-to-one with the frozen teacher's
+target, so the residual in Eq.~7 is formed \emph{token-wise} and keeps its spatial structure. The
+two policy classes then differ only in the read-out taken from that sequence, which Sec.~III-B now
+spells out: for the simulation benchmarks we concatenate $z_t$ and $\Delta_z$ with proprioception
+and feed an action decoder that outputs continuous commands, whereas for the real-robot tabletop
+tasks we reshape the patch tokens of $z_t$ and $\Delta_z$ into spatial feature maps and fuse them
+to predict language-conditioned affordance maps. Spatial resolution is available in both cases
+because the predictor emits $N{+}1$ tokens from $N{+}1$ learned queries; it is not decompressed
+from a single token.}
 
-\item \C{Eq.~(4) uses $V'_{\text{cls}}$ and $L'$, but the figure appears to feed only
-the CLS token.}
-\R{The figure and the equations now describe the same thing. The bottleneck is a
-\emph{memory-access} condition on a shared predictor: the full stream reads
-$[v'_{\texttt{cls}}, v'_{1:N}, L']$ and the intent stream reads $[v'_{\texttt{cls}}, L']$
-(Eqs.~1--2). Spatial resolution comes from the $N{+}1$ learned queries, not from
-decompressing the class token, so the bottlenecked stream still emits a patch-level
-forecast.}
+\item \C{Currently, Figure 2 is difficult to understand. The text backbone is not marked as either
+trainable or frozen, the figure lacks arrows indicating how information flows through the
+bidirectional attention modules, and the caption terminology does not appear in the figure.}
+\R{Figure~2 has been redrawn. It now carries an explicit legend with four entries --- frozen,
+shared weights, stop-gradient, and bidirectional cross-attention --- and every module is marked
+accordingly: the text backbone (DistilBERT) and the DINOv3 teacher carry snowflakes, and all
+remaining modules are trainable. The bidirectional fusion block is drawn as two directed updates,
+language$\,\to\,$visual and visual$\,\to\,$language, rather than as an undifferentiated box. The
+two predictor instances carry a shared-weights marker so that it is visually obvious they are one
+network, the stop-gradient is drawn as a red bar on the full-information output only, and the three
+losses $\mathcal{L}_{\mathrm{int}}$, $\mathcal{L}_{\mathrm{full}}$ and
+$\mathcal{L}_{\mathrm{cons}}$ are labelled on the arrows that carry them. The terminology used in
+the caption --- intent stream, full-information stream, stop-gradient, shared weights, GT latent
+--- now appears in the figure itself.}
 
-\item \C{The visual inputs and camera viewpoints are not specified in either setting.}
-\R{Added. Meta-World: the \texttt{corner2} third-person camera at $224\times224$, a
-single RGB frame plus a 4-D proprioceptive state, no wrist camera, no depth, no frame
-stacking (Sec.~IV-C). Real robot: a wrist-mounted Intel RealSense providing RGB only,
-depth unused (Sec.~IV-E and the Fig.~6 caption).}
+\item \C{According to Eq.~(4), $F_{\mathrm{intent}}$ uses $V'_{\mathrm{cls}}$ and $L'$, whereas the
+figure seems to suggest that it takes only the CLS token as input.}
+\R{The figure and the equations now describe the same object. The essential point, which the
+submitted version failed to make, is that the two streams are not two networks with different
+inputs but one shared predictor $P$ with shared future queries $Q$, evaluated under two
+\emph{memory-access} conditions:
+$\hat z^{\mathrm{full}}_{t+k}=P(Q\mid[V'_{\texttt{cls}},V'_{\texttt{patch}},L'])$ and
+$\hat z^{\mathrm{int}}_{t+k}=P(Q\mid[V'_{\texttt{cls}},L'])$ (Eqs.~1--2). Fig.~2 now draws the
+token chips entering each predictor explicitly --- two chips (class, language) into the intent
+predictor and three chips (class, patch, language) into the full predictor --- so the asymmetry
+that the equations state is the asymmetry the figure shows.}
 
-\item \C{How is occlusion handled in the real-robot setup?}
-\R{\pending{describe when the observation is taken relative to the motion --- e.g.\ the
-arm returns to a fixed observation pose before each decision, so the placement region is
-resolved from an unoccluded view --- and how occlusion-induced failures are counted.}}
+\item \C{In both simulation and real-world experiments, the visual inputs are not clearly
+specified. Based on Fig.~6 the real-robot setup appears to use a RealSense RGB-D camera mounted
+near the end effector, but the observations shown as ``Obs'' in Fig.~3 do not seem fully consistent
+with that viewpoint. Please clarify the image inputs and camera viewpoints used in both settings.}
+\R{We have added a full observation specification for each setting.
 
-\item \C{When and how often is the predictor executed during control?}
-\R{At every control step, in closed loop. The robot observes, encodes, runs the retained
-intent stream once, computes $\Delta_z$, and predicts an action; the cycle repeats after
-the robot moves. The predictor is never rolled out over multiple future steps and is
-never executed only once per episode (Sec.~III-G).}
+\emph{Meta-World} (Sec.~IV-C, paragraph ``Visual input''): the \texttt{corner2} third-person camera
+rendered at $224\times224$; the policy receives a single RGB frame together with a $4$-dimensional
+proprioceptive state (end-effector position and gripper aperture); no wrist camera, no depth
+channel and no frame stacking.
 
-\item \C{Scene initialisation is underspecified, and five trials per task are
-insufficient.}
-\R{For simulation we now report three random seeds with 50 episodes per task and seed,
-using evaluation seeds disjoint from all demonstration-collection seeds, and we state
-that object positions are randomised by the benchmark at every reset.
-\pending{real-robot protocol: how object positions and orientations are sampled, whether
-all methods see the same initial configurations, and the increased number of trials per
-task with confidence intervals.}}
+\emph{Franka Kitchen} (Sec.~IV-B): the benchmark's two standard viewpoints, with results averaged
+over both, under the same frozen-backbone behavioural-cloning protocol as all baselines.
 
-\item \C{Minor: the affordance visualisation in Fig.~3 looks odd.}
-\R{\pending{redraw: overlay the map on the RGB observation with a perceptually uniform
-colormap, add a colorbar and the instruction text, mark the argmax, and state the
-normalisation used.}}
+\emph{Real robot} (Sec.~IV-D and the Fig.~7 caption): a wrist-mounted Intel RealSense observing a
+$60\,\mathrm{cm}\times30\,\mathrm{cm}$ workspace. The policy uses RGB only; the depth stream is not
+used, and we have corrected the text, which previously described the sensor as ``RGB-D'' in a way
+that implied depth was an input.
 
-\item \C{Minor: citing R3M in support of ``existing models discard the predictive
-decoder'' is inappropriate.}
-\R{We agree and have rewritten the sentence. The introduction now separates the two
-cases: predictive decoders are removed before downstream learning in masked- and
-future-prediction pipelines, whereas objectives such as R3M's time-contrastive learning
-leave temporal information only implicitly inside a static embedding. R3M is no longer
-cited as an instance of discarding a decoder.}
+On the apparent inconsistency the reviewer noticed: \pending{the intended explanation is that the
+affordance figure shows the observation captured from the arm's fixed observation pose, to which
+the arm returns before each decision, so the ``Obs'' view and the wrist camera are the same sensor
+seen at a canonical pose rather than two different cameras. Please confirm this is the actual
+protocol before we state it.}}
 
-\item \C{The video demonstration is too fast; please indicate the playback speed.}
-\R{\pending{label each clip with its playback speed and state in the supplement which
-segments are real time.}}
+\item \C{The paper does not explain how occlusion is handled in the real-robot setup. If only a
+wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
+region after grasping, when the gripper or grasped object may block the workspace.}
+\R{\pending{this answer needs the authors' protocol details. The expected answer is that the policy
+is not asked to observe the workspace while holding an object: pick and place locations are both
+read off a single affordance prediction made from an unoccluded observation taken before the
+grasp, and the transport motion is executed without re-observation, so the gripper and the grasped
+object never occlude the region the policy is conditioned on. Please confirm this, state how many
+observations are taken per episode, and say whether any evaluated failures were attributed to
+occlusion.}}
+
+\item \C{The deployment-time role of the predictor is also unclear. It is unclear whether the
+predictor is run once at the beginning of an episode, periodically, or at every control step in a
+closed-loop manner.}
+\R{At every control step, in closed loop. Sec.~III-B now states the cycle explicitly: the robot
+observes, the frozen encoder and fusion module produce $z_t$, the retained intent stream produces
+$\hat z^{\mathrm{int}}_{t+k}$ once, the residual $\Delta_z$ is formed, the action decoder predicts
+an action, the robot moves, and the cycle repeats from the new observation. The predictor is never
+rolled out over multiple future steps and is never executed only once per episode, and the offset
+$k$ used in pre-training does not set the robot's action frequency. Fig.~1 (bottom) also draws the
+loop for this reason.}
+
+\item \C{The experimental protocol lacks important details on scene initialisation, and only five
+evaluation trials per task seem insufficient to convincingly demonstrate the effectiveness and
+robustness of the method.}
+\R{We accept both points and have addressed them with additional experiments rather than with
+qualifications.
+
+\emph{Trial counts.} In simulation, every reported number is now a mean over three random seeds
+with 50 closed-loop episodes per task and seed --- 150 episodes per task on MT10, and the Franka
+Kitchen numbers are likewise averaged over three seeds and two viewpoints. On the real robot we
+have tripled the evaluation from 5 to 15 independent trials per subtask, i.e.\ 105 trials per
+method across the seven subtasks. The conclusions are unchanged: TRAIL reaches 90\% overall against
+roughly 80\% for the strongest baseline, LaVA-Man (Fig.~6).
+
+\emph{Scene initialisation in simulation.} Object positions are randomised by the benchmark at
+every reset, and the evaluation seeds control that randomisation. Crucially, the evaluation seeds
+are disjoint from all demonstration-collection seeds, so no policy is scored on an object
+configuration it saw during data collection. All methods are given the same demonstration splits,
+the same seeds, the same camera and proprioceptive inputs, the same action decoder and the same
+evaluation configurations, so the comparison is paired.
+
+\emph{Scene initialisation on the real robot.} \pending{please state how object positions and
+orientations are sampled at the start of each trial (randomised by hand within the workspace, drawn
+from a fixed set of layouts, or fully fixed), and whether all four methods are evaluated on the
+same initial configurations. We would like to add one or two sentences to Sec.~IV-D.}}
+
+\item \C{Minor: the visualisation of the affordance in Fig.~3 looks weird and should be improved.}
+\R{The affordance figure has been replaced. It now shows the predicted affordance maps overlaid on
+the corresponding RGB observations at the start and end stages of the real-robot tabletop tasks,
+so that the reader can see the response follow the commanded object and then the commanded target
+region within a single episode rather than seeing an isolated heat map. The caption states what is
+being visualised and what it is evidence for --- language-conditioned spatial grounding --- rather
+than implying a quantitative claim.}
+
+\item \C{Minor: it may not be appropriate to include R3M as reference [2] in support of the claim
+that existing models discard the predictive decoder. R3M's dynamics learning is driven primarily by
+time-contrastive learning, so discarding its auxiliary head is not equivalent to discarding the
+dynamics information that predictive learning is intended to capture. The wording should be revised
+or the citation removed.}
+\R{We agree with the reviewer's distinction and have rewritten the sentence to make it. The
+introduction now separates the two cases explicitly: predictive decoders \emph{may be removed
+before downstream learning} in masked- and future-prediction pipelines (cited to MVP and masked
+visual pre-training), \emph{while} objectives such as time-contrastive learning (cited to R3M)
+leave temporal information only implicitly inside a static embedding. R3M is therefore no longer
+offered as an instance of discarding a decoder, but as an instance of the second, distinct
+situation --- which, as the reviewer notes, still leaves the downstream policy to recover that
+information. The sentence that follows states the resulting challenge in those terms: not how to
+learn future prediction, but how to retain the task-relevant part of it as an explicit policy
+input.}
+
+\item \C{The demonstration in the video is too fast. Also, are all of the demonstrations shown in
+real time? If not, it would be helpful to indicate the playback speed used for each one.}
+\R{\pending{the video has not yet been re-cut. Please confirm the playback rate of each clip so we
+can burn a per-clip speed label (e.g.\ ``$1\times$'', ``$2\times$'') into the corner of each
+segment, slow the fastest real-robot clips to at most $2\times$, and add a line to the supplementary
+material stating which segments are real time.}}
 
 \end{qa}
 
@@ -205,13 +356,22 @@ segments are real time.}}
 
 \begin{qa}
 
-\item \C{Positive assessment of the conceptual contribution and the experimental
-validation; no specific revisions requested.}
-\R{Thank you. We have kept this framing and strengthened its evidential basis: with
-three seeds on both simulation benchmarks, the residual variant is now the best of the
-four ablation arms on Franka Kitchen and on MT10 (Table~IV), so the claim that retaining
-the predictor and exposing the residual explicitly is what helps is supported on both
-benchmarks rather than one.}
+\item \C{The reviewer's assessment is positive on both the conceptual contribution --- retaining
+the predictor and computing explicit latent residuals rather than discarding the predictive decoder
+--- and the experimental validation, and requests no specific revisions.}
+\R{We thank the reviewer for this reading, which matches the contribution we intended to make. We
+have kept that framing and strengthened its evidential basis in three ways in response to the other
+reviewers. First, a second simulation benchmark: on Meta-World MT10 a single language-conditioned
+policy over ten heterogeneous tasks reaches 78.2\% with TRAIL against 70.0\% for the strongest
+baseline (Table~III), so the result is no longer carried by one benchmark. Second, all simulation
+numbers are now averaged over three random seeds, and the real-robot evaluation has been extended
+from 5 to 15 trials per subtask. Third, and most directly relevant to the mechanism the reviewer
+highlights, the ablation in Table~IV now covers both benchmarks and separates the two questions
+that were previously conflated: \emph{retaining} the predictor helps a great deal (Encoder-Only
+reaches 74.5\% on Franka Kitchen and 57.0\% on MT10, against 81.2\% and 78.2\% for the full model),
+and \emph{exposing it as a residual} is the most effective of the three ways of supplying the
+future --- ahead of the predicted future state alone (75.5\% / 77.0\%) and of the absolute pair
+(76.1\% / 76.0\%) on both benchmarks.}
 
 \end{qa}
 
