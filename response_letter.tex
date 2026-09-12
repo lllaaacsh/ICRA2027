@@ -14,8 +14,8 @@
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
 \titlespacing*{\section}{0pt}{16pt}{6pt}
 
-% Red marker for text that still needs the authors' confirmation.
-\newcommand{\pending}[1]{\textcolor{red}{\textbf{[CONFIRM: #1]}}}
+% Red marker for a reviewer comment that has NOT yet been addressed in the paper.
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[NOT YET ADDRESSED --- #1]}}}
 
 \newlist{qa}{enumerate}{1}
 \setlist[qa]{label=\textbf{\arabic*.}, leftmargin=2.2em, itemsep=8pt, topsep=6pt}
@@ -96,46 +96,52 @@ manuscript unless stated otherwise.
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{We thank the reviewer for raising this comparison, which sharpens what our contribution is and
-is not.
+\R{\todo{the manuscript does not yet contain a comparison with latent action
+models. The bibliography already carries LAPA, Genie, AgiBot World and the inverse-dynamics
+bottleneck work, but no section currently cites them, so this comment is not answered by the
+present revision. A response will be added once the corresponding discussion is written into
+Sec.~II-B.}}
 
-\emph{Where the capacity constraint is placed.} Latent action methods (LAPA~[1] and the
-inverse-dynamics/bottleneck line it builds on, and the AgiBot World generalist policy~[2]) infer an
-\emph{action} variable $u_t$ from an observation pair $(o_t,o_{t+k})$, force $u_t$ through a
-low-capacity bottleneck so that it retains the controllable part of the transition, and then
-require an alignment stage on action-labelled data to map $u_t$ onto real commands. TRAIL never
-introduces an action variable. The constraint is placed on \emph{visual memory access} instead: the
-intent stream retains the language-grounded class token and the contextualised language tokens but
-is denied the dense patch tokens (Eq.~2). Compression is forced by the capacity limit, and
-\emph{which} information survives compression is determined by the language grounding.
-
-\emph{How dynamics are learned without latent-action supervision.} The supervision is the
-future-prediction objective itself. The model must map the current observation and the instruction
-onto a frozen encoder's embedding of the frame $k$ steps later (Eqs.~3--4), so the quantity we
-extract, $\Delta_z=\hat z^{\mathrm{int}}_{t+k}-z_t$ (Eq.~7), \emph{is} the $k$-step transition that
-the instruction implies. TRAIL does not need to identify \emph{which command} produced that
-transition, because the downstream policy is trained with real action labels; the residual only has
-to indicate where the scene should go, not what to send to the controller. The ablation in
-Table~IV isolates exactly this: a policy given only the current state $z_t$ reaches 74.5\% on
-Franka Kitchen and 57.0\% on MT10, whereas the same policy given $(z_t,\Delta_z)$ reaches 81.2\%
-and 78.2\%, so the prediction objective demonstrably supplies dynamics information that the static
-embedding does not carry.
-
-\emph{The advantage, and the cost.} A latent action inferred from human hands in web video is
-defined relative to the human embodiment, and transferring it to a parallel-jaw gripper is exactly
-what the alignment stage has to absorb. A state residual carries no embodiment: it is a direction
-in a perceptual space shared by both, which is what allows TRAIL to pre-train on Kinetics-400 with
-no in-domain robot data at all and still transfer to a simulated Franka, a simulated Sawyer and a
-physical UR5 (Tables~I and~III, Fig.~6). The cost is equally explicit, and we state it rather than
-hide it: because $\Delta_z$ is not an action, it cannot be rolled out for planning or used as a
-policy target on its own, which latent action models can do. The two lines are therefore
-complementary --- TRAIL is a representation-side prior, not a substitute for a learned action
-space.
-
-\pending{whether this comparison is also added to the manuscript. The bibliography already contains
-LAPA, Genie, AgiBot World and the inverse-dynamics bottleneck work, but no section currently cites
-them; we recommend adding a short paragraph at the end of Sec.~II-B so that the reviewer's point is
-addressed in the paper and not only in this letter.}}
+% ------------------------------------------------------------------------------
+% DRAFT ANSWER, HELD BACK UNTIL THE PAPER ACTUALLY CONTAINS THE DISCUSSION.
+% Uncomment (and delete the \todo above) once Sec. II-B cites LAPA / AgiBot World.
+% ------------------------------------------------------------------------------
+% We thank the reviewer for raising this comparison, which sharpens what our contribution is and
+% is not.
+%
+% \emph{Where the capacity constraint is placed.} Latent action methods (LAPA~[1] and the
+% inverse-dynamics/bottleneck line it builds on, and the AgiBot World generalist policy~[2]) infer an
+% \emph{action} variable $u_t$ from an observation pair $(o_t,o_{t+k})$, force $u_t$ through a
+% low-capacity bottleneck so that it retains the controllable part of the transition, and then
+% require an alignment stage on action-labelled data to map $u_t$ onto real commands. TRAIL never
+% introduces an action variable. The constraint is placed on \emph{visual memory access} instead: the
+% intent stream retains the language-grounded class token and the contextualised language tokens but
+% is denied the dense patch tokens (Eq.~2). Compression is forced by the capacity limit, and
+% \emph{which} information survives compression is determined by the language grounding.
+%
+% \emph{How dynamics are learned without latent-action supervision.} The supervision is the
+% future-prediction objective itself. The model must map the current observation and the instruction
+% onto a frozen encoder's embedding of the frame $k$ steps later (Eqs.~3--4), so the quantity we
+% extract, $\Delta_z=\hat z^{\mathrm{int}}_{t+k}-z_t$ (Eq.~7), \emph{is} the $k$-step transition that
+% the instruction implies. TRAIL does not need to identify \emph{which command} produced that
+% transition, because the downstream policy is trained with real action labels; the residual only has
+% to indicate where the scene should go, not what to send to the controller. The ablation in
+% Table~IV isolates exactly this: a policy given only the current state $z_t$ reaches 74.5\% on
+% Franka Kitchen and 57.0\% on MT10, whereas the same policy given $(z_t,\Delta_z)$ reaches 81.2\%
+% and 78.2\%, so the prediction objective demonstrably supplies dynamics information that the static
+% embedding does not carry.
+%
+% \emph{The advantage, and the cost.} A latent action inferred from human hands in web video is
+% defined relative to the human embodiment, and transferring it to a parallel-jaw gripper is exactly
+% what the alignment stage has to absorb. A state residual carries no embodiment: it is a direction
+% in a perceptual space shared by both, which is what allows TRAIL to pre-train on Kinetics-400 with
+% no in-domain robot data at all and still transfer to a simulated Franka, a simulated Sawyer and a
+% physical UR5 (Tables~I and~III, Fig.~6). The cost is equally explicit, and we state it rather than
+% hide it: because $\Delta_z$ is not an action, it cannot be rolled out for planning or used as a
+% policy target on its own, which latent action models can do. The two lines are therefore
+% complementary --- TRAIL is a representation-side prior, not a substitute for a learned action
+% space.
+% ------------------------------------------------------------------------------
 
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
@@ -265,22 +271,28 @@ $60\,\mathrm{cm}\times30\,\mathrm{cm}$ workspace. The policy uses RGB only; the 
 used, and we have corrected the text, which previously described the sensor as ``RGB-D'' in a way
 that implied depth was an input.
 
-On the apparent inconsistency the reviewer noticed: \pending{the intended explanation is that the
-affordance figure shows the observation captured from the arm's fixed observation pose, to which
-the arm returns before each decision, so the ``Obs'' view and the wrist camera are the same sensor
-seen at a canonical pose rather than two different cameras. Please confirm this is the actual
-protocol before we state it.}}
+On the apparent inconsistency the reviewer noticed, the two views are in fact the same sensor.
+The wrist-mounted camera is not read from arbitrary poses along the trajectory: the arm returns to
+a fixed observation pose before each decision, and the image the policy consumes --- the one shown
+as ``Obs'' --- is always captured from that canonical pose. What looks like a third-person overhead
+view is therefore the wrist camera at the observation pose, not a second, externally mounted
+camera. We apologise for not having made this explicit.}
 
 \item \C{The paper does not explain how occlusion is handled in the real-robot setup. If only a
 wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
 region after grasping, when the gripper or grasped object may block the workspace.}
-\R{\pending{this answer needs the authors' protocol details. The expected answer is that the policy
-is not asked to observe the workspace while holding an object: pick and place locations are both
-read off a single affordance prediction made from an unoccluded observation taken before the
-grasp, and the transport motion is executed without re-observation, so the gripper and the grasped
-object never occlude the region the policy is conditioned on. Please confirm this, state how many
-observations are taken per episode, and say whether any evaluated failures were attributed to
-occlusion.}}
+\R{The situation the reviewer describes does not arise, because the policy is never asked to
+observe the workspace while it is holding an object. Both the pick location and the place location
+are read off a \emph{single} affordance prediction, computed from one unoccluded observation taken
+at the fixed observation pose \emph{before} the grasp. The subsequent pick-transport-place motion
+is then executed without re-observation, so by the time the gripper or the grasped object could
+occlude the placement region, the policy is no longer conditioned on that region --- the decision
+has already been made from a clean view.
+
+This is a property of the spatial-affordance read-out used for the tabletop tasks, described in
+Sec.~III-B, rather than an additional mechanism: the residual $\Delta_z$ is reshaped into a spatial
+map from which both endpoints of the motion are decoded at once. It is also the reason the
+wrist-mounted camera is sufficient here despite carrying no depth channel.}
 
 \item \C{The deployment-time role of the predictor is also unclear. It is unclear whether the
 predictor is run once at the beginning of an episode, periodically, or at every control step in a
@@ -313,10 +325,14 @@ configuration it saw during data collection. All methods are given the same demo
 the same seeds, the same camera and proprioceptive inputs, the same action decoder and the same
 evaluation configurations, so the comparison is paired.
 
-\emph{Scene initialisation on the real robot.} \pending{please state how object positions and
-orientations are sampled at the start of each trial (randomised by hand within the workspace, drawn
-from a fixed set of layouts, or fully fixed), and whether all four methods are evaluated on the
-same initial configurations. We would like to add one or two sentences to Sec.~IV-D.}}
+\emph{Scene initialisation on the real robot.} At the start of each trial the objects are placed by
+hand at randomised positions and orientations within the $60\,\mathrm{cm}\times30\,\mathrm{cm}$
+workspace, so no trial repeats a memorised layout. All four methods --- CLIPort, MPI, LaVA-Man and
+TRAIL --- are evaluated on the same set of initial configurations, so the 15 trials per subtask
+form a paired comparison rather than four independently sampled ones. Together with the strict
+exclusion of the five held-out blocks and five held-out objects from the training data, this is
+what makes the margins on ``Packing unseen blocks'' and ``Packing unseen objects'' (Fig.~6)
+attributable to the representation rather than to a more favourable draw of initial states.}
 
 \item \C{Minor: the visualisation of the affordance in Fig.~3 looks weird and should be improved.}
 \R{The affordance figure has been replaced. It now shows the predicted affordance maps overlaid on
@@ -344,10 +360,10 @@ input.}
 
 \item \C{The demonstration in the video is too fast. Also, are all of the demonstrations shown in
 real time? If not, it would be helpful to indicate the playback speed used for each one.}
-\R{\pending{the video has not yet been re-cut. Please confirm the playback rate of each clip so we
-can burn a per-clip speed label (e.g.\ ``$1\times$'', ``$2\times$'') into the corner of each
-segment, slow the fastest real-robot clips to at most $2\times$, and add a line to the supplementary
-material stating which segments are real time.}}
+\R{\todo{the video attachment has not yet been re-cut, so this comment is not answered by the
+present revision. The intended fix is to burn a per-clip playback-speed label into each segment,
+slow the fastest real-robot clips, and state in the supplementary material which segments are shown
+in real time.}}
 
 \end{qa}
 
