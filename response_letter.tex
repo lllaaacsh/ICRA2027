@@ -281,29 +281,52 @@ camera. We apologise for not having made this explicit.}
 \item \C{The paper does not explain how occlusion is handled in the real-robot setup. If only a
 wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
 region after grasping, when the gripper or grasped object may block the workspace.}
-\R{The situation the reviewer describes does not arise, because the policy is never asked to
-observe the workspace while it is holding an object. Both the pick location and the place location
-are read off a \emph{single} affordance prediction, computed from one unoccluded observation taken
-at the fixed observation pose \emph{before} the grasp. The subsequent pick-transport-place motion
-is then executed without re-observation, so by the time the gripper or the grasped object could
-occlude the placement region, the policy is no longer conditioned on that region --- the decision
-has already been made from a clean view.
+\R{The situation the reviewer describes does not arise, because on the tabletop tasks the policy
+is never asked to observe the workspace while an object is held.
 
-This is a property of the spatial-affordance read-out used for the tabletop tasks, described in
-Sec.~III-B, rather than an additional mechanism: the residual $\Delta_z$ is reshaped into a spatial
-map from which both endpoints of the motion are decoded at once. It is also the reason the
-wrist-mounted camera is sufficient here despite carrying no depth channel.}
+The action space there is a \emph{pick-and-place primitive} rather than a low-level command
+(Sec.~III-B: the tabletop read-out reshapes the patch tokens of $z_t$ and $\Delta_z$ into spatial
+maps and predicts language-conditioned affordance maps). One affordance prediction, computed from a
+single unoccluded observation taken at the fixed observation pose, yields \emph{both} endpoints of
+the motion --- where to pick and where to place. The approach, grasp, transport and release are
+then executed as one unit, with no observation taken in between. By the time the gripper or the
+grasped object could occlude the placement region, the decision that depends on that region has
+already been made from a clean view, so occlusion cannot corrupt the policy input.
+
+Tasks that require several primitives, such as stacking blocks, simply repeat this: the arm returns
+to the observation pose, a new --- again unoccluded --- observation is taken, and the next primitive
+is predicted from it. The loop is therefore closed at the granularity of primitives, and every
+observation the policy ever consumes is taken with the workspace unobstructed. This is the same
+mechanism described in our answer to comment~7 below, seen from the occlusion side.}
 
 \item \C{The deployment-time role of the predictor is also unclear. It is unclear whether the
 predictor is run once at the beginning of an episode, periodically, or at every control step in a
 closed-loop manner.}
-\R{At every control step, in closed loop. Sec.~III-B now states the cycle explicitly: the robot
-observes, the frozen encoder and fusion module produce $z_t$, the retained intent stream produces
-$\hat z^{\mathrm{int}}_{t+k}$ once, the residual $\Delta_z$ is formed, the action decoder predicts
-an action, the robot moves, and the cycle repeats from the new observation. The predictor is never
-rolled out over multiple future steps and is never executed only once per episode, and the offset
-$k$ used in pre-training does not set the robot's action frequency. Fig.~1 (bottom) also draws the
-loop for this reason.}
+\R{The predictor is executed once per \emph{policy decision}, always from a fresh observation, in
+closed loop. It is never rolled out over multiple future steps and never executed only once per
+episode. What we failed to make explicit, and what we now state here, is that a ``decision'' has a
+different granularity in the two action spaces TRAIL is evaluated in, because the two use different
+read-outs (Sec.~III-B):
+
+\begin{itemize}[leftmargin=1.4em,itemsep=3pt,topsep=4pt]
+  \item \emph{Simulation (Franka Kitchen, Meta-World).} The policy emits low-level continuous
+        commands, so one decision is one control step. The cycle --- observe, encode $z_t$, run the
+        retained intent stream once to get $\hat z^{\mathrm{int}}_{t+k}$, form $\Delta_z$, predict
+        an action, move --- runs at the environment's control frequency, and the predictor is
+        re-evaluated on every new observation.
+  \item \emph{Real robot.} The policy emits a pick-and-place primitive, so one decision is one
+        primitive. The arm sits at its fixed observation pose, one observation is encoded, the
+        intent stream runs once, and the resulting affordance prediction supplies both endpoints of
+        the motion; the primitive then executes without re-observation, after which the arm returns
+        to the observation pose and the next decision is made from a new observation. This is
+        precisely why the occlusion concern in comment~6 does not arise: no observation is ever
+        taken while an object is held.
+\end{itemize}
+
+In both cases the loop is closed on a fresh observation at every decision, the predictor is
+evaluated exactly once per decision, and the pre-training offset $k$ plays no role --- it does not
+set the robot's action frequency, which the downstream decoder learns from the labelled
+demonstrations. Fig.~1 (bottom) draws this loop.}
 
 \item \C{The experimental protocol lacks important details on scene initialisation, and only five
 evaluation trials per task seem insufficient to convincingly demonstrate the effectiveness and
