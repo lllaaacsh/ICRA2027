@@ -144,21 +144,9 @@ Sec.~II-B.}}
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
 \R{Thanks for your suggestion. We have conducted another experiment on a considerably harder simulation benchmark. Sec.~IV-C
-and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All the backbones were frozen including ours followed by the identical pooled action decoder, To validate theso the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over
-three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits,
-seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
-methods; the evaluation seeds are disjoint from the demonstration-collection seeds. Franka Kitchen
-is now also reported over three random seeds and two viewpoints.
+and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. To compare our learned representations with others, we freeze all the backbones including ours and added the identical pooled action decoder. We report mean success over three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits, seeds, camera and proprioceptive inputs and evaluation configurations that are shared across methods. Franka Kitchen is now also reported over three random seeds and two viewpoints.
 
-TRAIL reaches 78.2\% against 70.0\% for the strongest baseline. We think the more informative
-observation is that the aggregate understates the effect: six of the ten tasks are at or near
-saturation for every usable representation and carry no discriminative signal, and essentially the
-whole gap comes from the two tasks in which the target object moves while the gripper approaches it
---- Pick-Place (40.0\% versus at most 18.0\% for any baseline) and Push (70.0\% versus at most
-38.0\%). These are precisely the tasks in which the correct action depends on where the scene is
-going rather than only on where it currently is. Fig.~5 decomposes the failures of these two tasks
-by the furthest stage reached and shows that TRAIL reduces failures before object contact and
-shifts the remaining Pick-Place failures towards the later placement stage.}
+TRAIL reaches 78.2\% against 70.0\% for the strongest baseline on Meta-World MT10. More informative observation is that the aggregate understates the effect: six of the ten tasks are at or near saturation for every usable representation and carry no discriminative signal, and essentially the whole gap comes from the two tasks in which the target object moves while the gripper approaches it --- Pick-Place (40.0\% versus at most 18.0\% for any baseline) and Push (70.0\% versus at most 38.0\%). These are precisely the tasks in which the correct action depends on where the scene is going rather than only on where it currently is. Fig.~5 decomposes the failures of these two tasks by the furthest stage reached and shows that TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures towards the later placement stage.}
 
 \item \C{The hyper-parameters are strange. It does not make sense to select $k=96$ to provide the
 target future state, since it is a long time for precise robotic manipulation tasks.}
