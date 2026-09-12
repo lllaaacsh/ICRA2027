@@ -54,6 +54,9 @@ Please find enclosed the revised version of the manuscript ``Learning Task-Relev
   \item \textbf{Experimental protocols are specified.} Camera, image resolution, proprioceptive
         dimension, frame stacking, depth usage, object randomisation and the separation between
         demonstration and evaluation seeds are now stated for each benchmark.
+  \item \textbf{Relation to latent action models.} Sec.~II-B now contrasts TRAIL with latent action
+        pre-training, stating where the capacity constraint is placed in each, why a state residual
+        needs no latent-to-real action alignment, and what TRAIL gives up in exchange.
   \item \textbf{Figures and wording.} The pre-training architecture figure has been redrawn with a
         frozen/trainable legend, shared-weight markers, an explicit stop-gradient marker and the
         two memory-access conditions drawn separately; the affordance visualisation has been
@@ -97,49 +100,41 @@ manuscript unless stated otherwise.
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{\todo{the main text does not yet contain a comparison with latent action
-models. We shall add a few lines to Sec.~II-B to respond to this question.}}
+\R{We thank the reviewer for raising this comparison, which sharpens what our contribution is and
+is not. We have added a paragraph at the end of Sec.~II-B making the distinction explicit; it is
+marked in magenta in the revised manuscript.
 
-% ------------------------------------------------------------------------------
-% DRAFT ANSWER, HELD BACK UNTIL THE PAPER ACTUALLY CONTAINS THE DISCUSSION.
-% Uncomment (and delete the \todo above) once Sec. II-B cites LAPA / AgiBot World.
-% ------------------------------------------------------------------------------
-% We thank the reviewer for raising this comparison, which sharpens what our contribution is and
-% is not.
-%
-% \emph{Where the capacity constraint is placed.} Latent action methods (LAPA~[1] and the
-% inverse-dynamics/bottleneck line it builds on, and the AgiBot World generalist policy~[2]) infer an
-% \emph{action} variable $u_t$ from an observation pair $(o_t,o_{t+k})$, force $u_t$ through a
-% low-capacity bottleneck so that it retains the controllable part of the transition, and then
-% require an alignment stage on action-labelled data to map $u_t$ onto real commands. TRAIL never
-% introduces an action variable. The constraint is placed on \emph{visual memory access} instead: the
-% intent stream retains the language-grounded class token and the contextualised language tokens but
-% is denied the dense patch tokens (Eq.~2). Compression is forced by the capacity limit, and
-% \emph{which} information survives compression is determined by the language grounding.
-%
-% \emph{How dynamics are learned without latent-action supervision.} The supervision is the
-% future-prediction objective itself. The model must map the current observation and the instruction
-% onto a frozen encoder's embedding of the frame $k$ steps later (Eqs.~3--4), so the quantity we
-% extract, $\Delta_z=\hat z^{\mathrm{int}}_{t+k}-z_t$ (Eq.~7), \emph{is} the $k$-step transition that
-% the instruction implies. TRAIL does not need to identify \emph{which command} produced that
-% transition, because the downstream policy is trained with real action labels; the residual only has
-% to indicate where the scene should go, not what to send to the controller. The ablation in
-% Table~IV isolates exactly this: a policy given only the current state $z_t$ reaches 74.5\% on
-% Franka Kitchen and 57.0\% on MT10, whereas the same policy given $(z_t,\Delta_z)$ reaches 81.2\%
-% and 78.2\%, so the prediction objective demonstrably supplies dynamics information that the static
-% embedding does not carry.
-%
-% \emph{The advantage, and the cost.} A latent action inferred from human hands in web video is
-% defined relative to the human embodiment, and transferring it to a parallel-jaw gripper is exactly
-% what the alignment stage has to absorb. A state residual carries no embodiment: it is a direction
-% in a perceptual space shared by both, which is what allows TRAIL to pre-train on Kinetics-400 with
-% no in-domain robot data at all and still transfer to a simulated Franka, a simulated Sawyer and a
-% physical UR5 (Tables~I and~III, Fig.~6). The cost is equally explicit, and we state it rather than
-% hide it: because $\Delta_z$ is not an action, it cannot be rolled out for planning or used as a
-% policy target on its own, which latent action models can do. The two lines are therefore
-% complementary --- TRAIL is a representation-side prior, not a substitute for a learned action
-% space.
-% ------------------------------------------------------------------------------
+\emph{Where the capacity constraint is placed.} Latent action methods --- LAPA~[1], the
+inverse-dynamics/bottleneck line it builds on, and the AgiBot World generalist policy~[2] --- infer
+an \emph{action} variable $u_t$ from an observation pair, force it through a low-capacity
+bottleneck so that it retains the controllable part of the transition, and then require an
+alignment stage on action-labelled data to map $u_t$ onto real commands. TRAIL never introduces an
+action variable. The constraint is placed on \emph{visual memory access} instead: the intent stream
+retains the language-grounded class token and the contextualised language tokens but is denied the
+dense patch tokens (Eq.~2). Compression is forced by the capacity limit, and \emph{which}
+information survives it is determined by the language grounding.
+
+\emph{How dynamics are learned without latent-action supervision.} The supervision is the
+future-prediction objective itself. The model must map the current observation and the instruction
+onto a frozen encoder's embedding of the frame $k$ steps later (Eqs.~3--4), so the quantity we
+extract, $\Delta_z=\hat z^{\mathrm{int}}_{t+k}-z_t$ (Eq.~7), \emph{is} the $k$-step transition that
+the instruction implies. TRAIL does not need to identify \emph{which command} produced that
+transition, because the downstream policy is trained with real action labels; the residual only has
+to indicate where the scene should go, not what to send to the controller. Table~IV isolates this:
+a policy given only $z_t$ reaches 74.5\% on Franka Kitchen and 57.0\% on MT10, whereas the same
+policy given $(z_t,\Delta_z)$ reaches 81.2\% and 78.2\%, so the prediction objective demonstrably
+supplies dynamics information that the static embedding does not carry.
+
+\emph{The advantage, and the cost.} A latent action inferred from human hands in web video is
+defined relative to the human embodiment, and transferring it to a parallel-jaw gripper is exactly
+what the alignment stage has to absorb. A state residual carries no embodiment: it is a direction
+in a perceptual space shared by both, which is what allows TRAIL to pre-train on Kinetics-400 with
+no in-domain robot data at all and still transfer to a simulated Franka, a simulated Sawyer and a
+physical UR5 (Tables~I and~III, Fig.~6). The cost is equally explicit, and we state it in the paper
+rather than hide it: because $\Delta_z$ is not an action, it cannot be rolled out for planning or
+used as a policy target on its own, which latent action models can do. The two lines are therefore
+complementary --- TRAIL is a representation-side prior, not a substitute for a learned action
+space.}
 
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
