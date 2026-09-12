@@ -44,7 +44,8 @@ Please find enclosed the revised version of the manuscript ``Learning Task-Relev
   \item \textbf{The stream retained at deployment is corrected.} It is the \emph{intent} stream,
         not the full-information stream, that is kept after pre-training. Sec.~III-B now specifies
         the output structure of the retained predictor, the read-outs used by the two policy
-        classes, and the closed-loop execution frequency.
+        classes, and the closed-loop execution frequency --- including what counts as one control
+        step in each of the two action spaces.
   \item \textbf{A second simulation benchmark.} Meta-World MT10 is added (Sec.~IV-C,
         Table~III): ten heterogeneous tasks covered by a single language-conditioned policy
         trained by offline behavioural cloning. Both simulation benchmarks are now averaged over
@@ -96,9 +97,8 @@ manuscript unless stated otherwise.
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{\todo{the main text not yet contain a comparison with latent action
-models. We shall add few lines to responde this question.
-Sec.~II-B.}}
+\R{\todo{the main text does not yet contain a comparison with latent action
+models. We shall add a few lines to Sec.~II-B to respond to this question.}}
 
 % ------------------------------------------------------------------------------
 % DRAFT ANSWER, HELD BACK UNTIL THE PAPER ACTUALLY CONTAINS THE DISCUSSION.
@@ -144,7 +144,7 @@ Sec.~II-B.}}
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
 \R{Thanks for your suggestion. We have conducted another experiment on a considerably harder simulation benchmark. Sec.~IV-C
-and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All the backbones were frozen including ours followed by the identical pooled action decoder, To validate theso the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over
+and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All the backbones were frozen including ours followed by the identical pooled action decoder, so that the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over
 three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits,
 seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
 methods; the evaluation seeds are disjoint from the demonstration-collection seeds. Franka Kitchen
@@ -164,15 +164,18 @@ shifts the remaining Pick-Place failures towards the later placement stage.}
 target future state, since it is a long time for precise robotic manipulation tasks.}
 \R{This was a genuine ambiguity in our writing and we have fixed it. $k$ is a frame gap used when
 sampling pre-training pairs from web video; it is \emph{not} a control horizon, and no robot ever
-executes a 96-step open-loop motion as in \textit{“ Token Bottleneck: One
-token to remember dynamics "}. Kinetics-400 is stored at 25--30\,fps, so $k=96$ spans roughly
+executes a 96-step open-loop motion. The value follows the pre-training protocol of Token
+Bottleneck (ToBo), cited in the manuscript, which samples frame pairs at a comparable gap for the
+same reason.
+Kinetics-400 is stored at 25--30\,fps, so $k=96$ spans roughly
 3--4 seconds of human activity. A much smaller gap would make the two sampled frames nearly
 identical under the frozen DINOv3 target encoder, the transition would be dominated by encoding
 noise, and the prediction target would degenerate towards an identity map --- which is why the gap
 is chosen to be long rather than short.
 
 At deployment the time scale is set by the downstream policy, not by $k$. The retained intent
-stream is executed at \emph{every} control step in closed loop, $\Delta_z$ is consumed as a
+stream is executed once per policy decision in closed loop --- see our answer to Reviewer~9,
+comment~7, for what constitutes a decision in each action space --- $\Delta_z$ is consumed as a
 \emph{direction}, and its magnitude and time scale are absorbed by the action decoder, which learns
 the action time scale from the labelled demonstrations. Both points are now stated explicitly, in
 Sec.~IV-A where $k$ is introduced and in Sec.~III-B where deployment is described.}
@@ -279,11 +282,12 @@ region after grasping, when the gripper or grasped object may block the workspac
 \R{The situation the reviewer describes does not arise, because on the tabletop tasks the policy
 is never asked to observe the workspace while an object is held.
 
-The action space there is a \emph{pick-and-place primitive} rather than a low-level command
-(Sec.~III-B: the tabletop read-out reshapes the patch tokens of $z_t$ and $\Delta_z$ into spatial
-maps and predicts language-conditioned affordance maps). One affordance prediction, computed from a
-single unoccluded observation taken at the fixed observation pose, yields \emph{both} endpoints of
-the motion --- where to pick and where to place. The approach, grasp, transport and release are
+The action space there is a \emph{pick-and-place primitive} rather than a low-level command: the
+tabletop read-out reshapes the patch tokens of $z_t$ and $\Delta_z$ into spatial maps and predicts
+language-conditioned affordance maps, and Sec.~III-B now states explicitly that one decision in
+this setting is a complete primitive executed without re-observation. One affordance prediction,
+computed from a single unoccluded observation taken at the fixed observation pose, yields
+\emph{both} endpoints of the motion --- where to pick and where to place. The approach, grasp, transport and release are
 then executed as one unit, with no observation taken in between. By the time the gripper or the
 grasped object could occlude the placement region, the decision that depends on that region has
 already been made from a clean view, so occlusion cannot corrupt the policy input.
@@ -299,9 +303,10 @@ predictor is run once at the beginning of an episode, periodically, or at every 
 closed-loop manner.}
 \R{The predictor is executed once per \emph{policy decision}, always from a fresh observation, in
 closed loop. It is never rolled out over multiple future steps and never executed only once per
-episode. What we failed to make explicit, and what we now state here, is that a ``decision'' has a
-different granularity in the two action spaces TRAIL is evaluated in, because the two use different
-read-outs (Sec.~III-B):
+episode. What the submitted version failed to make explicit is that a ``decision'' has a different
+granularity in the two action spaces TRAIL is evaluated in, because the two use different
+read-outs. We have added this to the deployment paragraph of Sec.~III-B, which now states that a
+control step denotes one policy decision whose granularity follows the action space:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=3pt,topsep=4pt]
   \item \emph{Simulation (Franka Kitchen, Meta-World).} The policy emits low-level continuous
@@ -351,14 +356,6 @@ form a paired comparison rather than four independently sampled ones. Together w
 exclusion of the five held-out blocks and five held-out objects from the training data, this is
 what makes the margins on ``Packing unseen blocks'' and ``Packing unseen objects'' (Fig.~6)
 attributable to the representation rather than to a more favourable draw of initial states.}
-
-\item \C{Minor: the visualisation of the affordance in Fig.~3 looks weird and should be improved.}
-\R{The affordance figure has been replaced. It now shows the predicted affordance maps overlaid on
-the corresponding RGB observations at the start and end stages of the real-robot tabletop tasks,
-so that the reader can see the response follow the commanded object and then the commanded target
-region within a single episode rather than seeing an isolated heat map. The caption states what is
-being visualised and what it is evidence for --- language-conditioned spatial grounding --- rather
-than implying a quantitative claim.}
 
 \item \C{Minor: it may not be appropriate to include R3M as reference [2] in support of the claim
 that existing models discard the predictive decoder. R3M's dynamics learning is driven primarily by
