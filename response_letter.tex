@@ -96,10 +96,8 @@ manuscript unless stated otherwise.
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{\todo{the manuscript does not yet contain a comparison with latent action
-models. The bibliography already carries LAPA, Genie, AgiBot World and the inverse-dynamics
-bottleneck work, but no section currently cites them, so this comment is not answered by the
-present revision. A response will be added once the corresponding discussion is written into
+\R{\todo{the main text not yet contain a comparison with latent action
+models. We shall add few lines to responde this question.
 Sec.~II-B.}}
 
 % ------------------------------------------------------------------------------
@@ -145,12 +143,8 @@ Sec.~II-B.}}
 
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
-\R{We agree, and we have added a second and considerably harder simulation benchmark. Sec.~IV-C
-and Table~III report Meta-World MT10: ten tasks with distinct scenes, objects and motion
-primitives, covered by a \emph{single} language-conditioned policy trained by offline behavioural
-cloning with no reinforcement learning and no online interaction. Every backbone is frozen and
-every method --- ours included --- uses the identical pooled action decoder, so the representation
-supplied to the decoder is the only quantity that varies across rows. We report mean success over
+\R{Thanks for your suggestion. We have conducted another experiment on a considerably harder simulation benchmark. Sec.~IV-C
+and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All the backbones were frozen including ours followed by the identical pooled action decoder, To validate theso the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over
 three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits,
 seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
 methods; the evaluation seeds are disjoint from the demonstration-collection seeds. Franka Kitchen
@@ -170,7 +164,8 @@ shifts the remaining Pick-Place failures towards the later placement stage.}
 target future state, since it is a long time for precise robotic manipulation tasks.}
 \R{This was a genuine ambiguity in our writing and we have fixed it. $k$ is a frame gap used when
 sampling pre-training pairs from web video; it is \emph{not} a control horizon, and no robot ever
-executes a 96-step open-loop motion. Kinetics-400 is stored at 25--30\,fps, so $k=96$ spans roughly
+executes a 96-step open-loop motion as in \textit{“ Token Bottleneck: One
+token to remember dynamics "}. Kinetics-400 is stored at 25--30\,fps, so $k=96$ spans roughly
 3--4 seconds of human activity. A much smaller gap would make the two sampled frames nearly
 identical under the frozen DINOv3 target encoder, the transition would be dominated by encoding
 noise, and the prediction target would degenerate towards an identity map --- which is why the gap
