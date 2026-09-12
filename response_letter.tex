@@ -9,6 +9,7 @@
 \usepackage{amsmath}
 \usepackage{titlesec}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\newcommand{\CO}[1]{{\color{magenta}#1}}
 
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
 \titlespacing*{\section}{0pt}{16pt}{6pt}
@@ -25,34 +26,27 @@
 
 \begin{center}
 {\Large\bfseries Response to Reviewers}\\[4pt]
-{\normalsize Manuscript: \emph{Learning Task-Relevant Latent Residuals for Robot Manipulation}}\\[2pt]
-{\normalsize (previously submitted as \emph{LARM}, submission 2433; the method is now named \emph{Trail})}
+% {\normalsize Manuscript: \emph{Learning Task-Relevant Latent Residuals for Robot Manipulation}}\\[2pt]
+% {\normalsize (previously submitted to IEEE/RSJ IROS 2026 (Submission \#2433).}
 \end{center}
 
 \vspace{6pt}
 \noindent
-We thank the Associate Editor and the reviewers for their careful reading. The central
-criticism --- that the method could not be reconstructed from the text --- was well
-founded, and it led us to find a genuine inconsistency: the paper stated that the
-intent stream was discarded and the full-information stream retained, whereas the
-opposite is the case. The Method section has been rewritten around this correction.
-The main changes are:
+Please find enclosed the revised version of the manuscript ``Learning Task-Relevant Latent Residuals for Robot Manipulation'', previously submitted to IEEE/RSJ IROS 2026. We have substantially modified the manuscript and addressed the comments from the reviewers and the Associate Editor, including the following main changes:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=4pt]
-  \item The two streams are now presented as \emph{one} shared predictor evaluated
-        under two memory-access conditions, with an explicit gradient-flow paragraph
-        and a pre-training algorithm.
-  \item The stream retained at deployment is corrected, and a Deployment subsection
+  \item \CO{\textbf{abc}.} The two streams are now presented as \emph{one} shared predictor evaluated under two memory-access conditions, with an explicit gradient-flow paragraph and a pre-training algorithm.
+  \item \CO{\textbf{abc}.} The stream retained at deployment is corrected, and a Deployment subsection
         specifies the output structure, the read-outs, and the execution frequency.
-  \item Meta-World MT10 is added as a second simulation benchmark; Franka Kitchen and
-        MT10 results are now averaged over three random seeds.
-  \item Figures 2 and 3 are redrawn; the related-work and introduction wording flagged
-        by Reviewer 9 is revised.
+  \item \textbf{Additional simulation experiment:} Meta-World MT10 is added as a second simulation benchmark; Franka Kitchen and MT10 results are now averaged over three random seeds.
+  \item \CO{\textbf{abc}.} Figures 2 and 3 are redrawn; the related-work and introduction wording flagged by Reviewer 9 is revised.
 \end{itemize}
 
 \vspace{2pt}
 \noindent
-Below we list each comment with the corresponding revision.
+This Statement of Changes includes our point-by-point response to each comment of the associate editor and the reviewers. We also include a version of the paper with changes from the previous version highlighted at the end of this document.
+
+% In this letter, the references to the literature, figures and tables correspond to those in the revised manuscript, unless stated otherwise. 
 
 % ------------------------------------------------------------------
 \section{Associate Editor}

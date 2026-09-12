@@ -1,10 +1,9 @@
 \section{Experiments}
 \label{sec:experiments}
-We evaluate TRAIL through representation analysis (Sec.~\ref{sec:exp_visualization}), simulated control (Secs.~\ref{sec:exp_franka},~\ref{sec:exp_metaworld}), real-robot manipulation (Sec.~\ref{sec:real_robot_tabletop}), and ablation analysis (Sec.~\ref{sec:ablation}). 
-% We first evaluate language grounding after human-video pre-training, then measure downstream control on Franka Kitchen, Meta-World MT10, and a physical UR5 setup, and finally isolate the contribution of the retained latent residual.
+We evaluate TRAIL through qualitative analysis of the representations (Sec.~\ref{sec:exp_visualization}), simulated control (Secs.~\ref{sec:exp_franka},~\ref{sec:exp_metaworld}), real-robot manipulation (Sec.~\ref{sec:real_robot_tabletop}), and ablation analysis (Sec.~\ref{sec:ablation}). 
 
 
-\subsection{Analysis of pre-trained representations}
+\subsection{Pre-training and representation analysis}
 \label{sec:exp_visualization}
 We first validate whether TRAIL successfully learns to extract task-relevant dynamics during pre-training.
 
@@ -20,7 +19,8 @@ We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3} as our foundational visua
     \label{fig:vis_attn}
 \end{figure}
 
-Fig.~\ref{fig:vis_attn} shows qualitative samples for the visual-language grounding learned during pre-training. Given different language instructions, the bidirectional cross-attention concentrates on the manipulated object regions rather than uniformly covering the scene background. This visualization supports the role of language in selecting task-relevant visual evidence before latent future prediction.
+As shown in Fig.~\ref{fig:vis_attn}, the cross-attention maps concentrate on object regions associated with the corresponding instructions rather than being distributed uniformly over the scene background. This suggests that TRAIL learns to use language to select visual information relevant to future-state prediction, despite receiving no object-level supervision during pre-training. We next evaluate the learned representations
+on simulated and real-robot manipulation tasks.
 
 
 
@@ -111,7 +111,7 @@ We further validate TRAIL on a physical UR5 setup where language-conditioned con
     \label{fig:setup}
 \end{figure}
 
-As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate of 90\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$80\%), and well above CLIPort and MPI ($\sim$55\%). The strongest evidence appears in the held-out settings: TRAIL reaches 93\% success on ``Packing unseen objects'' (vs.\ 73\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). On the contact-rich ``Pushing piles'' task, TRAIL also reaches 80\%, substantially improves the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
+As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate of 90\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$80\%), and well above CLIPort and MPI ($\sim$55\%). The strongest evidence appears in the held-out settings: TRAIL reaches 93\% success on ``Packing unseen objects'' (vs.\ 73\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). In the contact-rich ``Pushing piles'' task, TRAIL also reaches 80\%, surpassing the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
 
 
 
