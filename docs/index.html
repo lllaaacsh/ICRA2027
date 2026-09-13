@@ -91,6 +91,15 @@
           Each task shows two evaluation trials; the counter gives TRAIL's successes over all 15 trials of that task.
         </p>
 
+        <figure class="figure-card setup-figure">
+          <a href="assets/real-robot-setup.jpg" target="_blank" rel="noopener" aria-label="Open real-robot setup at full resolution">
+            <img loading="lazy" decoding="async" src="assets/real-robot-setup.jpg" width="1600" height="794" alt="UR5 arm with gripper and wrist-mounted RealSense camera, and all objects used in the real-robot experiments.">
+          </a>
+          <figcaption>
+            UR5 with a wrist-mounted RealSense (RGB only; depth is not used), and every object used in the real-robot experiments.
+          </figcaption>
+        </figure>
+
         <h3 class="group-title">Seen objects</h3>
         <div class="task-panels">
           <article class="task-panel">
@@ -119,30 +128,12 @@
             </div>
             <footer class="success-count"><b>13</b>/15 successes</footer>
           </article>
-
-          <article class="task-panel">
-            <header><h4><span class="task-no">4</span>Pushing piles</h4><span class="speed-badge">▶▶ 1.75×</span></header>
-            <div class="trial-row">
-              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 1"><source src="assets/videos/trail-real-pushing-piles-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
-              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 2"><source src="assets/videos/trail-real-pushing-piles-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
-            </div>
-            <footer class="success-count"><b>12</b>/15 successes</footer>
-          </article>
-
-          <article class="task-panel">
-            <header><h4><span class="task-no">5</span>Pressing buttons</h4><span class="speed-badge">▶▶ 1.75×</span></header>
-            <div class="trial-row">
-              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 1"><source src="assets/videos/trail-real-pressing-buttons-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
-              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 2"><source src="assets/videos/trail-real-pressing-buttons-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
-            </div>
-            <footer class="success-count"><b>15</b>/15 successes</footer>
-          </article>
         </div>
 
-        <h3 class="group-title">Held-out objects <span class="group-note">never seen during training</span></h3>
-        <div class="task-panels task-panels-two">
+        <h3 class="group-title">Held-out objects <span class="group-note">objects never seen during training</span></h3>
+        <div class="task-panels">
           <article class="task-panel task-panel-heldout">
-            <header><h4><span class="task-no">6</span>Packing unseen blocks</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <header><h4><span class="task-no">4</span>Packing unseen blocks</h4><span class="speed-badge">▶▶ 1.75×</span></header>
             <div class="trial-row">
               <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen blocks, trial 1"><source src="assets/videos/trail-real-packing-unseen-blocks-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
               <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen blocks, trial 2"><source src="assets/videos/trail-real-packing-unseen-blocks-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
@@ -151,12 +142,33 @@
           </article>
 
           <article class="task-panel task-panel-heldout">
-            <header><h4><span class="task-no">7</span>Packing unseen objects</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <header><h4><span class="task-no">5</span>Packing unseen objects</h4><span class="speed-badge">▶▶ 1.75×</span></header>
             <div class="trial-row">
               <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen objects, trial 1"><source src="assets/videos/trail-real-packing-unseen-objects-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
               <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen objects, trial 2"><source src="assets/videos/trail-real-packing-unseen-objects-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
             </div>
             <footer class="success-count"><b>14</b>/15 successes</footer>
+          </article>
+        </div>
+
+        <h3 class="group-title">Unseen tasks <span class="group-note">tasks never demonstrated during training</span></h3>
+        <div class="task-panels">
+          <article class="task-panel task-panel-unseen">
+            <header><h4><span class="task-no">6</span>Pushing piles</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 1"><source src="assets/videos/trail-real-pushing-piles-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 2"><source src="assets/videos/trail-real-pushing-piles-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>12</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel task-panel-unseen">
+            <header><h4><span class="task-no">7</span>Pressing buttons</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 1"><source src="assets/videos/trail-real-pressing-buttons-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 2"><source src="assets/videos/trail-real-pressing-buttons-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>15</b>/15 successes</footer>
           </article>
         </div>
       </div>
