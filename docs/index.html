@@ -8,7 +8,7 @@
   <meta property="og:title" content="TRAIL: Learning Task-Relevant Latent Residuals for Robot Manipulation">
   <meta property="og:description" content="Task-relevant residuals as an action prior for robot manipulation.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/teaser.png">
+  <meta property="og:image" content="assets/videos/teaser-wall-poster.jpg">
   <title>TRAIL: Learning Task-Relevant Latent Residuals for Robot Manipulation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,393 +30,221 @@
           <strong>T</strong>ask-<strong>R</strong>elevant residuals as an
           <strong>A</strong>ction prior for robot man<strong>I</strong>pu<strong>L</strong>ation
         </p>
-
-        <div class="publication-authors" aria-label="Authors">
-          <span>Anonymous Authors</span>
-        </div>
+        <div class="publication-authors" aria-label="Authors"><span>Anonymous Authors</span></div>
         <div class="publication-venue">Anonymous submission</div>
 
-        <div class="publication-links" aria-label="Page sections">
-          <a class="button" href="#abstract">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 11h6M9 15h6"/></svg>
-            <span>Abstract</span>
+        <nav class="publication-links" aria-label="Page sections">
+          <a class="button" href="#real-robot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+            <span>Real-robot rollouts</span>
+          </a>
+          <a class="button" href="#simulation">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4zM8 20h8M12 16v4"/></svg>
+            <span>Simulation rollouts</span>
+          </a>
+          <a class="button" href="#results">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+            <span>Results</span>
           </a>
           <a class="button" href="#method">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 11l7-4M8.5 13l7 4"/></svg>
             <span>Method</span>
           </a>
-          <a class="button" href="#experiments">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
-            <span>Experiments</span>
-          </a>
-          <a class="button" href="#videos">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
-            <span>Videos</span>
-          </a>
+        </nav>
+      </div>
+    </section>
+
+    <section class="teaser-wall-section" aria-label="Rollout overview">
+      <div class="container-wide">
+        <div class="teaser-wall">
+          <video class="teaser-wall-video" autoplay muted loop playsinline preload="auto"
+                 poster="assets/videos/teaser-wall-poster.jpg"
+                 aria-label="Wall of TRAIL rollouts on a physical UR5, Franka Kitchen and Meta-World, zooming out from two real-robot trials">
+            <source src="assets/videos/teaser-wall.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="speed-legend" aria-label="Playback speeds">
+          <span class="legend-label">Playback speed</span>
+          <span class="legend-item"><i class="dot dot-real"></i>Physical UR5 <b>1.75×</b></span>
+          <span class="legend-item"><i class="dot dot-franka"></i>Franka Kitchen <b>1×</b></span>
+          <span class="legend-item"><i class="dot dot-mw"></i>Meta-World <b>0.5×</b></span>
         </div>
       </div>
     </section>
 
-    <section class="section teaser-section">
-      <div class="container container-wide">
-        <figure class="figure-card teaser-figure">
-          <a href="assets/teaser.png" target="_blank" rel="noopener" aria-label="Open overview figure at full resolution">
-            <img src="assets/teaser.png" width="1340" height="807" alt="Comparison of a policy using only static current-state features and TRAIL using a task-relevant residual learned from action-free human videos.">
-          </a>
-          <figcaption>
-            <strong>Figure 1. Overview.</strong>
-            Static visual representations provide only the current state, leaving the policy to infer task-relevant changes from demonstrations. TRAIL retains its intent predictor and supplies the explicit latent residual <span class="math">Δz</span> as closed-loop policy context.
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="section section-alt" id="abstract">
+    <section class="section tldr-section">
       <div class="container container-text">
-        <h2 class="section-title">Abstract</h2>
-        <div class="abstract-box">
-          <p>
-            Learning language-conditioned robot manipulation policies requires representations that capture not only the current scene but also how it changes under task instructions. While general-purpose visual representations have improved robotic perception, they are mainly focused on encoding static scenes and provide limited guidance on the temporal dynamics relevant to robotic actions.
-          </p>
-          <p>
-            We propose a self-supervised framework that extracts task-relevant temporal dynamics as latent residuals that provide a clear and direct target for the robot actions. They are learned through an information-access bottleneck: a single future predictor is run both with and without direct access to dense patch tokens, and the intent stream is distilled from the full-information stream so that prediction emphasizes changes associated with the instruction.
-          </p>
-          <p>
-            During policy learning, our method bridges the gap between pre-training and deployment by retaining the predictive module to compute an explicit latent residual between the current observation and the predicted future state. This lightweight, control-oriented signal highlights the necessary actions directly and hence simplifies the policy learning process. Experiments on two simulation benchmarks and seven real-robot tasks demonstrate that these latent residuals serve as an effective prior for policy learning.
-          </p>
+        <p class="tldr">
+          <span class="tldr-tag">TL;DR</span>
+          TRAIL pre-trains only on action-free human videos, keeps its future predictor after pre-training,
+          and hands the policy the predicted <em>change</em> <span class="math">Δz</span> rather than a static
+          scene embedding. Every clip on this page is a closed-loop TRAIL policy; speeds are labelled on each video.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= REAL ROBOT ================= -->
+    <section class="section section-alt" id="real-robot">
+      <div class="container container-wide">
+        <h2 class="section-title">Real-robot rollouts</h2>
+        <p class="section-intro">
+          One language-conditioned policy on a physical UR5 with a wrist-mounted RGB camera, trained on 200 demonstrations.
+          Each task shows two evaluation trials; the counter gives TRAIL's successes over all 15 trials of that task.
+        </p>
+
+        <h3 class="group-title">Seen objects</h3>
+        <div class="task-panels">
+          <article class="task-panel">
+            <header><h4><span class="task-no">1</span>Stacking blocks</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Stacking blocks, trial 1"><source src="assets/videos/trail-real-stacking-blocks-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Stacking blocks, trial 2"><source src="assets/videos/trail-real-stacking-blocks-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>14</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel">
+            <header><h4><span class="task-no">2</span>Packing blocks</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing blocks, trial 1"><source src="assets/videos/trail-real-packing-blocks-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing blocks, trial 2"><source src="assets/videos/trail-real-packing-blocks-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>15</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel">
+            <header><h4><span class="task-no">3</span>Packing objects</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing objects, trial 1"><source src="assets/videos/trail-real-packing-objects-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing objects, trial 2"><source src="assets/videos/trail-real-packing-objects-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>13</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel">
+            <header><h4><span class="task-no">4</span>Pushing piles</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 1"><source src="assets/videos/trail-real-pushing-piles-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pushing piles, trial 2"><source src="assets/videos/trail-real-pushing-piles-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>12</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel">
+            <header><h4><span class="task-no">5</span>Pressing buttons</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 1"><source src="assets/videos/trail-real-pressing-buttons-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pressing buttons, trial 2"><source src="assets/videos/trail-real-pressing-buttons-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>15</b>/15 successes</footer>
+          </article>
+        </div>
+
+        <h3 class="group-title">Held-out objects <span class="group-note">never seen during training</span></h3>
+        <div class="task-panels task-panels-two">
+          <article class="task-panel task-panel-heldout">
+            <header><h4><span class="task-no">6</span>Packing unseen blocks</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen blocks, trial 1"><source src="assets/videos/trail-real-packing-unseen-blocks-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen blocks, trial 2"><source src="assets/videos/trail-real-packing-unseen-blocks-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>12</b>/15 successes</footer>
+          </article>
+
+          <article class="task-panel task-panel-heldout">
+            <header><h4><span class="task-no">7</span>Packing unseen objects</h4><span class="speed-badge">▶▶ 1.75×</span></header>
+            <div class="trial-row">
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen objects, trial 1"><source src="assets/videos/trail-real-packing-unseen-objects-trial1.mp4" type="video/mp4"></video></div><figcaption>Trial 1</figcaption></figure>
+              <figure class="trial"><div class="trial-video"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Packing unseen objects, trial 2"><source src="assets/videos/trail-real-packing-unseen-objects-trial2.mp4" type="video/mp4"></video></div><figcaption>Trial 2</figcaption></figure>
+            </div>
+            <footer class="success-count"><b>14</b>/15 successes</footer>
+          </article>
         </div>
       </div>
     </section>
 
+    <!-- ================= SIMULATION ================= -->
+    <section class="section" id="simulation">
+      <div class="container container-wide">
+        <h2 class="section-title">Simulation rollouts</h2>
+
+        <div class="sim-block">
+          <div class="sim-head">
+            <h3>Franka Kitchen <span class="group-note">left and right camera views of the same task</span></h3>
+            <span class="speed-badge">▶▶ 1×</span>
+          </div>
+          <div class="franka-grid">
+            <figure class="franka-task"><div class="view-pair"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Turn knob, left view"><source src="assets/videos/trail-franka-turn-knob-left.mp4" type="video/mp4"></video><video muted loop playsinline preload="metadata" data-autoplay aria-label="Turn knob, right view"><source src="assets/videos/trail-franka-turn-knob-right.mp4" type="video/mp4"></video></div><figcaption>Turn knob</figcaption></figure>
+            <figure class="franka-task"><div class="view-pair"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Open door, left view"><source src="assets/videos/trail-franka-open-door-left.mp4" type="video/mp4"></video><video muted loop playsinline preload="metadata" data-autoplay aria-label="Open door, right view"><source src="assets/videos/trail-franka-open-door-right.mp4" type="video/mp4"></video></div><figcaption>Open door</figcaption></figure>
+            <figure class="franka-task"><div class="view-pair"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Flip switch, left view"><source src="assets/videos/trail-franka-flip-switch-left.mp4" type="video/mp4"></video><video muted loop playsinline preload="metadata" data-autoplay aria-label="Flip switch, right view"><source src="assets/videos/trail-franka-flip-switch-right.mp4" type="video/mp4"></video></div><figcaption>Flip switch</figcaption></figure>
+            <figure class="franka-task"><div class="view-pair"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Open microwave, left view"><source src="assets/videos/trail-franka-open-microwave-left.mp4" type="video/mp4"></video><video muted loop playsinline preload="metadata" data-autoplay aria-label="Open microwave, right view"><source src="assets/videos/trail-franka-open-microwave-right.mp4" type="video/mp4"></video></div><figcaption>Open microwave</figcaption></figure>
+            <figure class="franka-task"><div class="view-pair"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Slide door, left view"><source src="assets/videos/trail-franka-slide-door-left.mp4" type="video/mp4"></video><video muted loop playsinline preload="metadata" data-autoplay aria-label="Slide door, right view"><source src="assets/videos/trail-franka-slide-door-right.mp4" type="video/mp4"></video></div><figcaption>Slide door</figcaption></figure>
+          </div>
+        </div>
+
+        <div class="sim-block">
+          <div class="sim-head">
+            <h3>Meta-World MT10 <span class="group-note">one policy for all ten tasks</span></h3>
+            <span class="speed-badge">▶▶ 0.5×</span>
+          </div>
+          <div class="mw-grid">
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Reach"><source src="assets/videos/trail-metaworld-reach.mp4" type="video/mp4"></video><figcaption>Reach</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Push"><source src="assets/videos/trail-metaworld-push.mp4" type="video/mp4"></video><figcaption>Push</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Pick and place"><source src="assets/videos/trail-metaworld-pick-place.mp4" type="video/mp4"></video><figcaption>Pick-Place</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Door open"><source src="assets/videos/trail-metaworld-door-open.mp4" type="video/mp4"></video><figcaption>Door open</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Drawer open"><source src="assets/videos/trail-metaworld-drawer-open.mp4" type="video/mp4"></video><figcaption>Drawer open</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Drawer close"><source src="assets/videos/trail-metaworld-drawer-close.mp4" type="video/mp4"></video><figcaption>Drawer close</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Button press"><source src="assets/videos/trail-metaworld-button-press.mp4" type="video/mp4"></video><figcaption>Button press</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Peg insert"><source src="assets/videos/trail-metaworld-peg-insert.mp4" type="video/mp4"></video><figcaption>Peg insert</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Window open"><source src="assets/videos/trail-metaworld-window-open.mp4" type="video/mp4"></video><figcaption>Window open</figcaption></figure>
+            <figure class="mw-task"><video muted loop playsinline preload="metadata" data-autoplay aria-label="Window close"><source src="assets/videos/trail-metaworld-window-close.mp4" type="video/mp4"></video><figcaption>Window close</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RESULTS AT A GLANCE ================= -->
+    <section class="section section-alt" id="results">
+      <div class="container">
+        <h2 class="section-title">Results at a glance</h2>
+        <p class="section-intro">Average success rate against the strongest baseline in each setting. Full tables are in the paper.</p>
+        <div class="stat-cards">
+          <article class="stat-card">
+            <h3>Physical UR5</h3>
+            <div class="stat-main"><strong>90</strong><span>%</span></div>
+            <div class="stat-vs">vs 79% LaVA-Man</div>
+            <p>7 tasks · 15 trials each · 105 trials per method</p>
+          </article>
+          <article class="stat-card">
+            <h3>Meta-World MT10</h3>
+            <div class="stat-main"><strong>78.2</strong><span>%</span></div>
+            <div class="stat-vs">vs 70.0% R3M</div>
+            <p>10 tasks · 3 seeds · 50 episodes per task and seed</p>
+          </article>
+          <article class="stat-card">
+            <h3>Franka Kitchen</h3>
+            <div class="stat-main"><strong>81.2</strong><span>%</span></div>
+            <div class="stat-vs">vs 79.2% LaVA-Man</div>
+            <p>5 tasks · 2 viewpoints · 3 seeds</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= METHOD ================= -->
     <section class="section" id="method">
       <div class="container">
-        <h2 class="section-title">Methodology</h2>
-        <p class="section-intro">
-          TRAIL learns a task-relevant latent change predictor from action-free human videos and retains the predictor to provide an explicit transition direction to downstream policies.
-        </p>
-
+        <h2 class="section-title">Method in one figure</h2>
         <figure class="figure-card method-figure">
           <a href="assets/method.png" target="_blank" rel="noopener" aria-label="Open method figure at full resolution">
-            <img loading="lazy" decoding="async" src="assets/method.png" width="2463" height="762" alt="TRAIL pre-training architecture with frozen visual and language encoders, bidirectional cross-attention, asymmetric intent and full prediction streams, and future latent supervision.">
+            <img loading="lazy" decoding="async" src="assets/method.png" width="2463" height="762" alt="TRAIL pre-training: a shared predictor runs with and without dense patch tokens; the restricted intent stream is kept for the policy.">
           </a>
           <figcaption>
-            <strong>Figure 2. TRAIL pre-training architecture.</strong>
-            Frozen DINOv3 and DistilBERT encoders produce visual and language tokens. A shared predictor is evaluated with full dense visual access and with a constrained intent stream; both predict the frozen future latent target, while consistency distillation transfers the full-information forecast to the intent stream.
+            One predictor runs twice: with dense patch tokens (full stream) and without them (intent stream).
+            Only the intent stream is kept, and the policy receives <span class="math">z<sub>t</sub></span> together with
+            <span class="math">Δz = ẑ<sup>int</sup><sub>t+k</sub> − z<sub>t</sub></span>.
           </figcaption>
         </figure>
-
-        <div class="method-grid">
-          <article class="method-box method-box-blue">
-            <span class="step-number">01</span>
-            <h3>Language-grounded encoding</h3>
-            <p>Bidirectional cross-attention grounds current visual tokens in the task instruction before future prediction.</p>
-          </article>
-          <article class="method-box method-box-purple">
-            <span class="step-number">02</span>
-            <h3>Asymmetric prediction</h3>
-            <p>The full stream reads class, patch, and language tokens; the intent stream has no direct access to dense patch tokens.</p>
-          </article>
-          <article class="method-box method-box-green">
-            <span class="step-number">03</span>
-            <h3>Residual-guided policy</h3>
-            <p>The retained intent stream forms <span class="math">Δz = ẑ<sup>int</sup><sub>t</sub> − z<sub>t</sub></span> at every control step.</p>
-          </article>
-        </div>
-
-        <div class="policy-equation" aria-label="Residual-guided policy representation">
-          <div><span>Current latent</span><strong>z<sub>t</sub></strong></div>
-          <b aria-hidden="true">+</b>
-          <div><span>Predicted change</span><strong class="residual">Δz</strong></div>
-          <b aria-hidden="true">→</b>
-          <div><span>Behavior cloning</span><strong>π(a<sub>t</sub>)</strong></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section section-alt" id="experiments">
-      <div class="container">
-        <h2 class="section-title">Experimental Results</h2>
-        <p class="section-intro">
-          We evaluate TRAIL on Franka Kitchen, Meta-World MT10, and seven physical UR5 tasks under controlled downstream policy-learning protocols.
-        </p>
-
-        <div class="table-container summary-table-container">
-          <table class="academic-table summary-table">
-            <caption>Average success rates across the three evaluation settings.</caption>
-            <thead>
-              <tr>
-                <th>Benchmark</th>
-                <th>Evaluation setting</th>
-                <th>Strongest compared baseline</th>
-                <th>TRAIL</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Franka Kitchen</td>
-                <td>5 tasks, 2 viewpoints, 3 seeds</td>
-                <td>79.2 <span class="method-note">(LaVA-Man)</span></td>
-                <td class="ours-cell"><strong>81.2</strong></td>
-              </tr>
-              <tr>
-                <td>Meta-World MT10</td>
-                <td>1 policy, 10 tasks, 3 seeds</td>
-                <td>70.0 <span class="method-note">(R3M)</span></td>
-                <td class="ours-cell"><strong>78.2</strong></td>
-              </tr>
-              <tr>
-                <td>Physical UR5</td>
-                <td>7 tasks, 5 trials per task</td>
-                <td>79.0 <span class="method-note">(LaVA-Man)</span></td>
-                <td class="ours-cell"><strong>90.0</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 class="subsection-title">Simulation benchmarks</h3>
-
-        <div class="results-block">
-          <h4>Franka Kitchen</h4>
-          <p>Average success rates over 25 demonstrations across five tasks, two viewpoints, and three random seeds.</p>
-          <div class="table-container">
-            <table class="academic-table task-table">
-              <thead>
-                <tr>
-                  <th>Method</th>
-                  <th>Turn knob</th>
-                  <th>Open door</th>
-                  <th>Flip switch</th>
-                  <th>Open microwave</th>
-                  <th>Slide door</th>
-                  <th>Average</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>DINOv3</td><td>79.3</td><td>43.7</td><td>92.3</td><td>40.3</td><td><strong>100.0</strong></td><td>71.3</td></tr>
-                <tr><td>R3M</td><td>53.3</td><td>50.7</td><td>86.3</td><td>59.3</td><td>97.0</td><td>69.5</td></tr>
-                <tr><td>MVP</td><td>79.0</td><td>48.0</td><td>90.7</td><td>41.0</td><td><strong>100.0</strong></td><td>71.7</td></tr>
-                <tr><td>ToBo</td><td>57.0</td><td>51.0</td><td>82.0</td><td>55.0</td><td>95.0</td><td>68.0</td></tr>
-                <tr><td>MPI</td><td>89.0</td><td><strong>57.7</strong></td><td>93.7</td><td>54.0</td><td><strong>100.0</strong></td><td>78.9</td></tr>
-                <tr><td>LaVA-Man</td><td>90.0</td><td>50.7</td><td>94.0</td><td>61.3</td><td><strong>100.0</strong></td><td>79.2</td></tr>
-                <tr class="ours-row"><td><strong>TRAIL</strong></td><td><strong>91.7</strong></td><td>56.7</td><td><strong>95.7</strong></td><td><strong>62.0</strong></td><td><strong>100.0</strong></td><td><strong>81.2</strong></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="results-block">
-          <h4>Meta-World MT10</h4>
-          <p>One language-conditioned policy is trained by offline behavior cloning on 100 expert demonstrations per task. Results are mean success over three seeds and 50 episodes per task and seed.</p>
-          <div class="table-container wide-table-container">
-            <table class="academic-table task-table mt10-table">
-              <thead>
-                <tr>
-                  <th>Method</th><th>Reach</th><th>Push</th><th>Pick-Place</th><th>Door</th><th>Drawer-O</th><th>Drawer-C</th><th>Button</th><th>Peg-Insert</th><th>Window-O</th><th>Window-C</th><th>Average</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>DINOv3</td><td>36.0</td><td>38.0</td><td>18.0</td><td><strong>100.0</strong></td><td>92.0</td><td><strong>100.0</strong></td><td>96.0</td><td>28.0</td><td>80.0</td><td><strong>100.0</strong></td><td>68.8</td></tr>
-                <tr><td>R3M</td><td><strong>50.0</strong></td><td>32.0</td><td>2.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>26.0</td><td>90.0</td><td><strong>100.0</strong></td><td>70.0</td></tr>
-                <tr><td>VC-1</td><td>32.0</td><td>2.0</td><td>0.0</td><td>80.0</td><td>86.0</td><td>36.0</td><td>28.0</td><td>2.0</td><td>22.0</td><td><strong>100.0</strong></td><td>38.8</td></tr>
-                <tr><td>ToBo</td><td>28.0</td><td>38.0</td><td>2.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>34.0</strong></td><td><strong>96.0</strong></td><td><strong>100.0</strong></td><td>69.8</td></tr>
-                <tr><td>MPI</td><td>36.0</td><td>24.0</td><td>4.0</td><td>80.0</td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>12.0</td><td>72.0</td><td><strong>100.0</strong></td><td>62.8</td></tr>
-                <tr class="ours-row"><td><strong>TRAIL</strong></td><td>44.0</td><td><strong>70.0</strong></td><td><strong>40.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td><strong>100.0</strong></td><td>33.0</td><td>95.0</td><td><strong>100.0</strong></td><td><strong>78.2</strong></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="table-note">Drawer-O/C denote drawer open/close; Window-O/C denote window open/close. Success rates are reported in percent.</p>
-        </div>
-
-        <h3 class="subsection-title">Real-robot manipulation</h3>
-        <p class="section-intro compact-intro">
-          A physical UR5 policy is evaluated on seven language-conditioned tabletop tasks, including held-out blocks and objects that are excluded from training.
-        </p>
-        <figure class="figure-card real-robot-figure">
-          <a href="assets/real-robot-results.jpg" target="_blank" rel="noopener" aria-label="Open real-robot results figure at full resolution">
-            <img loading="lazy" decoding="async" src="assets/real-robot-results.jpg" width="3000" height="640" alt="Real-robot task examples and success rates comparing TRAIL with CLIPort, MPI, and LaVA-Man across seven tasks.">
-          </a>
-          <figcaption>
-            <strong>Figure 3. Real-world multi-task manipulation.</strong>
-            Comparison with CLIPort, MPI, and LaVA-Man across seven tabletop tasks. Held-out colored blocks and novel objects are used only for zero-shot evaluation.
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="section video-section" id="videos">
-      <div class="container container-wide">
-        <h2 class="section-title">Task Videos</h2>
-        <p class="section-intro">
-          Task-level demonstrations from our Meta-World, Franka Kitchen, and physical-robot evaluation settings.
-        </p>
-
-        <div class="video-group">
-          <h3>Meta-World MT10</h3>
-          <p>Successful closed-loop TRAIL rollouts, one for each task.</p>
-          <div class="video-grid video-grid-five">
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Reach"><source src="assets/videos/trail-metaworld-reach.mp4" type="video/mp4"></video>
-              <figcaption>Reach</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Push"><source src="assets/videos/trail-metaworld-push.mp4" type="video/mp4"></video>
-              <figcaption>Push</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Pick and Place"><source src="assets/videos/trail-metaworld-pick-place.mp4" type="video/mp4"></video>
-              <figcaption>Pick and Place</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Door Open"><source src="assets/videos/trail-metaworld-door-open.mp4" type="video/mp4"></video>
-              <figcaption>Door Open</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Drawer Open"><source src="assets/videos/trail-metaworld-drawer-open.mp4" type="video/mp4"></video>
-              <figcaption>Drawer Open</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Drawer Close"><source src="assets/videos/trail-metaworld-drawer-close.mp4" type="video/mp4"></video>
-              <figcaption>Drawer Close</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Button Press"><source src="assets/videos/trail-metaworld-button-press.mp4" type="video/mp4"></video>
-              <figcaption>Button Press</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Peg Insert"><source src="assets/videos/trail-metaworld-peg-insert.mp4" type="video/mp4"></video>
-              <figcaption>Peg Insert</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Window Open"><source src="assets/videos/trail-metaworld-window-open.mp4" type="video/mp4"></video>
-              <figcaption>Window Open</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="TRAIL completing Meta-World Window Close"><source src="assets/videos/trail-metaworld-window-close.mp4" type="video/mp4"></video>
-              <figcaption>Window Close</figcaption>
-            </figure>
-          </div>
-        </div>
-
-        <div class="video-group">
-          <h3>Franka Kitchen</h3>
-          <p>Expert demonstrations are shown temporarily and will be replaced by TRAIL rollouts.</p>
-          <div class="video-grid video-grid-five">
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Turn Knob demonstration"><source src="assets/videos/trail-franka-turn-knob.mp4" type="video/mp4"></video>
-              <figcaption>Turn Knob</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Open Door demonstration"><source src="assets/videos/trail-franka-open-door.mp4" type="video/mp4"></video>
-              <figcaption>Open Door</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Flip Switch demonstration"><source src="assets/videos/trail-franka-flip-switch.mp4" type="video/mp4"></video>
-              <figcaption>Flip Switch</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Open Microwave demonstration"><source src="assets/videos/trail-franka-open-microwave.mp4" type="video/mp4"></video>
-              <figcaption>Open Microwave</figcaption>
-            </figure>
-            <figure class="video-card">
-              <video controls muted loop playsinline preload="metadata" aria-label="Franka Kitchen Slide Door demonstration"><source src="assets/videos/trail-franka-slide-door.mp4" type="video/mp4"></video>
-              <figcaption>Slide Door</figcaption>
-            </figure>
-          </div>
-        </div>
-
-        <div class="video-group">
-          <h3>Real-World Manipulation</h3>
-          <p>The seven physical-robot rollout slots are grouped by generalization setting.</p>
-
-          <div class="video-subgroup">
-            <h4>Seen Tasks</h4>
-            <div class="video-grid">
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Stacking Blocks video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Stacking Blocks</figcaption>
-              </figure>
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Packing Blocks video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Packing Blocks</figcaption>
-              </figure>
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Packing Objects video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Packing Objects</figcaption>
-              </figure>
-            </div>
-          </div>
-
-          <div class="video-subgroup">
-            <h4>Unseen Object Tasks</h4>
-            <div class="video-grid video-grid-two">
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Packing Unseen Blocks video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Packing Unseen Blocks</figcaption>
-              </figure>
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Packing Unseen Objects video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Packing Unseen Objects</figcaption>
-              </figure>
-            </div>
-          </div>
-
-          <div class="video-subgroup">
-            <h4>Unseen Tasks</h4>
-            <div class="video-grid video-grid-two">
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Pushing Piles video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Pushing Piles</figcaption>
-              </figure>
-              <figure class="video-card">
-                <div class="video-placeholder" aria-label="Pressing Buttons video coming soon"><span>Video coming soon</span></div>
-                <figcaption>Pressing Buttons</figcaption>
-              </figure>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="analysis">
-      <div class="container">
-        <h2 class="section-title">Representation Analysis</h2>
-
-        <figure class="figure-card grounding-figure">
-          <a href="assets/grounding.jpg" target="_blank" rel="noopener" aria-label="Open grounding figure at full resolution">
-            <img loading="lazy" decoding="async" src="assets/grounding.jpg" width="1247" height="606" alt="Instruction-conditioned cross-attention maps on human activities and robot scenes highlighting task-relevant regions.">
-          </a>
-          <figcaption>
-            <strong>Figure 4. Qualitative language grounding.</strong>
-            Instruction-conditioned cross-attention concentrates on manipulated objects without bounding-box supervision, providing a qualitative sanity check for language-conditioned prediction.
-          </figcaption>
-        </figure>
-
-        <figure class="figure-card failure-figure">
-          <a href="assets/failure-stages.png" target="_blank" rel="noopener" aria-label="Open failure-stage figure at full resolution">
-            <img loading="lazy" decoding="async" src="assets/failure-stages.png" width="838" height="848" alt="Failure-stage decomposition for Meta-World Pick-Place and Push comparing TRAIL with baselines.">
-          </a>
-          <figcaption>
-            <strong>Figure 5. Failure stages on Meta-World Push and Pick-Place.</strong>
-            TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
-          </figcaption>
-        </figure>
-
-        <h3 class="subsection-title">Ablation on the policy representation</h3>
-        <div class="table-container ablation-container">
-          <table class="academic-table ablation-table">
-            <caption>Effect of retaining future information and explicitly constructing the latent residual.</caption>
-            <thead>
-              <tr><th>Variant</th><th>Policy input</th><th>Franka Kitchen</th><th>MT10</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Encoder-Only</td><td><span class="math">z<sub>t</sub></span></td><td>74.5</td><td>57.0</td></tr>
-              <tr><td>Predictor-Only</td><td><span class="math">ẑ<sup>int</sup><sub>t</sub></span></td><td>75.5</td><td>77.0</td></tr>
-              <tr><td>Absolute pair</td><td><span class="math">z<sub>t</sub>, ẑ<sup>int</sup><sub>t</sub></span></td><td>76.1</td><td>76.0</td></tr>
-              <tr class="ours-row"><td><strong>TRAIL (Full)</strong></td><td><span class="math"><strong>z<sub>t</sub>, Δz</strong></span></td><td><strong>81.2</strong></td><td><strong>78.2</strong></td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </section>
   </main>
@@ -427,5 +255,26 @@
       <p class="footer-note">Anonymous project page · Materials provided for peer review</p>
     </div>
   </footer>
+
+  <script>
+    // Play rollout videos only while they are on screen; honour reduced-motion.
+    (function () {
+      var vids = document.querySelectorAll('video[data-autoplay]');
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) {
+        vids.forEach(function (v) { v.controls = true; });
+        if (reduce) { var w = document.querySelector('.teaser-wall-video'); if (w) { w.pause(); w.controls = true; } }
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var v = e.target;
+          if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = true; }); }
+          else { v.pause(); }
+        });
+      }, { rootMargin: '120px 0px', threshold: 0.15 });
+      vids.forEach(function (v) { io.observe(v); });
+    })();
+  </script>
 </body>
 </html>

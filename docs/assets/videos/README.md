@@ -1,41 +1,32 @@
 # Website video manifest
 
-All published clips use H.264 MP4 with `yuv420p` pixel format and fast-start metadata.
+All clips: H.264 MP4, `yuv420p`, fast-start, no audio, square 480x480 (teaser wall 1600x800).
 Replace a clip in place with the same filename; no HTML change is needed.
+
+## Playback speed (shown on the page — keep these in sync if a clip is re-cut)
+
+| Setting | Speed | How it is derived |
+|---|---|---|
+| Physical UR5 | 1.75x | Source clips were exported at 1.75x by the authors |
+| Franka Kitchen | 1x | One frame per control step, dt = 0.08 s, encoded at 12.5 steps/s |
+| Meta-World MT10 | 0.5x | One frame per env step, dt = 0.0125 s (80 Hz), encoded at 40 steps/s |
+
+## Teaser
+
+- `teaser-wall.mp4`, `teaser-wall-poster.jpg` — 14 s zoom-out wall of 32 rollouts (built by `make_wall.py`)
+
+## Physical UR5 (two trials per task)
+
+`trail-real-<task>-trial{1,2}.mp4` for: stacking-blocks, packing-blocks, packing-objects,
+pushing-piles, pressing-buttons, packing-unseen-blocks, packing-unseen-objects.
+Source numbering: 2/3 stacking, 1/4 packing blocks, 5/6 packing objects, 11/12 pushing piles,
+9/10 pressing buttons, 13/14 packing unseen blocks, 7/8 packing unseen objects.
+
+## Franka Kitchen (left and right camera views)
+
+`trail-franka-<task>-{left,right}.mp4` for: turn-knob, open-door, flip-switch, open-microwave, slide-door.
 
 ## Meta-World MT10
 
-- `trail-metaworld-reach.mp4`
-- `trail-metaworld-push.mp4`
-- `trail-metaworld-pick-place.mp4`
-- `trail-metaworld-door-open.mp4`
-- `trail-metaworld-drawer-open.mp4`
-- `trail-metaworld-drawer-close.mp4`
-- `trail-metaworld-button-press.mp4`
-- `trail-metaworld-peg-insert.mp4`
-- `trail-metaworld-window-open.mp4`
-- `trail-metaworld-window-close.mp4`
-
-## Franka Kitchen
-
-- `trail-franka-turn-knob.mp4`
-- `trail-franka-open-door.mp4`
-- `trail-franka-flip-switch.mp4`
-- `trail-franka-open-microwave.mp4`
-- `trail-franka-slide-door.mp4`
-
-The current Franka files are temporary ground-truth demonstrations from the public
-[R3M expert-demonstration release](https://drive.google.com/drive/folders/108VW5t5JV8uNtkWvfZxEvY2P2QkC_tsf?usp=sharing),
-using its default camera. They should be overwritten by TRAIL rollouts before the final release.
-
-## Real-world manipulation
-
-When the seven robot videos are ready, use these filenames:
-
-- `trail-real-stacking-blocks.mp4`
-- `trail-real-packing-blocks.mp4`
-- `trail-real-packing-unseen-blocks.mp4`
-- `trail-real-packing-objects.mp4`
-- `trail-real-packing-unseen-objects.mp4`
-- `trail-real-pushing-piles.mp4`
-- `trail-real-pressing-buttons.mp4`
+`trail-metaworld-<task>.mp4` for: reach, push, pick-place, door-open, drawer-open, drawer-close,
+button-press, peg-insert, window-open, window-close.
