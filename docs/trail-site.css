@@ -119,6 +119,7 @@ img, video { display: block; }
   font-size: 12px; font-weight: 700; letter-spacing: .04em; vertical-align: 2px;
 }
 .math { white-space: nowrap; font-family: Georgia, "Times New Roman", serif; }
+.nowrap { white-space: nowrap; }
 
 .speed-badge {
   flex: none;
@@ -206,9 +207,9 @@ img, video { display: block; }
 .figure-card { margin: 0 auto; padding: 14px; border: 1px solid #edf0f2; border-radius: 12px; background: white; box-shadow: 0 8px 28px rgba(22, 32, 45, .07); }
 .figure-card a { display: block; }
 .figure-card img { max-width: 100%; height: auto; margin: 0 auto; border-radius: 7px; }
-.figure-card figcaption { max-width: 860px; margin: 12px auto 0; color: #606a74; font-size: 14px; line-height: 1.55; text-align: center; }
+.figure-card figcaption { max-width: 860px; margin: 12px auto 0; color: #606a74; font-size: 14px; line-height: 1.55; text-align: center; text-wrap: balance; }
 .method-figure { max-width: 960px; }
-.setup-figure { max-width: 960px; margin-bottom: 34px; }
+.setup-figure { max-width: 720px; margin-bottom: 34px; }
 
 .footer { padding: 32px 20px 40px; border-top: 1px solid var(--line); background: white; text-align: center; }
 .footer p { margin: 0; color: #57616b; font-size: 13px; }
