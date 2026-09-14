@@ -146,10 +146,7 @@ uses a ``\texttt{[CLS]} residual'' for 1-D control, could the authors clarify ho
 \item \C{Currently, Figure 2 is difficult to understand. The text backbone is not marked as either
 trainable or frozen, the figure lacks arrows indicating how information flows through the
 bidirectional attention modules, and the caption terminology does not appear in the figure.}
-\R{Figure~2 has been redrawn, including an explicit legend with four entries: frozen,
-shared weights, stop-gradient, and bidirectional cross-attention, and every module is marked
-accordingly: the text backbone (DistilBERT) and the DINOv3 teacher are frozen, and all
-remaining modules are trainable during pre-training.}
+\R{Figure~2 has been redrawn with an explicit legend (frozen modules, shared weights, stop-gradient, bidirectional cross-attention, and the latent tokens), and the two directions of the bidirectional cross-attention are drawn as Language$\rightarrow$Visual and Visual$\rightarrow$Language. Every module is marked accordingly: the text backbone (DistilBERT) and the DINOv3 teacher are frozen, and all remaining modules are trainable during pre-training.}
 
 \item \C{According to Eq.~(4), $F_{\mathrm{intent}}$ uses $V'_{\mathrm{cls}}$ and $L'$, whereas the
 figure seems to suggest that it takes only the CLS token as input.}
@@ -184,7 +181,8 @@ The wrist-mounted camera is not read from arbitrary poses along the trajectory. 
 wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
 region after grasping, when the gripper or grasped object may block the workspace.}
 
-\R{In our real-robot tabletop tasks, the policy is not asked to observe the workspace while an object is held, but first predicts both picking and placing poses at an initial state.
+\R{In our real-robot tabletop tasks, the policy is not asked to observe the workspace while an object is held, but first predicts both picking and placing poses at an initial state. We have added this description to Sec.~IV-D.
+
 
 Specifically, the action space is a \emph{pick-and-place primitive} rather than a low-level command: the tabletop read-out reshapes the patch tokens of $z_t$ and $\Delta_z$ into spatial maps and predicts language-conditioned affordance maps. We have modified Sec.~III-B to explicitly explain our setting.}
 
@@ -214,7 +212,7 @@ control step denotes one policy decision whose granularity follows the action sp
         taken while an object is held.
 \end{itemize}
 
-In both cases the loop is closed on a fresh observation at every decision, the predictor is
+In both cases every decision is made from a fresh observation, the predictor is
 evaluated exactly once per decision, and the pre-training offset $k$ plays no role --- it does not
 set the robot's action frequency, which the downstream decoder learns from the labeled
 demonstrations. Fig.~1 (bottom) draws this loop.}
@@ -253,16 +251,7 @@ that existing models discard the predictive decoder. R3M's dynamics learning is 
 time-contrastive learning, so discarding its auxiliary head is not equivalent to discarding the
 dynamics information that predictive learning is intended to capture. The wording should be revised
 or the citation removed.}
-\R{We agree with the reviewer's distinction and have rewritten the sentence to make it. The
-introduction now separates the two cases explicitly: predictive decoders \emph{may be removed
-before downstream learning} in masked- and future-prediction pipelines (cited to MVP and masked
-visual pre-training), \emph{while} objectives such as time-contrastive learning (cited to R3M)
-leave temporal information only implicitly inside a static embedding. R3M is therefore no longer
-offered as an instance of discarding a decoder, but as an instance of the second, distinct
-situation --- which, as the reviewer notes, still leaves the downstream policy to recover that
-information. The sentence that follows states the resulting challenge in those terms: not how to
-learn future prediction, but how to retain the task-relevant part of it as an explicit policy
-input.}
+\R{We agree with the reviewer's distinction and have removed the R3M citation from this claim.}
 
 \item \C{The demonstration in the video is too fast. Also, are all of the demonstrations shown in
 real time? If not, it would be helpful to indicate the playback speed used for each one.}
