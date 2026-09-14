@@ -175,7 +175,7 @@ used, and we have corrected the text, which previously described the sensor as `
 that implied depth was an input.
 
 On the inconsistency the reviewer commented: The two views are in fact the same sensor.
-The wrist-mounted camera is not read from arbitrary poses along the trajectory. The arm returns to a fixed observation pose before each decision, and the image the policy consumes (the one shown as ``Obs'') is always captured from that canonical pose. What looks like a third-person overhead view is therefore the wrist camera at the observation pose, not a second, externally mounted camera. We have added this description to clarify the observation protocol in Secs.~III-B and IV-D.}
+At the start of each trial, the arm is at its initial pose and the wrist-mounted camera sees the entire workspace; this single image (shown as ``Obs'') is the policy input, which is why it resembles an overhead view. We have added this description to Sec.~IV-D.}
 
 \item \C{The paper does not explain how occlusion is handled in the real-robot setup. If only a
 wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
@@ -203,13 +203,7 @@ control step denotes one policy decision whose granularity follows the action sp
         retained intent stream once to get $\hat z^{\mathrm{int}}_{t+k}$, form $\Delta_z$, predict
         an action, move --- runs at the environment's control frequency, and the predictor is
         re-evaluated on every new observation.
-  \item \emph{Real robot.} The policy outputs a pick-and-place primitive, so one decision is one
-        primitive. The arm sits at its fixed observation pose, one observation is encoded, the
-        intent stream runs once, and the resulting affordance prediction supplies both endpoints of
-        the motion; the primitive then executes without re-observation, after which the arm returns
-        to the observation pose and the next decision is made from a new observation. This is
-        precisely why the occlusion concern in comment~6 does not arise: no observation is ever
-        taken while an object is held.
+  \item \emph{Real robot.} The policy outputs a pick-and-place primitive. At the start of each trial, one observation is encoded, the intent stream runs once, and the resulting affordance prediction supplies both endpoints of the motion; the primitive then executes without re-observation. This is precisely why the occlusion concern in comment~6 does not arise: no observation is ever taken while an object is held.
 \end{itemize}
 
 In both cases every decision is made from a fresh observation, the predictor is
