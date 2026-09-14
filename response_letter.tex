@@ -32,34 +32,13 @@
 Please find enclosed the revised version of the manuscript ``Learning Task-Relevant Latent Residuals for Robot Manipulation'', previously submitted to IEEE/RSJ IROS 2026 (Submission \#2433). We thank the Associate Editor and the reviewers for their constructive comments. We have substantially revised our manuscript based on the reviewers' comments, and the main changes are:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt,topsep=4pt]
-  \item \textbf{The asymmetric prediction mechanism is re-described.} The two streams are now
-        presented as \emph{one} shared predictor $P$ with shared future queries $Q$, evaluated
-        under two memory-access conditions (Eqs.~1--2), and the section closes with an explicit
-        statement of where gradients stop and which modules are frozen versus trainable
-        (Sec.~III-A).
-  \item \textbf{The stream retained at deployment is corrected.} It is the \emph{intent} stream,
-        not the full-information stream, that is kept after pre-training. Sec.~III-B now specifies
-        the output structure of the retained predictor, the read-outs used by the two policy
-        classes, and the closed-loop execution frequency --- including what counts as one control
-        step in each of the two action spaces.
-  \item \textbf{A second simulation benchmark.} Meta-World MT10 is added (Sec.~IV-C,
-        Table~III): ten heterogeneous tasks covered by a single language-conditioned policy
-        trained by offline behavioural cloning. Both simulation benchmarks are now averaged over
-        three random seeds, and the real-robot evaluation has been extended from 5 to 15 trials
-        per subtask.
-  \item \textbf{Experimental protocols are specified.} The revised experiments provide the
-        applicable camera views, image resolution, proprioceptive inputs, frame stacking, depth
-        usage, object randomisation and separation between demonstration and evaluation seeds.
-  \item \textbf{Relation to latent action models.} Sec.~II-B now contrasts TRAIL with latent action
-        pre-training.
-  \item \textbf{Figures and wording.} The pre-training architecture figure has been redrawn with a
-        frozen/trainable legend, shared-weight markers, an explicit stop-gradient marker and the
-        two memory-access conditions drawn separately; the affordance visualisation has been
-        replaced; and the introduction's claim about discarded predictive decoders no longer
-        cites R3M as an instance of it.
-  \item \textbf{Supplementary videos.} The project webpage linked from the manuscript now labels
-        the playback speed of every video group, distinguishing accelerated, real-time and
-        slowed-down footage.
+  \item \textbf{The asymmetric prediction mechanism is re-described.} The two streams are now presented as \emph{one} shared predictor $P$ with shared future queries $Q$, evaluated under two memory-access conditions (Eqs.~1--2), and the section closes with an explicit statement of where gradients stop and which modules are frozen versus trainable (Sec.~III-A).
+  \item \textbf{The stream retained at deployment is corrected} to the \emph{intent} stream. Sec.~III-B now specifies the output structure of the retained predictor, the read-outs used by the two policy classes, and the closed-loop execution frequency.
+  \item \textbf{A second simulation benchmark.} Meta-World MT10 is added (Sec.~IV-C, Table~III): ten heterogeneous tasks covered by a single language-conditioned policy trained by offline behavioural cloning. Both simulation benchmarks are now averaged over three random seeds, and the real-robot evaluation has been extended from 5 to 15 trials per subtask.
+  \item \textbf{Experimental protocols are specified.} The revised experiments provide the applicable camera views, image resolution, proprioceptive inputs, frame stacking, depth usage, object randomisation and separation between demonstration and evaluation seeds.
+  \item \textbf{Relation to latent action models.} Sec.~II-B now contrasts TRAIL with latent action pre-training.
+  \item \textbf{Figures and wording.} We have substantially improved our pipeline figure and modified the caption to introduce the details more clearly.
+  \item \textbf{Supplementary videos.} The robot manipulation videos in the supplementary video and the anonymized project webpage (link available in the manuscript) now labels the playback speed of every video.
 \end{itemize}
 
 \vspace{2pt}
@@ -86,9 +65,7 @@ In particular, the paper states that $F_{\mathrm{intent}}$ is discarded after tr
 none of the losses affecting $F_{\mathrm{full}}$ appears to depend on $F_{\mathrm{intent}}$.
 Should the stop-gradient in Eq.~(5) instead be applied to $F_{\mathrm{intent}}$? There may also
 be coupling through the text backbone, making the method difficult to assess.}
-\R{We thank the Associate Editor for identifying this ambiguity. The previous manuscript
-incorrectly stated which stream is retained and did not make the parameter sharing or gradient
-flow sufficiently explicit. In the revision, Sec.~III-A and Fig.~2 describe a \emph{single}
+\R{We thank the Associate Editor for identifying this ambiguity. The previous manuscript incorrectly stated which stream is retained and did not make the parameter sharing or gradient flow sufficiently explicit. In this submission, Sec.~III-A and Fig.~2 describe a \emph{single}
 predictor $P$ with shared future queries $Q$, evaluated twice under different memory-access
 conditions. The full-information pass receives
 $[V'_{\texttt{cls}},V'_{\texttt{patch}},L']$, whereas the intent pass receives
@@ -106,10 +83,7 @@ This term treats the patch-informed full prediction as a fixed target and update
 It does not stop $\mathcal{L}_{\mathrm{full}}$ from training the shared predictor through the
 full-information pass; $\mathcal{L}_{\mathrm{int}}$ likewise trains it through the intent pass.
 Applying stop-gradient to the intent prediction instead would reverse the intended direction of
-the consistency transfer. There is no gradient coupling through the text backbone because
-DistilBERT is frozen; the current-frame visual encoder, language projection, fusion module,
-future queries and shared predictor are trainable. These details are now stated after Eqs.~(3)--(6)
-and visualised in Fig.~2.
+the consistency transfer. There is no gradient coupling through the text backbone as DistilBERT is frozen. Note that the current-frame visual encoder, language projection, fusion module, future queries and shared predictor are trainable. These details are now stated after Eqs.~(3)--(6) and visualised in Fig.~2.
 
 Finally, the corrected deployment description in Secs.~III-A--III-B states that the
 full-information access condition is used only during pre-training. The \emph{intent} stream is
@@ -184,7 +158,7 @@ uses a ``\texttt{[CLS]} residual'' for 1-D control, could the authors clarify ho
 \texttt{[CLS]} token is obtained at deployment?}
 \R{We apologise for the confusion. The previous sentence was incorrect: the \emph{intent} stream
 is retained after pre-training, and the full-information access condition is removed. The retained
-predictor emits a complete future token sequence aligned with the visual target, so Eq.~(7) forms
+predictor outputs a complete future token sequence aligned with the visual target, so Eq.~(7) forms
 $\Delta_z$ token by token. For continuous-control benchmarks, $z_t$ and $\Delta_z$ are concatenated
 with proprioception and passed to the action decoder. For the real-robot tabletop tasks, their patch
 tokens are reshaped into spatial feature maps and fused to predict language-conditioned affordance
@@ -256,12 +230,12 @@ read-outs. We have added this to the deployment paragraph of Sec.~III-B, which n
 control step denotes one policy decision whose granularity follows the action space:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=3pt,topsep=4pt]
-  \item \emph{Simulation (Franka Kitchen, Meta-World).} The policy emits low-level continuous
+  \item \emph{Simulation (Franka Kitchen, Meta-World).} The policy outputs low-level continuous
         commands, so one decision is one control step. The cycle --- observe, encode $z_t$, run the
         retained intent stream once to get $\hat z^{\mathrm{int}}_{t+k}$, form $\Delta_z$, predict
         an action, move --- runs at the environment's control frequency, and the predictor is
         re-evaluated on every new observation.
-  \item \emph{Real robot.} The policy emits a pick-and-place primitive, so one decision is one
+  \item \emph{Real robot.} The policy outputs a pick-and-place primitive, so one decision is one
         primitive. The arm sits at its fixed observation pose, one observation is encoded, the
         intent stream runs once, and the resulting affordance prediction supplies both endpoints of
         the motion; the primitive then executes without re-observation, after which the arm returns
