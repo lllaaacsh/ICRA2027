@@ -53,7 +53,7 @@ These results show that our approach to explicitly modeling task-relevant transi
 
 % \vspace{-2pt}
 
-Table~\ref{tab:dif} summarizes the pre-training data and supervision used by the predictive models. MPI and LaVA-Man use robot-domain pre-training data, and MPI additionally requires fine-grained supervision such as bounding boxes. TRAIL uses \textit{human-centric internet videos} for self-supervised pre-training. Under this more scalable pre-training setting, TRAIL matches or outperforms existing predictive models. This supports our central claim that constrained future prediction can extract robot-relevant physical dynamics from human behavior videos.
+Table~\ref{tab:dif} summarizes the pre-training data and supervision used by the predictive models. MPI and LaVA-Man use robot-domain pre-training data, and MPI additionally requires fine-grained supervision such as bounding boxes. TRAIL uses \textit{human-centric internet videos} for self-supervised pre-training. Under this more scalable pre-training setting, TRAIL outperforms existing predictive models, demonstrating that our approach can extract robot-relevant physical dynamics from human behavior videos.
 
 
 % \vspace{-1pt}
@@ -111,10 +111,10 @@ We further validate TRAIL on a physical UR5 setup where language-conditioned con
     \includegraphics[width=0.95\linewidth]{ieeeconf/figure/setup_cropped.pdf}
     \caption{\textbf{Real-robot setup}. A wrist-mounted camera provides RGB observations for UR5. Depth is not used.}
     \label{fig:setup}
-    \vspace{-3pt}
+    % \vspace{-3pt}
 \end{figure}
 
-As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate of 90\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$80\%), and well above CLIPort and MPI ($\sim$55\%). The strongest evidence appears in the held-out settings: TRAIL reaches 93\% success on ``Packing unseen objects'' (vs.\ 73\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). In the contact-rich ``Pushing piles'' task, TRAIL also reaches 80\%, surpassing the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
+In Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate of 90\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$80\%), and well above CLIPort and MPI ($\sim$55\%). The strongest evidence can be observed in the held-out settings, where TRAIL reaches 93\% success on ``Packing unseen objects'' (vs.\ 73\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). In the contact-rich ``Pushing piles'' task, TRAIL also reaches 80\%, surpassing the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
 
 
 
@@ -124,6 +124,7 @@ As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the bas
     \centering
     \includegraphics[width=\linewidth]{ieeeconf/figure/aff_cropped.pdf}
 \caption{\textbf{Sampled affordance maps.} We visualize TRAIL's predicted affordance maps at the start and end stages of real-robot tabletop manipulation tasks. The responses follow the commanded object and target regions, providing qualitative evidence for language-conditioned spatial grounding.}
+\vspace{-8pt}
 \label{fig:affordance_maps}
 \end{figure}
 
