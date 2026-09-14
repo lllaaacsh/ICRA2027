@@ -14,6 +14,7 @@ TRAIL learns task-relevant latent changes from action-free human videos and uses
 
 \subsection{Language-guided asymmetric prediction}
 \label{subsec:pretrain}
+\vspace{-6pt}
 % \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
 
 % \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
@@ -133,6 +134,7 @@ Note that, during pre-training, $k$ specifies the frame gap between $I_t$ and $I
 \includegraphics[width=0.95\linewidth,]{ieeeconf/figure/ACDINO_cropped}
 \caption{\textbf{Proposed residual-guided policy learning}. The retained intent stream estimates a task-relevant latent forecast from the current observation and instruction. TRAIL subtracts the current latent state to obtain $\Delta_z$, balances the state and residual feature scales, and then fuses them with proprioception for imitation learning.}
 \label{fig:acdino}
+\vspace{-5pt}
 \end{figure}
 
 

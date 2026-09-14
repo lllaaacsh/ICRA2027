@@ -105,38 +105,20 @@ presentation on the project webpage and added explicit playback-speed labels to 
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{Thanks for the suggestion. We have added an explicit comparison with latent action models in Sec.~II-B.
-\emph{Similarity:} both approaches exploit temporal transitions in action-free video.
-\emph{Difference:} latent action models infer a low-capacity latent action from the current and
-future frames, use it to reconstruct future-frame pixels, and subsequently map that latent action
-to executable robot actions. TRAIL does not learn an action variable. It predicts the frozen visual
-representation of a future frame from the current frame and instruction, then supplies the
-observation-space residual between the current and predicted future representations to the policy.
-\emph{Advantage:} TRAIL operates in latent feature space rather than reconstructing pixels and does
-not require a separate latent-to-executable-action mapping stage. The answer to how dynamics are
-learned without a latent action is therefore the future-latent prediction objective itself: to
-minimise this objective, the predictor must encode the task-relevant transition implied by the
-current scene and language instruction. The downstream imitation-learning policy then learns the
-robot action from labelled demonstrations while using that transition as context.}
+
+\R{Thanks for the suggestion. We revised Sec.~II-B added a discussion on latent action models and compared with TRAIL. Both latent action models and TRAIL are similar in that both learn dynamics from action-free videos by predicting the future. However, latent action models infer a low-capacity latent action from the current and future frames and reconstruct the future frame conditioned on the current frame and then use the latent action to pre-train policies and must later be mapped to executable actions with action-labelled data. TRAIL instead predicts future representations in latent space through a task-relevant bottleneck on the predictor's visual input, and gives the predicted residual to the policy as an input. Hence, TRAIL avoids pixel-level reconstruction and needs no stage that maps latent actions to executable actions.}
 
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
 \R{Thanks for your suggestion. We have conducted another experiment on a harder simulation benchmark that consists of 10 different robotic manipulation tasks. Sec.~IV-C
-and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All backbones are frozen and followed by the same pooled action decoder, so the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits, seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
+and Table~III report the results on Meta-World MT10: ten tasks with distinct scenes, objects and motion primitives, covered by a \emph{single} language-conditioned policy trained by imitation learning. All the backbones were frozen including ours followed by the identical pooled action decoder, so that the representation supplied to the decoder is the only quantity that varies across rows. We report mean success over three random seeds with 50 closed-loop episodes per task and seed, using demonstration splits, seeds, camera and proprioceptive inputs and evaluation configurations that are shared across
 methods. Franka Kitchen results are now also reported over three random seeds and two viewpoints.
 
-TRAIL reaches 78.2\% against 70.0\% for the strongest baseline. The performance gap mainly comes from the two tasks including moving objects, Pick-Place (40.0\% versus at most 18.0\% for any baseline) and Push (70.0\% versus at most 38.0\%), which require the policy that considers the object movement. We also show Fig.~5 that decomposes the failures of these two tasks by the furthest achieved stage. The results show that TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures towards the later placement stage.}
+}
 
 \item \C{The hyper-parameters are strange. It does not make sense to select $k=96$ to provide the target future state, since it is a long time for precise robotic manipulation tasks.}
-\R{We agree that the previous description could be misread as a robot control horizon. Here,
-$k=96$ is only the frame gap used to construct pre-training pairs from Kinetics-400; it does not
-mean that a robot executes 96 steps open loop. At the dataset's $25$--$30$\,fps, this gap spans
-roughly $3$--$4$ seconds of human activity and is chosen to capture a meaningful state transition
-rather than nearly identical adjacent frames. At deployment, the retained intent stream is
-re-evaluated from a fresh observation at every policy decision. The residual is used as a
-directional feature, while the action decoder learns the action magnitude and time scale from
-labelled robot demonstrations. We now state this distinction explicitly in Sec.~IV-A, where $k$
-is introduced, and Sec.~III-B, where closed-loop deployment is described.}
+
+\R{Thanks for pointing out our mistake. We have modified the description about the hyper-parameters in Sec.~III-B and Sec.~IV-A.}
 
 \end{qa}
 
@@ -149,22 +131,15 @@ is introduced, and Sec.~III-B, where closed-loop deployment is described.}
 \texttt{[CLS]} token without clearly specifying from which modality it originates. Eq.~(4) uses
 $V_{\mathrm{cls}}'$, which suggests the visual-side CLS token, but this should be stated
 explicitly, especially since the language encoder may also contain special tokens.}
-\R{Thanks for your comment. We have clarified the notation. Sec.~III-A now introduces the visual sequence as one class token $V_{\texttt{cls}}$ and $196$ patch tokens $V_{\texttt{patch}}$, and the instruction separately as the language-token sequence $L$. $V'_{\texttt{cls}}$, $V'_{\texttt{patch}}$ and $L'$ denote the same quantities after bidirectional cross-attention. We have also updated Eqs.~(1)--(2), Fig.~2 and the corresponding paragraphs in Sec.~III-A.}
+
+\R{Thanks for your comment. We have clarified the notations, and Sec.~III-A now introduces the visual sequence as one class token $V_{\texttt{cls}}$ and $196$ patch tokens $V_{\texttt{patch}}$, and the instruction separately as the language-token sequence $L$. $V'_{\texttt{cls}}$, $V'_{\texttt{patch}}$ and $L'$ denote the same quantities after bidirectional cross-attention. We have also modified the equations (Eqs.~1--2), the figure (Fig.~2) and paragraphs in Sec.~III-A.}
 
 \item \C{The paper states that the intent predictor is discarded at deployment, while the
 full-information predictor is retained to produce $z_{t+1}$. However, it remains unclear what
 output structure this retained predictor produces during control. In particular, since Sec.~III-C
 uses a ``\texttt{[CLS]} residual'' for 1-D control, could the authors clarify how the
 \texttt{[CLS]} token is obtained at deployment?}
-\R{We apologise for the confusion. The previous sentence was incorrect: the \emph{intent} stream
-is retained after pre-training, and the full-information access condition is removed. The retained
-predictor outputs a complete future token sequence aligned with the visual target, so Eq.~(7) forms
-$\Delta_z$ token by token. For continuous-control benchmarks, $z_t$ and $\Delta_z$ are concatenated
-with proprioception and passed to the action decoder. For the real-robot tabletop tasks, their patch
-tokens are reshaped into spatial feature maps and fused to predict language-conditioned affordance
-maps. Thus, the spatial output is predicted directly from the future queries rather than recovered
-from a single \texttt{[CLS]} token. We have corrected and clarified this in Secs.~III-A--III-B and
-the Fig.~2 caption.}
+\R{Sorry for the confusion. The sentence was incorrect and we have now modified it. The \emph{intent} stream is retained after pre-training, and the \textit{full-information} stream is discarded. The full-information stream exists only to provide the stopped consistency target during pre-training. We have modified Sec.~III-A, Sec.~III-B and the Fig.~2 caption.}
 
 \item \C{Currently, Figure 2 is difficult to understand. The text backbone is not marked as either
 trainable or frozen, the figure lacks arrows indicating how information flows through the
@@ -176,12 +151,10 @@ remaining modules are trainable during pre-training.}
 
 \item \C{According to Eq.~(4), $F_{\mathrm{intent}}$ uses $V'_{\mathrm{cls}}$ and $L'$, whereas the
 figure seems to suggest that it takes only the CLS token as input.}
-\R{We have aligned Eqs.~(1)--(2) and Fig.~2. They now show one shared predictor $P$ and shared
-future queries $Q$ under two memory-access conditions:
-$\hat z^{\mathrm{full}}_{t+k}=P(Q\mid[V'_{\texttt{cls}},V'_{\texttt{patch}},L'])$ and
-$\hat z^{\mathrm{int}}_{t+k}=P(Q\mid[V'_{\texttt{cls}},L'])$. The revised figure explicitly draws
-the class and language tokens entering the intent pass, and the class, patch and language tokens
-entering the full-information pass.}
+\R{We have modified equations (Eqs.~1--2) and redrawn Fig.~2 to present our pipeline more clearly.}
+
+
+
 
 \item \C{In both simulation and real-world experiments, the visual inputs are not clearly
 specified. Based on Fig.~6 the real-robot setup appears to use a RealSense RGB-D camera mounted
@@ -209,14 +182,9 @@ The wrist-mounted camera is not read from arbitrary poses along the trajectory. 
 wrist-mounted RGB-D camera is used, it is unclear how the policy can reliably observe the placement
 region after grasping, when the gripper or grasped object may block the workspace.}
 
-\R{For the real-robot tabletop tasks, the policy does not observe the workspace while an
-object is held. The action space is a complete \emph{pick-and-place primitive}, rather than a
-low-level command: from one initial observation, the tabletop read-out reshapes the patch tokens of
-$z_t$ and $\Delta_z$ into spatial maps and predicts both picking and placing poses through
-language-conditioned affordance maps. The primitive then executes without re-observation. Thus,
-possible occlusion after grasping cannot affect the placement decision, which has already been made
-from the initial unobstructed observation. We have made this action granularity explicit in
-Sec.~III-B.}
+\R{In our real-robot tabletop tasks, the policy is not asked to observe the workspace while an object is held, but first predicts both picking and placing poses at an initial state.
+
+Specifically, the action space is a \emph{pick-and-place primitive} rather than a low-level command: the tabletop read-out reshapes the patch tokens of $z_t$ and $\Delta_z$ into spatial maps and predicts language-conditioned affordance maps. We have modified Sec.~III-B to explicitly explain our setting.}
 
 
 \item \C{The deployment-time role of the predictor is also unclear. It is unclear whether the

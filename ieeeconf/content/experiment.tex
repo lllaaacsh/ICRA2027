@@ -17,6 +17,7 @@ We adopt DINOv3 (ViT-Base/16)~\cite{simeoni2025dinov3} as our foundational visua
     \includegraphics[width=\linewidth]{ieeeconf/figure/vis_attn_cropped.pdf}
     \caption{\textbf{Qualitative language grounding after human-video pre-training.} We visualize instruction-conditioned cross-attention maps from TRAIL. Warmer regions indicate larger attention weights and concentrate on task-relevant objects without bounding-box supervision, providing a qualitative check for the language-conditioned prediction objective.}
     \label{fig:vis_attn}
+    \vspace{-3pt}
 \end{figure}
 
 As shown in Fig.~\ref{fig:vis_attn}, the cross-attention maps concentrate on object regions associated with the corresponding instructions rather than being distributed uniformly over the scene background. This suggests that TRAIL learns to use language to select visual information relevant to future-state prediction, despite receiving no object-level supervision during pre-training. We next evaluate the learned representations
@@ -77,6 +78,7 @@ We collect 100 expert demonstrations per task with the benchmark's scripted poli
     \vspace{-2pt}
 \caption{\textbf{Failure stages on Meta-World Push and Pick-Place.} Episodes are grouped by the furthest stage reached. Push has no grasp stage.}
     \label{fig:failure_stages}
+    \vspace{-5pt}
 \end{figure}
 
 TRAIL reaches a {78.2\%} MT10 average, ahead of the strongest baseline R3M~\cite{nair2022r3m} (70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' ({40.0\%} vs.\ at most 18.0\% for any baseline) and ``Push'' ({70.0\%} vs.\ at most 38.0\%). Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
@@ -109,6 +111,7 @@ We further validate TRAIL on a physical UR5 setup where language-conditioned con
     \includegraphics[width=0.95\linewidth]{ieeeconf/figure/setup_cropped.pdf}
     \caption{\textbf{Real-robot setup}. A wrist-mounted camera provides RGB observations for UR5. Depth is not used.}
     \label{fig:setup}
+    \vspace{-3pt}
 \end{figure}
 
 As shown in Fig.~\ref{fig:robot_results}, TRAIL consistently outperforms the baselines in real-world multi-task manipulation. It achieves an overall success rate of 90\%, substantially higher than the strongest baseline, LaVA-Man ($\sim$80\%), and well above CLIPort and MPI ($\sim$55\%). The strongest evidence appears in the held-out settings: TRAIL reaches 93\% success on ``Packing unseen objects'' (vs.\ 73\% for LaVA-Man) and 80\% on ``Packing unseen blocks'' (a 20-point absolute improvement over LaVA-Man). In the contact-rich ``Pushing piles'' task, TRAIL also reaches 80\%, surpassing the performance of MPI and LaVA-Man. Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects.
