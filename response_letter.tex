@@ -99,14 +99,7 @@ manuscript unless stated otherwise.
 latent action training. Prior works [1, 2] have utilised a latent action representation for policy
 training with action-free video datasets. However, this work does not train this latent
 information; how could this method make the model learn the dynamics information?}
-\R{Thanks for the suggestion. We have added a paragraph at the end of Sec.~II-B, marked in
-magenta, that compares TRAIL with latent action pre-training. Briefly, latent action models
-constrain an \emph{action} variable and then need an alignment stage to map it onto real commands,
-whereas TRAIL constrains \emph{visual memory access}, so $\Delta_z$ stays in the observation space
-of a frozen encoder and requires no such stage. The dynamics are supervised by the future-latent
-prediction objective itself, so $\Delta_z$ is the $k$-step transition that the instruction implies,
-while the downstream policy is trained with real action labels. The trade-off is that $\Delta_z$ is
-not an action and cannot be rolled out for planning.}
+\R{Thanks for the suggestion. Sec.~II-B now positions TRAIL with respect to latent action models, with the additions marked in red. \emph{Similarity:} both learn dynamics from action-free videos by predicting the future. \emph{Difference:} latent action models infer a low-capacity latent action from the current and future frames and reconstruct the future frame conditioned on it; the latent action is used to pre-train policies and must later be mapped to executable actions with action-labelled data. TRAIL instead predicts future representations in latent space through a task-relevant bottleneck on the predictor's visual input, and gives the predicted residual to the policy as an input. \emph{Advantage:} TRAIL avoids pixel-level reconstruction and needs no stage that maps latent actions to executable actions. \emph{Learning dynamics without latent actions:} the dynamics are supervised by the future prediction objective itself, because the predictor must produce the representation of a future frame from the current scene and the instruction.}
 
 \item \C{The Franka Kitchen simulation is too simple to validate the effectiveness of this method.
 The authors should provide more simulation results.}
