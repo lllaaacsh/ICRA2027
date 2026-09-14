@@ -1,7 +1,7 @@
 \documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out if you need a4paper
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL old.tex   Mon Sep 14 10:28:03 2026
-%DIF ADD new.tex   Mon Sep 14 10:28:03 2026
+%DIF DEL /data/home/qp252151/workspace/ICRA2027_diff/iros2026_flat.tex   Mon Sep 14 16:09:39 2026
+%DIF ADD /data/home/qp252151/workspace/ICRA2027_diff/icra2027_flat.tex   Mon Sep 14 16:09:39 2026
 
 %\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4 paper
  
@@ -405,7 +405,7 @@ This separation between perception and dynamics understanding forces policies to
         \DIFaddFL{(Top) Existing approaches provide the policy with the current visual state, leaving the downstream controller to infer task-relevant changes.
         (Bottom) Our method uses the intent stream that provides task-relevant residual $\Delta_z$ as context for the closed-loop policy.}}
     \label{fig:teaser}
-    \vspace{-3pt}
+    \vspace{-9pt}
 \end{figure}
 \DIFaddend 
 
@@ -415,24 +415,19 @@ This separation between perception and dynamics understanding forces policies to
 \DIFdelbegin %DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdel{Learning predictive representations offers a natural solution by introducing a temporal structure through future-state forecasting. By learning to predict the future state, a model can capture the dynamics that policies need}\DIFdelend \DIFaddbegin \DIFadd{Predictive representation learning provides a natural way to model these temporal changes, while existing predictive pipelines do not directly employ a control-oriented change signal to the policy. Future prediction has long been used to learn dynamics useful for decision making}\DIFaddend ~\cite{hafner2019dream,finn2017deep}. \DIFdelbegin \DIFdel{However, existing approaches show two critical limitations. First, many approaches rely on computationally heavy pixel-level reconstructions~\mbox{%DIFAUXCMD
+\DIFdel{Learning predictive representations offers a natural solution by introducing a temporal structure through future-state forecasting. By learning to predict the future state, a model can capture the dynamics that policies need}\DIFdelend \DIFaddbegin \DIFadd{Predictive representation learning can model these temporal changes, and future prediction helps learn dynamics that are useful for decision making}\DIFaddend ~\cite{hafner2019dream,finn2017deep}. \DIFdelbegin \DIFdel{However, existing approaches show two critical limitations. First, many approaches rely on computationally heavy pixel-level reconstructions~\mbox{%DIFAUXCMD
 \cite{he2022masked, gupta2023siamese, zhu2025lava, zeng2024learning, karamcheti2023language,kim2025token}}\hskip0pt%DIFAUXCMD
 , forcing models to allocate a capacity to learn high-frequency }\DIFdelend \DIFaddbegin \DIFadd{In vision-based representation learning, many methods train by reconstructing or predicting future visual content~\mbox{%DIFAUXCMD
 \cite{he2022masked,gupta2023siamese,zhu2025lava,zeng2024learning,karamcheti2023language,kim2025token}}\hskip0pt%DIFAUXCMD
-. Such objectives can allocate capacity to }\DIFaddend visual details that \DIFdelbegin \DIFdel{might be irrelevant to operating robotic tasks. This entangles manipulation-induced object motion with passive dynamics or environmental noise. Second, existing models typically discard the predictive decoder entirely during downstream policy training~\mbox{%DIFAUXCMD
+. However, such objectives may focus on }\DIFaddend visual details that \DIFdelbegin \DIFdel{might be irrelevant to operating robotic tasks. This entangles manipulation-induced object motion with passive dynamics or environmental noise. Second, existing models typically discard the predictive decoder entirely during downstream policytraining~\mbox{%DIFAUXCMD
 \cite{nair2022r3m, radosavovic2023real, xiao2022masked}}\hskip0pt%DIFAUXCMD
-. By retaining only the static encoder (Fig. ~\ref{fig:teaser}, top), these models discard dynamics information that predictive learning is designed to capture, forcing downstream task policies to re-solve the disentanglement problem from scratch.
-}%DIFDELCMD < 
+. By retaining only the static encoder (Fig.~\ref{fig:teaser}, top), these models discard dynamics information that predictive learning is designed to capture, forcing downstream task policies to re-solve the disentanglement problem from scratch. }%DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdel{In this work, we hypothesize that predictive learning should not be treated only as a }\DIFdelend \DIFaddbegin \DIFadd{are not decisive for manipulation. Moreover, the temporal component is often discarded or compressed after }\DIFaddend pre-training\DIFdelbegin \DIFdel{task that will be discarded, but rather as a mechanism for extracting }\textit{\DIFdel{intent-aligned state transitions}} %DIFAUXCMD
-\DIFdel{directly within the latent space.
-Instead of predicting all future environmental changes, we focus on identifying specific future states that align with the intended task.
-}\DIFdelend \DIFaddbegin \DIFadd{: predictive decoders may be removed before downstream learning~\mbox{%DIFAUXCMD
+\DIFdel{In this work, we hypothesize that predictive learning should not be treated only as a pre-training task that will be discarded, but rather as a mechanism for extracting }\textit{\DIFdel{intent-aligned state transitions}} %DIFAUXCMD
+\DIFdel{directly within the latent space. Instead of predicting all future environmental changes, we focus on identifying specific future states that align with the intended task}\DIFdelend \DIFaddbegin \DIFadd{are irrelevant to manipulation and do not explicitly capture a control-oriented change signal to the policy}\DIFaddend . \DIFaddbegin \DIFadd{Moreover, the temporal component is discarded or compressed after pre-training, i.e. predictive decoders may be removed before downstream learning~\mbox{%DIFAUXCMD
 \cite{radosavovic2023real,xiao2022masked}}\hskip0pt%DIFAUXCMD
-, while objectives such as time-contrastive learning~\mbox{%DIFAUXCMD
-\cite{nair2022r3m} }\hskip0pt%DIFAUXCMD
-leave temporal information only implicitly inside a static embedding. The challenge is therefore not simply how to learn future prediction, but how to retain the task-relevant part of prediction as an explicit policy input.
+, or temporal information remains implicitly in the learned representations. The challenge is therefore not how to learn future prediction, but how to retain the task-relevant part of prediction as an explicit policy input.
 }\DIFaddend 
 
 We \DIFdelbegin \DIFdel{present LARM (\textbf{L}earning Intent-\textbf{A}ligned Latent Residuals for Language-Conditioned \textbf{R}obotic \textbf{M}anipulation)}\DIFdelend \DIFaddbegin \DIFadd{propose TRAIL (\textbf{T}ask-\textbf{R}elevant residuals as an \textbf{A}ction prior for robot man\textbf{I}pu\textbf{L}ation)}\DIFaddend , a self-supervised \DIFdelbegin \DIFdel{representation learning framework that constrains future latent representations using task semantics derived from an image and language instructions. Specifically, LARM uses two distinct prediction modules. One module has access to detailed visual features of the scene,
@@ -480,7 +475,15 @@ Vision foundation models have become widely used for robotic representation lear
 These methods \DIFdelbegin \DIFdel{primarily }\DIFdelend produce static representations that capture \textit{what} is in the scene, but not \textit{how} it changes over time. To extract more robust and task-relevant signals, recent approaches extend these static representations using the Information Bottleneck (IB) principle~\cite{tishby2000information}. By strictly limiting information capacity, IB-based methods learn compressed representations that filter out irrelevant distractors, improving downstream reinforcement learning~\cite{you2024multimodal} and behavior cloning~\cite{bai2025rethinking}. However, these IB-based methods still lack explicit modeling of \DIFdelbegin \DIFdel{task-conditioned }\DIFdelend \DIFaddbegin \DIFadd{task-relevant }\DIFaddend dynamics, as they compress the current state while not predicting its future evolution.
 
 \subsection{Predictive modeling for visual control}
-An alternative approach is learning representations by predicting future observations, which effectively captures environment dynamics. Several approaches focus on pixel-level video prediction (e.g., RoboNet~\cite{dasari2019robonet}, UniPi~\cite{du2023learning}, SUSIE~\cite{black2023zero}), for visual planning or sub-goal generation. Other approaches, such as Voltron~\cite{karamcheti2023language} and LaVA-Man~\cite{zhu2025lava}, extend such pixel-level prediction by integrating language and action conditioning into image reconstruction and forward video prediction. \DIFaddbegin \DIFadd{Latent action models~\mbox{%DIFAUXCMD
+An alternative approach is learning representations by predicting future observations, which effectively captures environment dynamics. Several approaches\DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
+\cite{dasari2019robonet,du2023learning,black2023zero} }\hskip0pt%DIFAUXCMD
+}\DIFaddend focus on pixel-level video prediction\DIFdelbegin \DIFdel{(e.g., RoboNet~\mbox{%DIFAUXCMD
+\cite{dasari2019robonet}}\hskip0pt%DIFAUXCMD
+, UniPi~\mbox{%DIFAUXCMD
+\cite{du2023learning}}\hskip0pt%DIFAUXCMD
+, SUSIE~\mbox{%DIFAUXCMD
+\cite{black2023zero}}\hskip0pt%DIFAUXCMD
+), }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend for visual planning or sub-goal generation. Other approaches, such as Voltron~\cite{karamcheti2023language} and LaVA-Man~\cite{zhu2025lava}, extend such pixel-level prediction by integrating language and action conditioning into image reconstruction and forward video prediction. \DIFaddbegin \DIFadd{Latent action models~\mbox{%DIFAUXCMD
 \cite{schmidt2024learning, bruce2024genie,ye2025latent} }\hskip0pt%DIFAUXCMD
 learn the action conditioning without action labels. These models infer a low-capacity latent action from the current and future frames and use it to reconstruct the future frame's pixels from the current frame. The latent actions are then used to pre-train policies, but must later be mapped to executable actions~\mbox{%DIFAUXCMD
 \cite{ye2025latent, agibot2025world}}\hskip0pt%DIFAUXCMD
@@ -514,7 +517,7 @@ Despite these advances, standard latent predictive models (e.g., Siamese MAE~\ci
 \DIFdelbegin \DIFdel{Our method leverages large-scale, general-domain human video datasets (e.g., web videos ) for self-supervised pre-training rather than relying on robot-specific trajectories. This allows the model to learn generalized motion priors by understanding the correlation between visual dynamics and language-based action annotations in datasets like Kinetics~\mbox{%DIFAUXCMD
 \cite{kay2017kinetics} }\hskip0pt%DIFAUXCMD
 (e.g., ``a person is water sliding''). By capturing the underlying structure of these motions, the model develops a robust understanding of physical dynamics, which can then be transferred to robotic control with minimal post-training. To this end, we formulate a two-stage framework: (1) }\textit{\DIFdel{self-supervised pre-training with intent-aligned prediction}}%DIFAUXCMD
-\DIFdel{, which learns to isolate }\DIFdelend \DIFaddbegin \DIFadd{TRAIL learns }\DIFaddend task-relevant \DIFdelbegin \DIFdel{dynamics by predicting future latent states under an information bottleneck }\DIFdelend \DIFaddbegin \DIFadd{latent changes from action-free human videos and uses it as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast future visual representations under different levels of visual access }\DIFaddend (Sec.~\DIFdelbegin \DIFdel{\ref{subsec:encoder} and ~\ref{subsec:pretraing}), and (2) }\textit{\DIFdel{residual-guided policy learning}}%DIFAUXCMD
+\DIFdel{, which learns to isolate }\DIFdelend \DIFaddbegin \DIFadd{TRAIL learns }\DIFaddend task-relevant \DIFdelbegin \DIFdel{dynamics by predicting future latent states under an information bottleneck }\DIFdelend \DIFaddbegin \DIFadd{latent changes from action-free human videos and uses them as policy context. During pre-training, a language-grounded encoder and an asymmetric predictor learn to forecast future visual representations under different levels of visual access }\DIFaddend (Sec.~\DIFdelbegin \DIFdel{\ref{subsec:encoder} and ~\ref{subsec:pretraing}), and (2) }\textit{\DIFdel{residual-guided policy learning}}%DIFAUXCMD
 \DIFdel{, which conditions the downstream policy on the predicted change between current and future states }\DIFdelend \DIFaddbegin \DIFadd{\ref{subsec:pretrain}). During downstream imitation learning, the intent stream produces a latent residual that conditions the policy on task-relevant change }\DIFaddend (Sec.~\ref{subsec:policy_learning}). 
 
 
@@ -522,7 +525,7 @@ Despite these advances, standard latent predictive models (e.g., Siamese MAE~\ci
 \centering
 
 \includegraphics[width=\textwidth]{ieeeconf/figure/DiPredict_cropped.pdf}
-\caption{\textbf{\DIFaddFL{TRAIL architecture in pre-training}}\DIFaddFL{. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream reads class, patch, and language tokens, whereas the intent stream reads only the class and language tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the intent prediction. The modules with snowflakes mark are frozen, and all other modules are set to trainable. At deployment, only the intent stream is retained to produce the predicted future latent $\hat z^{\mathrm{int}}_{t+k}$ for the downstream policy.}}
+\caption{\textbf{\DIFaddFL{TRAIL architecture in pre-training}}\DIFaddFL{. Visual and language tokens are first fused by bidirectional cross-attention. The same predictor is then evaluated under two memory-access conditions: the full-information stream reads class, patch, and language tokens, whereas the intent stream reads only the class and language tokens. Both streams predict the frozen future target, and the full-information prediction provides a stopped consistency target for the intent prediction. Modules marked with a snowflake are frozen; all other modules are trainable. At deployment, only the intent stream is retained to produce the predicted future latent $\hat z^{\mathrm{int}}_{t+k}$ for the downstream policy.}}
 \label{fig:ab_probe}
 \end{figure*}
 
@@ -530,7 +533,7 @@ Despite these advances, standard latent predictive models (e.g., Siamese MAE~\ci
 \DIFdelbegin %DIFDELCMD < \label{subsec:encoder}
 %DIFDELCMD < %%%
 \DIFdel{In }\DIFdelend \DIFaddbegin \label{subsec:pretrain}
-\vspace{-6pt}
+
 %DIF >  \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
 
 %DIF >  \CO{Make this section have a following order: formulation, encoding, prediction, losses.}
@@ -722,15 +725,15 @@ condition policies on fully reconstructed future images, which introduces signif
 , we flatten the }\texttt{%DIFDELCMD < [%%%
 \DIFdel{CLS}%DIFDELCMD < ]%%%
 } %DIFAUXCMD
-\DIFdel{residual into a 1D vector and concatenate it with $q_t$ }\DIFdelend \DIFaddbegin \DIFadd{TRAIL can be integrated with different downstream policy architectures through the same residual representation. For simulation benchmarks, e.g. Franka Kitchen and Meta-World, we concatenate $z_t$ and $\Delta_z$ with proprioception use them }\DIFaddend as input to \DIFdelbegin \DIFdel{a multi-layer perceptron (MLP) policy. In }\textit{\DIFdel{2D spatial-action policies}} %DIFAUXCMD
-\DIFdel{designed for vision-based affordance models  (e.g., tabletop }\DIFdelend \DIFaddbegin \DIFadd{an action decoder that outputs continuous control commands. For real-robot tabletop tasks, we reshape the patch tokens from both $z_t$ and $\Delta_z$ into spatial feature maps and fuse them to predict language-conditioned affordance maps~\mbox{%DIFAUXCMD
+\DIFdel{residual into a 1D vector and concatenate it with $q_t$ }\DIFdelend \DIFaddbegin \DIFadd{TRAIL can be integrated with different downstream policy architectures through the same residual representation. For simulation benchmarks, e.g., Franka Kitchen and Meta-World, we concatenate $z_t$ and $\Delta_z$ with proprioception and use them }\DIFaddend as input to \DIFdelbegin \DIFdel{a multi-layer perceptron (MLP) policy. In }\textit{\DIFdel{2D spatial-action policies}} %DIFAUXCMD
+\DIFdel{designed for vision-based affordance models  (e.g., tabletop }\DIFdelend \DIFaddbegin \DIFadd{an action decoder that outputs continuous control commands. For real-robot tabletop tasks, we reshape patch tokens from both $z_t$ and $\Delta_z$ into spatial feature maps and fuse them to predict language-conditioned affordance maps~\mbox{%DIFAUXCMD
 \cite{shridhar2022cliport}}\hskip0pt%DIFAUXCMD
 . Thus, the same pre-trained TRAIL representations can be used across different action spaces by adapting only the downstream readout.
 }
 
 \DIFadd{At deployment, the intent stream is executed at every control step in closed loop. Given the current image and instruction, the model predicts $\hat z^{\mathrm{int}}_{t+k}$ and computes $\Delta_z$, and then predicts an action. This process is repeated after each robot action, and the predictor is not rolled out over multiple future steps. Here a control step denotes one policy decision, whose granularity follows the action space. For the continuous-control benchmarks, one decision is a single low-level command, so the predictor is re-evaluated at the environment control frequency. For the tabletop affordance read-out, one decision is a complete }\DIFaddend pick-and-place \DIFdelbegin \DIFdel{~\mbox{%DIFAUXCMD
 \cite{shridhar2022cliport}}\hskip0pt%DIFAUXCMD
-), we extract the residual of patch tokens , reshape it into a 2D spatial feature map, and fuse it with the policy's visual backbone via convolutional layers, providing an explicit spatial prior on where and how to interact. This flexibility allows LARM to integrate seamlessly with both low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification. }\DIFdelend \DIFaddbegin \DIFadd{primitive: a single prediction supplies both endpoints of the motion from one observation, and the primitive is executed without re-observation before the next decision is made. 
+), we extract the residual of patch tokens , reshape it into a 2D spatial feature map, and fuse it with the policy's visual backbone via convolutional layers, providing an explicit spatial prior on where and how to interact. This flexibility allows LARM to integrate seamlessly with both low-dimensional state policies and high-dimensional visuomotor architectures without architectural modification. }\DIFdelend \DIFaddbegin \DIFadd{primitive: a single prediction supplies both endpoints of the motion from one observation, and the primitive is executed without re-observation. 
 Note that, during pre-training, $k$ specifies the frame gap between $I_t$ and $I_{t+k}$ and does not determine the robot action frequency. The downstream policy instead learns the action timescale from labeled demonstrations.
 }\DIFaddend 
 
@@ -798,7 +801,7 @@ on simulated and real-robot manipulation tasks.
 
 \subsection{\DIFadd{Simulation results on Franka Kitchen}}
 \label{sec:exp_franka}
-\DIFadd{We validate whether dynamics learned from human videos supports long-horizon robot manipulation across five visuomotor tasks with a simulated 9-DoF Franka Emika arm~\mbox{%DIFAUXCMD
+\DIFadd{We validate whether dynamics learned from human videos support long-horizon robot manipulation across five visuomotor tasks with a simulated 9-DoF Franka Emika arm~\mbox{%DIFAUXCMD
 \cite{franka_kitchen}}\hskip0pt%DIFAUXCMD
 .
 }
@@ -1069,7 +1072,7 @@ LaVA-Man~\cite{zhu2025lava}           & ViT-Base & OOPP~\cite{zhu2025lava}, DROI
 \textbf{Model} & \textbf{Robot Data} & \textbf{Supervision} & \textbf{Future Cond.} \\
 \midrule
 MPI        & $\checkmark$ & Bbox, image     & $\times$ \\
-LaVA-MAN   & $\checkmark$ & Self-supervised & $\checkmark$ \\
+\DIFdelbeginFL \DIFdelFL{LaVA-MAN   }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{LaVA-Man   }\DIFaddendFL & $\checkmark$ & Self-supervised & $\checkmark$ \\
 
 \rowcolor[HTML]{DCD5E0} 
 \textbf{Ours}  & \textbf{$\times$}   & \textbf{Self-supervised} & \textbf{$\checkmark$} \\
@@ -1107,7 +1110,7 @@ These results show that our approach to explicitly modeling task-relevant transi
 
 % \vspace{-2pt}
 
-Table~\ref{tab:dif} \DIFdelbegin \DIFdel{compares }\DIFdelend \DIFaddbegin \DIFadd{summarizes the }\DIFaddend pre-training \DIFdelbegin \DIFdel{configurations of }\DIFdelend \DIFaddbegin \DIFadd{data and supervision used by }\DIFaddend the predictive models\DIFdelbegin \DIFdel{that show similar performance on Franka Kitchen. While }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend MPI and LaVA-Man \DIFdelbegin \DIFdel{rely heavily on in-domain robot data, with MPI further requiring expensive }\DIFdelend \DIFaddbegin \DIFadd{use robot-domain pre-training data, and MPI additionally requires }\DIFaddend fine-grained \DIFdelbegin \DIFdel{annotations (e.g., bounding boxes), our method operates without robot data, using }\DIFdelend \DIFaddbegin \DIFadd{supervision such as bounding boxes. TRAIL uses }\textit{\DIFadd{human-centric internet videos}} \DIFadd{for }\DIFaddend self-supervised \DIFdelbegin \DIFdel{learning on internet-scale human videos. Despite this strictly scalable setup, LARM systematically outperforms robot data-dependent baselines. By sharing the future-conditioning paradigm with LaVA-Man but removing the reliance on in-domain data, we demonstrate }\DIFdelend \DIFaddbegin \DIFadd{pre-training. Under this more scalable pre-training setting, TRAIL matches or outperforms existing predictive models. This supports our central claim }\DIFaddend that constrained future prediction \DIFdelbegin \DIFdel{is effective for extracting task-relevant }\DIFdelend \DIFaddbegin \DIFadd{can extract robot-relevant }\DIFaddend physical dynamics from human \DIFaddbegin \DIFadd{behavior }\DIFaddend videos.
+Table~\ref{tab:dif} \DIFdelbegin \DIFdel{compares }\DIFdelend \DIFaddbegin \DIFadd{summarizes the }\DIFaddend pre-training \DIFdelbegin \DIFdel{configurations of }\DIFdelend \DIFaddbegin \DIFadd{data and supervision used by }\DIFaddend the predictive models\DIFdelbegin \DIFdel{that show similar performance on Franka Kitchen. While }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend MPI and LaVA-Man \DIFdelbegin \DIFdel{rely heavily on in-domain robot data, with MPI further requiring expensive }\DIFdelend \DIFaddbegin \DIFadd{use robot-domain pre-training data, and MPI additionally requires }\DIFaddend fine-grained \DIFdelbegin \DIFdel{annotations (e.g., bounding boxes), our method operates without robot data, using }\DIFdelend \DIFaddbegin \DIFadd{supervision such as bounding boxes. TRAIL uses }\textit{\DIFadd{human-centric internet videos}} \DIFadd{for }\DIFaddend self-supervised \DIFdelbegin \DIFdel{learning on internet-scale human videos. Despite this strictly scalable setup, LARM systematically outperforms robot data-dependent baselines. By sharing the future-conditioning paradigm with LaVA-Man but removing the reliance on in-domain data, we demonstrate that constrained future prediction is effective for extracting task-relevant }\DIFdelend \DIFaddbegin \DIFadd{pre-training. Under this more scalable pre-training setting, TRAIL outperforms existing predictive models, demonstrating that our approach can extract robot-relevant }\DIFaddend physical dynamics from human \DIFaddbegin \DIFadd{behavior }\DIFaddend videos.
 
 
 % \vspace{-1pt}
@@ -1209,7 +1212,7 @@ MPI~\cite{zeng2024learning}      & 36.0 & 24.0 & 4.0 & 80.0 & \bf 100.0 & \bf 10
 %DIF <  \input{ieeeconf/tables/REG}
 \DIFaddbegin \DIFadd{TRAIL reaches a }{\DIFadd{78.2\%}} \DIFadd{MT10 average, ahead of the strongest baseline R3M~\mbox{%DIFAUXCMD
 \cite{nair2022r3m} }\hskip0pt%DIFAUXCMD
-(70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Six of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (}{\DIFadd{40.0\%}} \DIFadd{vs.\ at most 18.0\% for any baseline) and ``Push'' (}{\DIFadd{70.0\%}} \DIFadd{vs.\ at most 38.0\%). Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
+(70.0\%). The aggregate margin is modest, but it is not spread evenly across the suite, and the per-task pattern is the informative part. Five of the ten tasks --- Door, both Drawer tasks, Button and Window-Close --- are at or near saturation for every method that yields a usable representation, and therefore carry no discriminative signal. The entire gap comes from two tasks: ``Pick-Place'' (}{\DIFadd{40.0\%}} \DIFadd{vs.\ at most 18.0\% for any baseline) and ``Push'' (}{\DIFadd{70.0\%}} \DIFadd{vs.\ at most 38.0\%). Fig.~\ref{fig:failure_stages} further decomposes Push and Pick-Place outcomes by the furthest stage reached. TRAIL reduces failures before object contact and shifts the remaining Pick-Place failures toward the later placement stage.
 }\DIFaddend 
 
 \DIFaddbegin \DIFadd{These two tasks share a property that the saturated ones lack: the target object moves while the gripper approaches it, so the correct action depends on where the scene is going rather than only on where it currently is. A static embedding is sufficient to replay a memorized opening trajectory, but it under-determines the action once the goal is non-stationary. Conditioning on the task-relevant residual $\Delta_z$ supplies exactly the missing directional signal, which is why the benefit is invisible on the articulation tasks and decisive on the two dynamic ones. Sec.~\ref{sec:ablation} isolates this effect by removing $\Delta_z$ from our own policy rather than comparing across representations.
@@ -1223,8 +1226,7 @@ MPI~\cite{zeng2024learning}      & 36.0 & 24.0 & 4.0 & 80.0 & \bf 100.0 & \bf 10
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{ieeeconf/figure/arm.pdf}
-\caption{\textbf{\DIFaddFL{Evaluation of real-robot manipulation}}\DIFaddFL{. We compare our method with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Task names
-abbreviation: P-unseen blocks denote Packing unseen blocks and P-unseen objects denote Packing unseen objects.}}
+\caption{\textbf{\DIFaddFL{Evaluation of real-robot manipulation}}\DIFaddFL{. We compare our method with CLIPort, MPI, and LaVA-Man across seven language-conditioned tabletop tasks. Task name abbreviations: P-unseen blocks and P-unseen objects denote Packing unseen blocks and Packing unseen objects, respectively.}}
 \label{fig:robot_results}
 \end{figure*}
 
@@ -1238,7 +1240,7 @@ abbreviation: P-unseen blocks denote Packing unseen blocks and P-unseen objects 
 We \DIFdelbegin \DIFdel{validate LARM in the real-robot environment using seven tabletop manipulation tasks}\DIFdelend \DIFaddbegin \DIFadd{further validate TRAIL on a physical UR5 setup where language-conditioned control must handle object appearance shifts, clutter, and contact-rich motions}\DIFaddend .
 
 
-\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a \DIFdelbegin \DIFdel{Robotiq 2F-85 gripper and an Intel RealSense RGB-D camera capturing }\DIFdelend \DIFaddbegin \DIFadd{wrist-mounted Intel RealSense camera observing }\DIFaddend a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). \DIFdelbegin \DIFdel{To adapt our model to real-world control, we }\DIFdelend \DIFaddbegin \DIFadd{The policy uses RGB images only, and depth measurements are not used. We }\DIFaddend collect 200 language-annotated expert demonstrations \DIFdelbegin \DIFdel{. We use this dataset to jointly fine-tune our method and three baselines (CLIPort}\DIFdelend \DIFaddbegin \DIFadd{and train each method under the same multi-task protocol, comparing TRAIL with CLIPort~\mbox{%DIFAUXCMD
+\noindent\textbf{Setup.} The hardware setup includes a UR5 robotic arm with a \DIFdelbegin \DIFdel{Robotiq 2F-85 gripper and an Intel RealSense RGB-D camera capturing }\DIFdelend \DIFaddbegin \DIFadd{wrist-mounted Intel RealSense camera observing }\DIFaddend a $60 \text{ cm} \times 30 \text{ cm}$ workspace (Fig.~\ref{fig:setup}). \DIFdelbegin \DIFdel{To adapt our model to real-world control, we }\DIFdelend \DIFaddbegin \DIFadd{The policy predicts pick and place positions from one RGB image taken at the arm's initial pose, without depth. We }\DIFaddend collect 200 language-annotated expert demonstrations \DIFdelbegin \DIFdel{. We use this dataset to jointly fine-tune our method and three baselines (CLIPort}\DIFdelend \DIFaddbegin \DIFadd{and train each method under the same multi-task protocol, comparing TRAIL with CLIPort~\mbox{%DIFAUXCMD
 \cite{shridhar2022cliport}}\hskip0pt%DIFAUXCMD
 , MPI~\mbox{%DIFAUXCMD
 \cite{zeng2024learning}}\hskip0pt%DIFAUXCMD
@@ -1246,15 +1248,15 @@ We \DIFdelbegin \DIFdel{validate LARM in the real-robot environment using seven 
 \cite{zhu2025lava} }\hskip0pt%DIFAUXCMD
 using identical demonstrations and task instructions. Each trained policy must select actions conditioned on the language command rather than on a task ID alone}\DIFaddend . To test zero-shot generalization, five colored blocks and five novel objects are strictly excluded from the training data \DIFdelbegin \DIFdel{. We evaluate the co-trained policy across }\DIFdelend \DIFaddbegin \DIFadd{and introduced only at evaluation time. In addition, pushing piles and pressing buttons are completely unseen tasks, with no demonstrations of either task in the training data. We evaluate }\DIFaddend seven subtasks: stacking blocks, packing blocks/objects, packing unseen blocks/objects, pushing piles, and pressing buttons. For each subtask, we conduct \DIFaddbegin \DIFadd{1}\DIFaddend 5 independent evaluation trials.
 
-\DIFaddbegin \begin{figure}[t]
+\DIFdelbegin \DIFdel{As shown in }\DIFdelend \DIFaddbegin \begin{figure}[t]
     \centering
     \includegraphics[width=0.95\linewidth]{ieeeconf/figure/setup_cropped.pdf}
     \caption{\textbf{\DIFaddFL{Real-robot setup}}\DIFaddFL{. A wrist-mounted camera provides RGB observations for UR5. Depth is not used.}}
     \label{fig:setup}
-    \vspace{-3pt}
+    %DIF >  \vspace{-3pt}
 \end{figure}
 
-\DIFaddend As shown in Fig.~\ref{fig:robot_results}, \DIFdelbegin \DIFdel{our method successfully executes the tasks and }\DIFdelend \DIFaddbegin \DIFadd{TRAIL }\DIFaddend consistently outperforms the baselines \DIFdelbegin \DIFdel{. On average, our model }\DIFdelend \DIFaddbegin \DIFadd{in real-world multi-task manipulation. It }\DIFaddend achieves an overall success rate of \DIFdelbegin \DIFdel{over 85\%, significantly surpassing }\DIFdelend \DIFaddbegin \DIFadd{90\%, substantially higher than }\DIFaddend the strongest baseline, LaVA-Man ($\sim$\DIFdelbegin \DIFdel{70}\DIFdelend \DIFaddbegin \DIFadd{80}\DIFaddend \%), \DIFdelbegin \DIFdel{as well as }\DIFdelend \DIFaddbegin \DIFadd{and well above }\DIFaddend CLIPort and MPI ($\sim$\DIFdelbegin \DIFdel{50}\DIFdelend \DIFaddbegin \DIFadd{55}\DIFaddend \%). \DIFdelbegin \DIFdel{In Fig.~\ref{fig:affordance_maps}, we demonstrate example pick-and-place affordance maps. Our method exhibits strong zero-shot generalization, achieving a 100\% success rate }\DIFdelend \DIFaddbegin \DIFadd{The strongest evidence appears in the held-out settings: TRAIL reaches 93\% success }\DIFaddend on ``Packing unseen objects'' (vs.\DIFdelbegin \DIFdel{80}\DIFdelend \DIFaddbegin \DIFadd{\ 73}\DIFaddend \% for LaVA-Man) and \DIFdelbegin \DIFdel{an }\DIFdelend 80\% \DIFdelbegin \DIFdel{success rate }\DIFdelend on ``Packing unseen blocks'' (a \DIFdelbegin \DIFdel{20\% }\DIFdelend \DIFaddbegin \DIFadd{20-point }\DIFaddend absolute improvement over LaVA-Man). \DIFdelbegin \DIFdel{Furthermore, for tasks with complex contact dynamics like }\DIFdelend \DIFaddbegin \DIFadd{In the contact-rich }\DIFaddend ``Pushing piles\DIFdelbegin \DIFdel{,'' our method reaches an }\DIFdelend \DIFaddbegin \DIFadd{'' task, TRAIL also reaches }\DIFaddend 80\%\DIFdelbegin \DIFdel{success rate, doubling }\DIFdelend \DIFaddbegin \DIFadd{, surpassing }\DIFaddend the performance of MPI and LaVA-Man. \DIFdelbegin \DIFdel{These results confirm that our intent-aligned pre-training effectively grounds language instructions to visual features, enabling robust continuous control without overfitting }\DIFdelend \DIFaddbegin \DIFadd{Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects}\DIFaddend .
+\DIFadd{In }\DIFaddend Fig.~\ref{fig:robot_results}, \DIFdelbegin \DIFdel{our method successfully executes the tasks and }\DIFdelend \DIFaddbegin \DIFadd{TRAIL }\DIFaddend consistently outperforms the baselines \DIFdelbegin \DIFdel{. On average, our model }\DIFdelend \DIFaddbegin \DIFadd{in real-world multi-task manipulation. It }\DIFaddend achieves an overall success rate of \DIFdelbegin \DIFdel{over 85\%, significantly surpassing }\DIFdelend \DIFaddbegin \DIFadd{90\%, substantially higher than }\DIFaddend the strongest baseline, LaVA-Man ($\sim$\DIFdelbegin \DIFdel{70}\DIFdelend \DIFaddbegin \DIFadd{80}\DIFaddend \%), \DIFdelbegin \DIFdel{as well as }\DIFdelend \DIFaddbegin \DIFadd{and well above }\DIFaddend CLIPort and MPI ($\sim$\DIFdelbegin \DIFdel{50}\DIFdelend \DIFaddbegin \DIFadd{55}\DIFaddend \%). \DIFdelbegin \DIFdel{In Fig.~\ref{fig:affordance_maps}, we demonstrate example pick-and-place affordance maps. Our method exhibits strong zero-shot generalization, achieving a 100\% success rate }\DIFdelend \DIFaddbegin \DIFadd{The strongest evidence can be observed in the held-out settings, where TRAIL reaches 93\% success }\DIFaddend on ``Packing unseen objects'' (vs.\DIFdelbegin \DIFdel{80}\DIFdelend \DIFaddbegin \DIFadd{\ 73}\DIFaddend \% for LaVA-Man) and \DIFdelbegin \DIFdel{an }\DIFdelend 80\% \DIFdelbegin \DIFdel{success rate }\DIFdelend on ``Packing unseen blocks'' (a \DIFdelbegin \DIFdel{20\% }\DIFdelend \DIFaddbegin \DIFadd{20-point }\DIFaddend absolute improvement over LaVA-Man). \DIFdelbegin \DIFdel{Furthermore, for tasks with complex contact dynamics like }\DIFdelend \DIFaddbegin \DIFadd{In the contact-rich }\DIFaddend ``Pushing piles\DIFdelbegin \DIFdel{,'' our method reaches an }\DIFdelend \DIFaddbegin \DIFadd{'' task, TRAIL also reaches }\DIFaddend 80\%\DIFdelbegin \DIFdel{success rate, doubling }\DIFdelend \DIFaddbegin \DIFadd{, surpassing }\DIFaddend the performance of MPI and LaVA-Man. \DIFdelbegin \DIFdel{These results confirm that our intent-aligned pre-training effectively grounds language instructions to visual features, enabling robust continuous control without overfitting }\DIFdelend \DIFaddbegin \DIFadd{Together with the affordance visualizations in Fig.~\ref{fig:affordance_maps}, these results support the claim that learning task-relevant latent changes improves robust real-world language-conditioned control and reduces overfitting to the training objects}\DIFaddend .
 
 
 
@@ -1264,17 +1266,22 @@ using identical demonstrations and task instructions. Each trained policy must s
     \centering
     \includegraphics[width=\linewidth]{ieeeconf/figure/aff_cropped.pdf}
 \caption{\textbf{Sampled affordance maps.} We \DIFdelbeginFL \DIFdelFL{obtain the }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{visualize TRAIL's }\DIFaddendFL predicted affordance maps \DIFdelbeginFL \DIFdelFL{of the LARM model }\DIFdelendFL at the start and end stages \DIFdelbeginFL \DIFdelFL{in }\DIFdelendFL \DIFaddbeginFL \DIFaddFL{of }\DIFaddendFL real-robot tabletop manipulation tasks. \DIFaddbeginFL \DIFaddFL{The responses follow the commanded object and target regions, providing qualitative evidence for language-conditioned spatial grounding.}\DIFaddendFL }
-\label{fig:affordance_maps}
+\DIFaddbeginFL \vspace{-8pt}
+\DIFaddendFL \label{fig:affordance_maps}
 \end{figure}
 
 \subsection{Ablation study}
 \label{sec:ablation}
-\DIFdelbegin \DIFdel{A core contribution of LARM is challenging the standard representation learning paradigm, which typically discards the predictive decoder }\DIFdelend \DIFaddbegin \DIFadd{TRAIL keeps the intent stream instead of discarding the predictive head }\DIFaddend after pre-training~\cite{he2022masked, nair2022r3m}. We \DIFdelbegin \DIFdel{validate the impact of explicitly retaining the intent-aligned predictor by conducting an ablation study on Franka Kitchen~\mbox{%DIFAUXCMD
+\DIFdelbegin \DIFdel{A core contribution of LARM is challenging the standard representation learning paradigm, which typically discards the predictive decoder }\DIFdelend \DIFaddbegin \DIFadd{TRAIL keeps the intent stream instead of discarding the predictive head }\DIFaddend after pre-training~\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
+\cite{he2022masked, nair2022r3m}}\hskip0pt%DIFAUXCMD
+. We validate the impact of explicitly retaining the intent-aligned predictor by conducting an ablation study on Franka Kitchen~\mbox{%DIFAUXCMD
 \cite{franka_kitchen}}\hskip0pt%DIFAUXCMD
 . }%DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdel{We compare three variants }\DIFdelend \DIFaddbegin \DIFadd{isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction. We compare four variants of TRAIL based on the inputs provided to the downstream policy}\DIFaddend : \DIFdelbegin %DIFDELCMD < \begin{itemize}
+\DIFdel{We compare three variants }\DIFdelend \DIFaddbegin \DIFadd{\mbox{%DIFAUXCMD
+\cite{he2022masked, radosavovic2023real}}\hskip0pt%DIFAUXCMD
+. We isolate this design choice by comparing policy inputs that keep either the current state, the predicted future state, the absolute pair, or the residual direction. We compare four variants of TRAIL based on the inputs provided to the downstream policy}\DIFaddend : \DIFdelbegin %DIFDELCMD < \begin{itemize}
 %DIFDELCMD <     \item %%%
 \textbf{\DIFdel{LARM (Encoder-Only):}} %DIFAUXCMD
 \DIFdel{The downstream policyis conditioned only on static current visual features }\DIFdelend \DIFaddbegin \textit{\DIFadd{Encoder-Only}}\DIFadd{, using only }\DIFaddend $z_t$\DIFdelbegin \DIFdel{.
@@ -1322,7 +1329,7 @@ Absolute pair & $z_t$,$\hat{z}^{\mathrm{int}}_{t+k}$ & \bf 92.0 & 45.0 & 88.7 & 
 \end{tabular}
 }
 \DIFaddendFL \label{tab:ablation_residual}
-\DIFaddbeginFL \vspace{-3pt}
+\DIFaddbeginFL \vspace{-6pt}
 \DIFaddendFL \end{table}
 
 
@@ -1338,7 +1345,7 @@ Absolute pair & $z_t$,$\hat{z}^{\mathrm{int}}_{t+k}$ & \bf 92.0 & 45.0 & 88.7 & 
 
 %
 \section{Conclusion}
-We proposed \DIFdelbegin \DIFdel{LARM, a prediction-based }\DIFdelend \DIFaddbegin \DIFadd{TRAIL, a }\DIFaddend self-supervised \DIFdelbegin \DIFdel{representation learning framework }\DIFdelend \DIFaddbegin \DIFadd{learning framework that learns predictive representations }\DIFaddend for robot manipulation policies. The key idea is to estimate \DIFdelbegin \DIFdel{intent-aware latent residuals that encourage the model to focus on task-relevant changes, }\DIFdelend \DIFaddbegin \DIFadd{task-relevant latent residuals }\DIFaddend and then use these \DIFdelbegin \DIFdel{latent }\DIFdelend residuals for effective policy learning. Simulation and real-robot experiments demonstrate that our model benefits the learning for both continuous control and tabletop arrangement policies, outperforming prior methods. \DIFdelbegin \DIFdel{In the future, we }\DIFdelend \DIFaddbegin \DIFadd{Future work }\DIFaddend will extend our framework to more diverse manipulation tasks and real-world robotic settings.
+We proposed \DIFdelbegin \DIFdel{LARM, a prediction-based }\DIFdelend \DIFaddbegin \DIFadd{TRAIL, a }\DIFaddend self-supervised \DIFdelbegin \DIFdel{representation learning framework }\DIFdelend \DIFaddbegin \DIFadd{learning framework that learns predictive representations }\DIFaddend for robot manipulation policies. The key idea is to estimate \DIFdelbegin \DIFdel{intent-aware latent residuals that encourage the model to focus on task-relevant changes, }\DIFdelend \DIFaddbegin \DIFadd{task-relevant latent residuals }\DIFaddend and then use these \DIFdelbegin \DIFdel{latent }\DIFdelend residuals for effective policy learning. Simulation and real-robot experiments demonstrate that our model benefits the learning for both continuous control and tabletop arrangement policies, outperforming prior methods. \DIFdelbegin \DIFdel{In the future, we }\DIFdelend \DIFaddbegin \DIFadd{A limitation is that the learned residual represents the direction of task-relevant state change rather than an executable action, and hence cannot be directly rolled out for planning. Future work }\DIFaddend will extend our framework to more diverse manipulation tasks and real-world robotic settings \DIFaddbegin \DIFadd{and investigate its use with planning-based policies}\DIFaddend .
 
 
 
